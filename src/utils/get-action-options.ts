@@ -21,13 +21,13 @@ const getActionOptions = () => {
   }
   return {
     token,
-    username,
-    motto,
-    filepath,
-    title,
-    includeFork,
-    includeArchived,
-    onlyPrivate
+    username
+    // motto,
+    // filepath,
+    // title,
+    // includeFork,
+    // includeArchived,
+    // onlyPrivate
   }
 }
 
