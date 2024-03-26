@@ -15,6 +15,7 @@ const getActionOptions = () => {
   // const onlyPrivate = core.getBooleanInput('onlyPrivate')
 
   core.info(`当前事件：${github.context.eventName}`)
+  core.info(`当前事件2：${JSON.stringify(github.context)}`)
   if (github.context.eventName === 'push') {
     const pushPayload = github.context.payload
     core.info(`The head commit is: ${pushPayload.head_commit}`)
