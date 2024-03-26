@@ -14,6 +14,7 @@ export default () => {
   const includeArchived = core.getBooleanInput('includeArchived')
   const onlyPrivate = core.getBooleanInput('onlyPrivate')
 
+  core.info(`当前事件：${github.context.eventName}`)
   if (github.context.eventName === 'push') {
     const pushPayload = github.context.payload
     core.info(`The head commit is: ${pushPayload.head_commit}`)
