@@ -1,6 +1,6 @@
 import axios from './request'
 import { BASE_PARAMS, botUrls } from '../config'
-import {
+import type {
   CommitKeysItemType,
   JobType,
   ReqFetchCommitParams_Type,

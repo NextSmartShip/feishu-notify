@@ -1,7 +1,7 @@
 import { networkInterfaces } from 'os'
 import dayjs from 'dayjs'
 import duration from 'dayjs/plugin/duration'
-import {
+import type {
   FormatCommitsItem,
   PullCommitsByShaParams_keys_Type,
   ReqPullCommitsByShaParams_Type
@@ -13,35 +13,37 @@ import {
 } from '../api'
 import * as groupUrls from '../config'
 import axios from 'axios'
-const { extend, duration: _duration } = dayjs
+const { extend } = dayjs
 extend(duration)
 
 export function getPublicIP() {
   const ifaces = networkInterfaces()
   let en0
 
-  Object.keys(ifaces).forEach(ifname => {
+  for (const ifname of Object.keys(ifaces)) {
     let alias = 0
+    const ifacesIfname = ifaces?.[ifname]
+    if (ifacesIfname) {
+      for (const iface of ifacesIfname) {
+        if ('IPv4' !== iface.family || iface.internal !== false) {
+          // skip over internal (i.e. 127.0.0.1) and non-ipv4 addresses
+          return
+        }
 
-    ifaces?.[ifname]?.forEach?.(function (iface) {
-      if ('IPv4' !== iface.family || iface.internal !== false) {
-        // skip over internal (i.e. 127.0.0.1) and non-ipv4 addresses
-        return
+        if (alias >= 1) {
+          // this single interface has multiple ipv4 addresses
+          en0 = iface.address
+          console.log(`${ifname}:${alias}${iface.address}`)
+        } else {
+          // this interface has only one ipv4 adress
+          console.log(ifname, iface.address)
+          en0 = iface.address
+        }
+        ++alias
       }
-
-      if (alias >= 1) {
-        // this single interface has multiple ipv4 addresses
-        en0 = iface.address
-        console.log(ifname + ':' + alias, iface.address)
-      } else {
-        // this interface has only one ipv4 adress
-        console.log(ifname, iface.address)
-        en0 = iface.address
-      }
-      ++alias
-    })
-  })
-  return en0
+    }
+    return en0
+  }
 }
 
 export function handleDiffTime(_start: string, _end: string) {
@@ -64,20 +66,20 @@ export const formatValue = (value: any) => {
   const params: Partial<ReqPullCommitsByShaParams_Type> = {}
   const keys = Object.keys(value)
   if (keys.length === 0) return []
-  keys.forEach(key => {
+  for (const key of keys) {
     params[key as PullCommitsByShaParams_keys_Type] = value[
       key as PullCommitsByShaParams_keys_Type
     ].replace(/\n/g, '')
-  })
+  }
   return params
 }
 
-export const formatCommitsMsg = function (commits: FormatCommitsItem[]) {
+export const formatCommitsMsg = (commits: FormatCommitsItem[]) => {
   let msgs = ''
   // `* [${buildDetailMsg}](${buildDetailPageUrl})`;
-  commits.forEach(({ message = '', html_url = '#' }) => {
+  for (const { message = '', html_url = '#' } of commits) {
     msgs += `\n* [${message.replace(/\n/g, '')}](${html_url})`
-  })
+  }
   return msgs
 }
 

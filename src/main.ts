@@ -1,6 +1,5 @@
 import * as core from '@actions/core'
-import { wait } from './wait'
-import getActionOptions from './utils/getActionOptions'
+import getActionOptions from './utils/get-action-options'
 
 /**
  * The main function for the action.
@@ -8,7 +7,7 @@ import getActionOptions from './utils/getActionOptions'
  */
 export async function run(): Promise<void> {
   try {
-    const {} = getActionOptions()
+    getActionOptions()
   } catch (error) {
     // Fail the workflow run if an error occurs
     if (error instanceof Error) core.setFailed(error.message)
