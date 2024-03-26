@@ -29058,12 +29058,9 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(2186));
-const github_1 = __importDefault(__nccwpck_require__(5438));
+const github = __importStar(__nccwpck_require__(5438));
 // import { PushEvent } from '@octokit/webhooks-definitions/schema';
 // import type { UserDefinedOptions } from '../type'
 const getActionOptions = () => {
@@ -29076,9 +29073,9 @@ const getActionOptions = () => {
     // const includeFork = core.getBooleanInput('includeFork')
     // const includeArchived = core.getBooleanInput('includeArchived')
     // const onlyPrivate = core.getBooleanInput('onlyPrivate')
-    core.info(`当前事件：${github_1.default.context.eventName}`);
-    if (github_1.default.context.eventName === 'push') {
-        const pushPayload = github_1.default.context.payload;
+    core.info(`当前事件：${github.context.eventName}`);
+    if (github.context.eventName === 'push') {
+        const pushPayload = github.context.payload;
         core.info(`The head commit is: ${pushPayload.head_commit}`);
     }
     return {
