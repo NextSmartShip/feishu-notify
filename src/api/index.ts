@@ -1,13 +1,13 @@
-import axios from "./request";
-import { BASE_PARAMS, botUrls } from "../config";
+import axios from './request'
+import { BASE_PARAMS, botUrls } from '../config'
 import {
   CommitKeysItemType,
   JobType,
   ReqFetchCommitParams_Type,
   ReqPullCommitsByShaParams_Type,
-  ResApiFetchCommitsItem,
-} from "../type";
-import { isProd, isWeekend } from "../utils";
+  ResApiFetchCommitsItem
+} from '../type'
+import { isProd, isWeekend } from '../utils'
 
 /**
  *
@@ -21,18 +21,18 @@ export async function fetchFeishuWebhook(
   const baseUrl = toBigGroup
     ? botUrls.ProdEnvGroupBot
     : isWeekend()
-    ? botUrls.FrontEndOldManGroupBot
-    : isProd
-    ? botUrls.TestEnvGroupBot
-    : botUrls.FrontEndOldManGroupBot;
+      ? botUrls.FrontEndOldManGroupBot
+      : isProd
+        ? botUrls.TestEnvGroupBot
+        : botUrls.FrontEndOldManGroupBot
   const options = {
-    method: "POST",
+    method: 'POST',
     url: baseUrl,
     data: body,
-    json: true, // Automatically stringifies the body to JSON
-  };
-  const result = await axios(options);
-  return result;
+    json: true // Automatically stringifies the body to JSON
+  }
+  const result = await axios(options)
+  return result
 }
 /**
  *
@@ -46,45 +46,45 @@ export async function fetchCommitsByCurrentCommitSha(
   body: ReqPullCommitsByShaParams_Type
 ): Promise<CommitKeysItemType[]> {
   try {
-    const baseUrl = `/repos/${body.owner}/${body.repo}/commits/${body.commit_sha}/pulls`;
-    const url = baseUrl;
+    const baseUrl = `/repos/${body.owner}/${body.repo}/commits/${body.commit_sha}/pulls`
+    const url = baseUrl
     const params = {
-      method: "GET",
+      method: 'GET',
       url,
-      ...BASE_PARAMS,
-    };
+      ...BASE_PARAMS
+    }
 
     // 将params.url转为json请求数据:
-    return await axios(params);
+    return await axios(params)
   } catch (error) {
-    console.log("emit by getCommitsByCurrentCommitSha error: ", error);
-    return [];
+    console.log('emit by getCommitsByCurrentCommitSha error: ', error)
+    return []
   }
 }
 export async function fetchCommits(
   url: string
 ): Promise<ResApiFetchCommitsItem[]> {
   return await axios({
-    method: "GET",
+    method: 'GET',
     url,
-    ...BASE_PARAMS,
-  });
+    ...BASE_PARAMS
+  })
 }
 export async function fetchCommit(
   body: ReqFetchCommitParams_Type
 ): Promise<ResApiFetchCommitsItem[]> {
-  const url = `/repos/${body.owner}/${body.repo}/commits/${body.commit_sha}`;
+  const url = `/repos/${body.owner}/${body.repo}/commits/${body.commit_sha}`
   const result = await axios<any, Promise<ResApiFetchCommitsItem>>({
-    method: "GET",
+    method: 'GET',
     url,
-    ...BASE_PARAMS,
-  });
-  return [result];
+    ...BASE_PARAMS
+  })
+  return [result]
 }
 export async function fetchJobHtmlUrl(url: string): Promise<JobType> {
   return await axios({
-    method: "GET",
+    method: 'GET',
     url,
-    ...BASE_PARAMS,
-  });
+    ...BASE_PARAMS
+  })
 }
