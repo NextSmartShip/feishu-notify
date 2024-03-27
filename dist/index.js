@@ -32522,10 +32522,10 @@ const _1 = __nccwpck_require__(9343);
 const groupUrls = __importStar(__nccwpck_require__(6373));
 const utils_1 = __nccwpck_require__(6252);
 async function Push(ctx) {
-    ctx.type = 'application/json';
-    const body = ctx.request.body;
-    const content = typeof body.payload === 'string' ? JSON.parse(body.payload) : body.payload;
     try {
+        ctx.type = 'application/json';
+        const body = ctx.request.body;
+        const content = typeof body.payload === 'string' ? JSON.parse(body.payload) : body.payload;
         // 事件钩子：
         const action = content.action;
         // 代表是否能发feishu：

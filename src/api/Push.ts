@@ -10,11 +10,11 @@ import {
 type BodyType = { payload: Record<string, any> }
 
 export default async function Push(ctx: any) {
-  ctx.type = 'application/json'
-  const body = ctx.request.body as BodyType
-  const content =
-    typeof body.payload === 'string' ? JSON.parse(body.payload) : body.payload
   try {
+    ctx.type = 'application/json'
+    const body = ctx.request.body as BodyType
+    const content =
+      typeof body.payload === 'string' ? JSON.parse(body.payload) : body.payload
     // 事件钩子：
     const action = content.action
     // 代表是否能发feishu：
