@@ -17,6 +17,10 @@ inputs:
     description: 'github token'
     required: true
     default: ${{ github.token }}
+  token2:
+    description: 'secrets GITHUB_TOKEN'
+    required: true
+    default: ${{ secrets.TOKEN }}
 
 # Define your outputs here.
 outputs:
