@@ -17,7 +17,8 @@ const getActionOptions = () => {
   const payload = github.context.payload as PushEvent
   const owner = payload.organization?.login
   const repo = payload.repository?.name
-  const run_id = github.context.runId
+  // const run_id = github.context.runId
+  const run_id = 8433332828
 
   core.info(`当前事件(token、token2)：${token}, ${token2}`)
   core.info(`当前事件：${github.context.eventName}`)
