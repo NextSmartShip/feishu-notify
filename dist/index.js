@@ -29191,8 +29191,8 @@ const github = __importStar(__nccwpck_require__(5438));
 // import type { UserDefinedOptions } from '../type'
 const getActionOptions = () => {
     const token = core.getInput('token');
+    const token2 = core.getInput('token2');
     const username = core.getInput('username');
-    const github_token = core.getInput('token');
     // getBooleanInput 其实本质上就是一种 parseBoolean(core.getInput('key'))
     // const motto = core.getBooleanInput('motto')
     // const filepath = core.getInput('filepath')
@@ -29204,8 +29204,9 @@ const getActionOptions = () => {
     const owner = payload.organization?.login;
     const repo = payload.repository?.name;
     const run_id = github.context.runId;
+    core.info(`当前事件(token、token2)：${token}, ${token2}`);
     core.info(`当前事件：${github.context.eventName}`);
-    core.info(`当前事件22：${JSON.stringify(github.context)}`);
+    core.info(`当前事件22：${JSON.stringify(github)}`);
     if (github.context.eventName === 'push') {
         const pushPayload = github.context.payload;
         core.info(`The head commit is: ${pushPayload.head_commit}`);
@@ -29217,7 +29218,7 @@ const getActionOptions = () => {
         owner,
         repo,
         run_id,
-        github_token
+        github_token: token
         // motto,
         // filepath,
         // title,
