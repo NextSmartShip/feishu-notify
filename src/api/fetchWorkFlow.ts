@@ -75,7 +75,8 @@ const FetchWorkFlow = async ({
     // .catch(error => {
     //   console.log(error)
     // })
-    console.log('查看请求返回值.：', JSON.stringify(res))
+    console.log('查看请求返回值.：', res)
+    console.log('查看请求返回值2.：', res.data)
   } catch (error) {
     console.log('查看请求by错误时：', error)
   }
