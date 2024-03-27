@@ -6,6 +6,8 @@ import * as core from '@actions/core'
 import { Octokit } from '@octokit/core'
 // 使用action的仓库名
 const token = core.getInput('token')
+console.log('auth之前查看abctok2en：', JSON.stringify(token))
+
 // token 为 the repo PAT or GITHUB_TOKEN
 const octokit = new Octokit({
   auth: token,

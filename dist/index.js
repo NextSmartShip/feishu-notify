@@ -29011,6 +29011,7 @@ const core = __importStar(__nccwpck_require__(2186));
 const core_1 = __nccwpck_require__(6762);
 // 使用action的仓库名
 const token = core.getInput('token');
+console.log('auth之前查看abctok2en：', JSON.stringify(token));
 // token 为 the repo PAT or GITHUB_TOKEN
 const octokit = new core_1.Octokit({
     auth: token,
