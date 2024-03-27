@@ -32497,6 +32497,7 @@ const octokit = new core_1.Octokit({
     }
 });
 const FetchWorkFlow = async ({ owner = 'NextSmartShip', repo = '', run_id = -1, github_token, ...props }) => {
+    console.log('请求前检查参数：', owner, repo, run_id, github_token);
     return await octokit.request(`GET /repos/{owner}/{repo}/actions/runs/{run_id}`, {
         owner,
         repo,
@@ -32676,7 +32677,7 @@ const getActionOptions = () => {
     const repo = payload.repository?.name;
     const run_id = github.context.runId;
     core.info(`当前事件：${github.context.eventName}`);
-    core.info(`当前事件2：${JSON.stringify(github.context)}`);
+    core.info(`当前事件22：${JSON.stringify(github.context)}`);
     if (github.context.eventName === 'push') {
         const pushPayload = github.context.payload;
         core.info(`The head commit is: ${pushPayload.head_commit}`);
