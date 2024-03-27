@@ -29041,7 +29041,7 @@ exports["default"] = FetchWorkFlow;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.BASE_PARAMS = exports.headers = exports.webhookToken = exports.FailImgKey = exports.SuccessImgKey = exports.PROJECT_URL_MAPS = exports.PROJECT_TEST_URL_MAPS = exports.projectNameMaps = exports.PROJECT_NAME_MAPS = exports.botUrls = void 0;
+exports.BASE_PARAMS = exports.headers = exports.FailImgKey = exports.SuccessImgKey = exports.PROJECT_URL_MAPS = exports.PROJECT_TEST_URL_MAPS = exports.projectNameMaps = exports.PROJECT_NAME_MAPS = exports.botUrls = void 0;
 exports.botUrls = {
     // 生产构建通知群 (技术部)：
     ProdEnvGroupBot: 'https://open.feishu.cn/open-apis/bot/v2/hook/955695b6-a83b-4335-a5a7-58068361d3bf',
@@ -29080,11 +29080,11 @@ exports.PROJECT_URL_MAPS = {
 };
 exports.SuccessImgKey = 'img_v2_8eba3fe2-0e47-4ad0-85da-4db38899d25g';
 exports.FailImgKey = 'img_v2_c6a3dadb-0eaa-4e81-803a-eee3d4240ebg';
-exports.webhookToken = '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';
+// export const webhookToken = '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'
 // export const webhookToken = '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'
 exports.headers = {
     'X-GitHub-Api-Version': '2022-11-28',
-    Authorization: `Bearer ${exports.webhookToken}`,
+    // Authorization: `Bearer ${webhookToken}`,
     'User-Agent': 'https://api.github.com/repos'
 };
 exports.BASE_PARAMS = {
