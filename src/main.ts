@@ -1,5 +1,6 @@
 import * as core from '@actions/core'
 import getActionOptions from './utils/get-action-options'
+import FetchWorkFlow from './api/fetchWorkFlow'
 
 /**
  * The main function for the action.
@@ -7,7 +8,8 @@ import getActionOptions from './utils/get-action-options'
  */
 export async function run(): Promise<void> {
   try {
-    getActionOptions()
+    const { owner, repo, run_id } = getActionOptions()
+    FetchWorkFlow({ owner, repo, run_id })
   } catch (error) {
     // Fail the workflow run if an error occurs
     if (error instanceof Error) core.setFailed(error.message)

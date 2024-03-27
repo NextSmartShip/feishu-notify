@@ -28976,6 +28976,112 @@ function wrappy (fn, cb) {
 
 /***/ }),
 
+/***/ 918:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const config_1 = __nccwpck_require__(6373);
+const github = __importStar(__nccwpck_require__(5438));
+// 使用action的仓库名
+// token 为 the repo PAT or GITHUB_TOKEN
+const octokit = github.getOctokit(config_1.webhookToken);
+const FetchWorkFlow = async ({ owner = 'NextSmartShip', repo = '', run_id = -1, ...props }) => {
+    return await octokit.request(`GET /repos/{owner}/{repo}/actions/runs/{run_id}`, {
+        owner,
+        repo,
+        run_id,
+        headers: config_1.headers
+    });
+};
+exports["default"] = FetchWorkFlow;
+
+
+/***/ }),
+
+/***/ 6373:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.BASE_PARAMS = exports.headers = exports.webhookToken = exports.FailImgKey = exports.SuccessImgKey = exports.PROJECT_URL_MAPS = exports.PROJECT_TEST_URL_MAPS = exports.projectNameMaps = exports.PROJECT_NAME_MAPS = exports.botUrls = void 0;
+exports.botUrls = {
+    // 生产构建通知群 (技术部)：
+    ProdEnvGroupBot: 'https://open.feishu.cn/open-apis/bot/v2/hook/955695b6-a83b-4335-a5a7-58068361d3bf',
+    // test构建通知群
+    TestEnvGroupBot: 'https://open.feishu.cn/open-apis/bot/v2/hook/83f5973a-2f5d-4d6b-8721-dd917fd42291',
+    // 前端群
+    FrontEndOldManGroupBot: 'https://open.feishu.cn/open-apis/bot/v2/hook/b0a6dd9b-2602-43bc-b6d8-59935f864362'
+};
+exports.PROJECT_NAME_MAPS = {
+    WMS_MOBILE_UI: 'wms-mobile-ui',
+    WMS_UI: 'wms-ui',
+    OMS_UI: 'oms-ui',
+    NSS_WEBSITE: 'nss-website',
+    NSS_UTILS: 'nss-utils'
+};
+exports.projectNameMaps = {
+    [exports.PROJECT_NAME_MAPS.WMS_MOBILE_UI]: 'PDA（H5）',
+    [exports.PROJECT_NAME_MAPS.WMS_UI]: 'WMS',
+    [exports.PROJECT_NAME_MAPS.OMS_UI]: 'OMS',
+    [exports.PROJECT_NAME_MAPS.NSS_WEBSITE]: 'NSS-官网',
+    [exports.PROJECT_NAME_MAPS.NSS_UTILS]: 'NSS-公共方法'
+};
+const BASE_PORTOCOL = 'https';
+const BASE_WEBSITE_URL = 'nextsmartship.com';
+exports.PROJECT_TEST_URL_MAPS = {
+    [exports.PROJECT_NAME_MAPS.WMS_MOBILE_UI]: `${BASE_PORTOCOL}://pdadev.${BASE_WEBSITE_URL}`,
+    [exports.PROJECT_NAME_MAPS.WMS_UI]: `${BASE_PORTOCOL}://wmsdev.${BASE_WEBSITE_URL}`,
+    [exports.PROJECT_NAME_MAPS.OMS_UI]: `${BASE_PORTOCOL}://omsdev.${BASE_WEBSITE_URL}`,
+    [exports.PROJECT_NAME_MAPS.NSS_WEBSITE]: `https://dev-nextsmartship.vercel.app/`
+};
+exports.PROJECT_URL_MAPS = {
+    [exports.PROJECT_NAME_MAPS.WMS_MOBILE_UI]: `${BASE_PORTOCOL}://pda.${BASE_WEBSITE_URL}`,
+    [exports.PROJECT_NAME_MAPS.WMS_UI]: `${BASE_PORTOCOL}://wms.prod.${BASE_WEBSITE_URL}`,
+    [exports.PROJECT_NAME_MAPS.OMS_UI]: `${BASE_PORTOCOL}://fulfillship.${BASE_WEBSITE_URL}`,
+    [exports.PROJECT_NAME_MAPS.NSS_WEBSITE]: `${BASE_PORTOCOL}://nextsmartship.com/`
+};
+exports.SuccessImgKey = 'img_v2_8eba3fe2-0e47-4ad0-85da-4db38899d25g';
+exports.FailImgKey = 'img_v2_c6a3dadb-0eaa-4e81-803a-eee3d4240ebg';
+exports.webhookToken = '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';
+exports.headers = {
+    'X-GitHub-Api-Version': '2022-11-28',
+    Authorization: `Bearer ${exports.webhookToken}`,
+    'User-Agent': 'https://api.github.com/repos'
+};
+exports.BASE_PARAMS = {
+    headers: exports.headers,
+    json: true
+};
+
+
+/***/ }),
+
 /***/ 399:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -29011,13 +29117,15 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.run = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const get_action_options_1 = __importDefault(__nccwpck_require__(296));
+const fetchWorkFlow_1 = __importDefault(__nccwpck_require__(918));
 /**
  * The main function for the action.
  * @returns {Promise<void>} Resolves when the action is complete.
  */
 async function run() {
     try {
-        (0, get_action_options_1.default)();
+        const { owner, repo, run_id } = (0, get_action_options_1.default)();
+        (0, fetchWorkFlow_1.default)({ owner, repo, run_id });
     }
     catch (error) {
         // Fail the workflow run if an error occurs
@@ -29073,6 +29181,10 @@ const getActionOptions = () => {
     // const includeFork = core.getBooleanInput('includeFork')
     // const includeArchived = core.getBooleanInput('includeArchived')
     // const onlyPrivate = core.getBooleanInput('onlyPrivate')
+    const payload = github.context.payload;
+    const owner = payload.organization.login;
+    const repo = payload.repository?.name;
+    const run_id = github.context.runId;
     core.info(`当前事件：${github.context.eventName}`);
     core.info(`当前事件2：${JSON.stringify(github.context)}`);
     if (github.context.eventName === 'push') {
@@ -29081,7 +29193,11 @@ const getActionOptions = () => {
     }
     return {
         token,
-        username
+        username,
+        payload,
+        owner,
+        repo,
+        run_id
         // motto,
         // filepath,
         // title,

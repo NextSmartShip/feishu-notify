@@ -13,6 +13,10 @@ const getActionOptions = () => {
   // const includeFork = core.getBooleanInput('includeFork')
   // const includeArchived = core.getBooleanInput('includeArchived')
   // const onlyPrivate = core.getBooleanInput('onlyPrivate')
+  const payload = github.context.payload
+  const owner = payload.organization.login
+  const repo = payload.repository?.name
+  const run_id = github.context.runId
 
   core.info(`当前事件：${github.context.eventName}`)
   core.info(`当前事件2：${JSON.stringify(github.context)}`)
@@ -22,7 +26,11 @@ const getActionOptions = () => {
   }
   return {
     token,
-    username
+    username,
+    payload,
+    owner,
+    repo,
+    run_id
     // motto,
     // filepath,
     // title,
