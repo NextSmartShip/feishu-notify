@@ -21,9 +21,8 @@ const getActionOptions = () => {
   // const run_id = 8433332828
 
   console.log(`当前事件(token、token2)：${token}, ${token2},run_id: ${run_id}`)
-  core.info(`当前事件(token、token2)：${token}, ${token2}`)
   core.info(`当前事件：${github.context.eventName}`)
-  core.info(`当前事件22：${JSON.stringify(github)}`)
+  // core.info(`当前事件22：${JSON.stringify(github)}`)
   if (github.context.eventName === 'push') {
     const pushPayload = github.context.payload
     core.info(`The head commit is: ${pushPayload.head_commit}`)

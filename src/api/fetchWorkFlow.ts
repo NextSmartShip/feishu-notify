@@ -30,26 +30,26 @@ const FetchWorkFlow = async ({
   github_token,
   ...props
 }: Props) => {
-  const params = {
-    owner,
-    repo,
-    run_id,
-    headers: {
-      ...headers,
-      authorization: `token ${github_token}`
-      // Authorization: `Bearer ${github_token}`
-    }
-  }
-  try {
-    console.log(
-      '检查环境变量1：',
-      process.env.TOKEN,
-      JSON.stringify(process.env)
-    )
-    console.log('请求前检查参数：', JSON.stringify(params))
-  } catch (error) {
-    console.log('error:', error)
-  }
+  // const params = {
+  //   owner,
+  //   repo,
+  //   run_id,
+  //   headers: {
+  //     ...headers,
+  //     authorization: `token ${github_token}`
+  //     // Authorization: `Bearer ${github_token}`
+  //   }
+  // }
+  // try {
+  //   console.log(
+  //     '检查环境变量1：',
+  //     process.env.TOKEN,
+  //     JSON.stringify(process.env)
+  //   )
+  //   console.log('请求前检查参数：', JSON.stringify(params))
+  // } catch (error) {
+  //   console.log('error:', error)
+  // }
 
   try {
     // const res = await octokit.request(
@@ -67,6 +67,7 @@ const FetchWorkFlow = async ({
         'X-GitHub-Api-Version': '2022-11-28'
       }
     }
+    console.log('请求前检查参数：', JSON.stringify(config))
 
     const res = await axios.request(config)
     // .then(response => {
@@ -75,7 +76,7 @@ const FetchWorkFlow = async ({
     // .catch(error => {
     //   console.log(error)
     // })
-    console.log('查看请求返回值.：', res)
+    // console.log('查看请求返回值.：', res)
     console.log('查看请求返回值2.：', res.data)
   } catch (error) {
     console.log('查看请求by错误时：', error)

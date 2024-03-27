@@ -32508,30 +32508,32 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const axios_1 = __importDefault(__nccwpck_require__(8757));
-const config_1 = __nccwpck_require__(6373);
 const core = __importStar(__nccwpck_require__(2186));
 // import * as github from '@actions/github'
 // 使用action的仓库名
 const token = core.getInput('token');
 console.log('auth之前查看abctok2en：', JSON.stringify(token));
 const FetchWorkFlow = async ({ owner = 'NextSmartShip', repo = '', run_id = -1, github_token, ...props }) => {
-    const params = {
-        owner,
-        repo,
-        run_id,
-        headers: {
-            ...config_1.headers,
-            authorization: `token ${github_token}`
-            // Authorization: `Bearer ${github_token}`
-        }
-    };
-    try {
-        console.log('检查环境变量1：', process.env.TOKEN, JSON.stringify(process.env));
-        console.log('请求前检查参数：', JSON.stringify(params));
-    }
-    catch (error) {
-        console.log('error:', error);
-    }
+    // const params = {
+    //   owner,
+    //   repo,
+    //   run_id,
+    //   headers: {
+    //     ...headers,
+    //     authorization: `token ${github_token}`
+    //     // Authorization: `Bearer ${github_token}`
+    //   }
+    // }
+    // try {
+    //   console.log(
+    //     '检查环境变量1：',
+    //     process.env.TOKEN,
+    //     JSON.stringify(process.env)
+    //   )
+    //   console.log('请求前检查参数：', JSON.stringify(params))
+    // } catch (error) {
+    //   console.log('error:', error)
+    // }
     try {
         // const res = await octokit.request(
         //   `GET /repos/{owner}/{repo}/actions/runs/{run_id}`,
@@ -32548,6 +32550,7 @@ const FetchWorkFlow = async ({ owner = 'NextSmartShip', repo = '', run_id = -1, 
                 'X-GitHub-Api-Version': '2022-11-28'
             }
         };
+        console.log('请求前检查参数：', JSON.stringify(config));
         const res = await axios_1.default.request(config);
         // .then(response => {
         //   console.log(JSON.stringify(response.data))
@@ -32555,7 +32558,7 @@ const FetchWorkFlow = async ({ owner = 'NextSmartShip', repo = '', run_id = -1, 
         // .catch(error => {
         //   console.log(error)
         // })
-        console.log('查看请求返回值.：', res);
+        // console.log('查看请求返回值.：', res)
         console.log('查看请求返回值2.：', res.data);
     }
     catch (error) {
@@ -32563,66 +32566,6 @@ const FetchWorkFlow = async ({ owner = 'NextSmartShip', repo = '', run_id = -1, 
     }
 };
 exports["default"] = FetchWorkFlow;
-
-
-/***/ }),
-
-/***/ 6373:
-/***/ ((__unused_webpack_module, exports) => {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.BASE_PARAMS = exports.headers = exports.FailImgKey = exports.SuccessImgKey = exports.PROJECT_URL_MAPS = exports.PROJECT_TEST_URL_MAPS = exports.projectNameMaps = exports.PROJECT_NAME_MAPS = exports.botUrls = void 0;
-exports.botUrls = {
-    // 生产构建通知群 (技术部)：
-    ProdEnvGroupBot: 'https://open.feishu.cn/open-apis/bot/v2/hook/955695b6-a83b-4335-a5a7-58068361d3bf',
-    // test构建通知群
-    TestEnvGroupBot: 'https://open.feishu.cn/open-apis/bot/v2/hook/83f5973a-2f5d-4d6b-8721-dd917fd42291',
-    // 前端群
-    FrontEndOldManGroupBot: 'https://open.feishu.cn/open-apis/bot/v2/hook/b0a6dd9b-2602-43bc-b6d8-59935f864362'
-};
-exports.PROJECT_NAME_MAPS = {
-    WMS_MOBILE_UI: 'wms-mobile-ui',
-    WMS_UI: 'wms-ui',
-    OMS_UI: 'oms-ui',
-    NSS_WEBSITE: 'nss-website',
-    NSS_UTILS: 'nss-utils'
-};
-exports.projectNameMaps = {
-    [exports.PROJECT_NAME_MAPS.WMS_MOBILE_UI]: 'PDA（H5）',
-    [exports.PROJECT_NAME_MAPS.WMS_UI]: 'WMS',
-    [exports.PROJECT_NAME_MAPS.OMS_UI]: 'OMS',
-    [exports.PROJECT_NAME_MAPS.NSS_WEBSITE]: 'NSS-官网',
-    [exports.PROJECT_NAME_MAPS.NSS_UTILS]: 'NSS-公共方法'
-};
-const BASE_PORTOCOL = 'https';
-const BASE_WEBSITE_URL = 'nextsmartship.com';
-exports.PROJECT_TEST_URL_MAPS = {
-    [exports.PROJECT_NAME_MAPS.WMS_MOBILE_UI]: `${BASE_PORTOCOL}://pdadev.${BASE_WEBSITE_URL}`,
-    [exports.PROJECT_NAME_MAPS.WMS_UI]: `${BASE_PORTOCOL}://wmsdev.${BASE_WEBSITE_URL}`,
-    [exports.PROJECT_NAME_MAPS.OMS_UI]: `${BASE_PORTOCOL}://omsdev.${BASE_WEBSITE_URL}`,
-    [exports.PROJECT_NAME_MAPS.NSS_WEBSITE]: `https://dev-nextsmartship.vercel.app/`
-};
-exports.PROJECT_URL_MAPS = {
-    [exports.PROJECT_NAME_MAPS.WMS_MOBILE_UI]: `${BASE_PORTOCOL}://pda.${BASE_WEBSITE_URL}`,
-    [exports.PROJECT_NAME_MAPS.WMS_UI]: `${BASE_PORTOCOL}://wms.prod.${BASE_WEBSITE_URL}`,
-    [exports.PROJECT_NAME_MAPS.OMS_UI]: `${BASE_PORTOCOL}://fulfillship.${BASE_WEBSITE_URL}`,
-    [exports.PROJECT_NAME_MAPS.NSS_WEBSITE]: `${BASE_PORTOCOL}://nextsmartship.com/`
-};
-exports.SuccessImgKey = 'img_v2_8eba3fe2-0e47-4ad0-85da-4db38899d25g';
-exports.FailImgKey = 'img_v2_c6a3dadb-0eaa-4e81-803a-eee3d4240ebg';
-// export const webhookToken = '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'
-// export const webhookToken = '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'
-exports.headers = {
-    'X-GitHub-Api-Version': '2022-11-28'
-    // Authorization: `Bearer ${webhookToken}`,
-    // 'User-Agent': 'https://api.github.com/repos'
-};
-exports.BASE_PARAMS = {
-    headers: exports.headers,
-    json: true
-};
 
 
 /***/ }),
@@ -32732,9 +32675,8 @@ const getActionOptions = () => {
     const run_id = github.context.runId;
     // const run_id = 8433332828
     console.log(`当前事件(token、token2)：${token}, ${token2},run_id: ${run_id}`);
-    core.info(`当前事件(token、token2)：${token}, ${token2}`);
     core.info(`当前事件：${github.context.eventName}`);
-    core.info(`当前事件22：${JSON.stringify(github)}`);
+    // core.info(`当前事件22：${JSON.stringify(github)}`)
     if (github.context.eventName === 'push') {
         const pushPayload = github.context.payload;
         core.info(`The head commit is: ${pushPayload.head_commit}`);
