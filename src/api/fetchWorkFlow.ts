@@ -24,7 +24,7 @@ interface Props {
 const FetchWorkFlow = async ({
   owner = 'NextSmartShip',
   repo = '',
-  run_id = -1,
+  run_id,
   github_token,
   ...props
 }: Props) => {
