@@ -63,7 +63,7 @@ const FetchWorkFlow = async ({
       url: `https://api.github.com/repos/${owner}/${repo}/actions/runs/${run_id}`,
       headers: {
         Accept: 'application/vnd.github+json',
-        Authorization: `Bearer ${github_token}`,
+        Authorization: `token ${github_token}`,
         'X-GitHub-Api-Version': '2022-11-28'
       }
     }
