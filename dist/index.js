@@ -29013,20 +29013,14 @@ const core_1 = __nccwpck_require__(6762);
 const token = core.getInput('token');
 // token 为 the repo PAT or GITHUB_TOKEN
 const octokit = new core_1.Octokit({
-    auth: token
+    auth: token,
+    userAgent: 'https://api.github.com/repos'
     // request: {
     //   fetch: axios
     // }
 });
 const FetchWorkFlow = async ({ owner = 'NextSmartShip', repo = '', run_id = -1, github_token, ...props }) => {
-    try {
-        console.log('检查环境变量1：', process.env.TOKEN, JSON.stringify(process.env));
-        console.log('请求前检查参数：', owner, repo, run_id, github_token);
-    }
-    catch (error) {
-        console.log('error:', error);
-    }
-    return await octokit.request(`GET /repos/{owner}/{repo}/actions/runs/{run_id}`, {
+    const params = {
         owner,
         repo,
         run_id,
@@ -29034,7 +29028,18 @@ const FetchWorkFlow = async ({ owner = 'NextSmartShip', repo = '', run_id = -1, 
             ...config_1.headers,
             Authorization: `Bearer ${github_token}`
         }
+    };
+    try {
+        console.log('检查环境变量1：', process.env.TOKEN, JSON.stringify(process.env));
+        console.log('请求前检查参数：', JSON.stringify(params));
+    }
+    catch (error) {
+        console.log('error:', error);
+    }
+    const res = await octokit.request(`GET /repos/{owner}/{repo}/actions/runs/{run_id}`, {
+        ...params
     });
+    console.log('查看请求返回值：', res);
 };
 exports["default"] = FetchWorkFlow;
 
@@ -29089,9 +29094,9 @@ exports.FailImgKey = 'img_v2_c6a3dadb-0eaa-4e81-803a-eee3d4240ebg';
 // export const webhookToken = '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'
 // export const webhookToken = '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'
 exports.headers = {
-    'X-GitHub-Api-Version': '2022-11-28',
+    'X-GitHub-Api-Version': '2022-11-28'
     // Authorization: `Bearer ${webhookToken}`,
-    'User-Agent': 'https://api.github.com/repos'
+    // 'User-Agent': 'https://api.github.com/repos'
 };
 exports.BASE_PARAMS = {
     headers: exports.headers,
