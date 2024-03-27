@@ -1,3 +1,4 @@
+import axios from 'axios'
 import { headers, webhookToken } from '../config'
 
 // import * as github from '@actions/github'
@@ -7,7 +8,7 @@ import { Octokit } from '@octokit/core'
 const octokit = new Octokit({
   auth: webhookToken,
   request: {
-    fetch: fetch
+    fetch: axios
   }
 })
 // const octokit = github.getOctokit(webhookToken)
