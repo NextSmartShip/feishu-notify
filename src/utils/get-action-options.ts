@@ -1,6 +1,6 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
-// import { PushEvent } from '@octokit/webhooks-definitions/schema';
+import type { PushEvent } from '@octokit/webhooks-definitions/schema'
 // import type { UserDefinedOptions } from '../type'
 
 const getActionOptions = () => {
@@ -13,8 +13,8 @@ const getActionOptions = () => {
   // const includeFork = core.getBooleanInput('includeFork')
   // const includeArchived = core.getBooleanInput('includeArchived')
   // const onlyPrivate = core.getBooleanInput('onlyPrivate')
-  const payload = github.context.payload
-  const owner = payload.organization.login
+  const payload = github.context.payload as PushEvent
+  const owner = payload.organization?.login
   const repo = payload.repository?.name
   const run_id = github.context.runId
 

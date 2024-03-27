@@ -28977,39 +28977,17 @@ function wrappy (fn, cb) {
 /***/ }),
 
 /***/ 918:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
 
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const config_1 = __nccwpck_require__(6373);
-const github = __importStar(__nccwpck_require__(5438));
+// import * as github from '@actions/github'
+const core_1 = __nccwpck_require__(6762);
 // 使用action的仓库名
 // token 为 the repo PAT or GITHUB_TOKEN
-const octokit = github.getOctokit(config_1.webhookToken);
+const octokit = new core_1.Octokit({ auth: config_1.webhookToken });
 const FetchWorkFlow = async ({ owner = 'NextSmartShip', repo = '', run_id = -1, ...props }) => {
     return await octokit.request(`GET /repos/{owner}/{repo}/actions/runs/{run_id}`, {
         owner,
@@ -29169,7 +29147,6 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(2186));
 const github = __importStar(__nccwpck_require__(5438));
-// import { PushEvent } from '@octokit/webhooks-definitions/schema';
 // import type { UserDefinedOptions } from '../type'
 const getActionOptions = () => {
     const token = core.getInput('token');
@@ -29182,7 +29159,7 @@ const getActionOptions = () => {
     // const includeArchived = core.getBooleanInput('includeArchived')
     // const onlyPrivate = core.getBooleanInput('onlyPrivate')
     const payload = github.context.payload;
-    const owner = payload.organization.login;
+    const owner = payload.organization?.login;
     const repo = payload.repository?.name;
     const run_id = github.context.runId;
     core.info(`当前事件：${github.context.eventName}`);
