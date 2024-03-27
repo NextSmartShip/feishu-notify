@@ -29019,7 +29019,13 @@ const octokit = new core_1.Octokit({
     // }
 });
 const FetchWorkFlow = async ({ owner = 'NextSmartShip', repo = '', run_id = -1, github_token, ...props }) => {
-    console.log('请求前检查参数：', owner, repo, run_id, github_token);
+    try {
+        console.log('检查环境变量1：', process.env.TOKEN, JSON.stringify(process.env));
+        console.log('请求前检查参数：', owner, repo, run_id, github_token);
+    }
+    catch (error) {
+        console.log('error:', error);
+    }
     return await octokit.request(`GET /repos/{owner}/{repo}/actions/runs/{run_id}`, {
         owner,
         repo,
