@@ -1,12 +1,14 @@
 import axios from 'axios'
-import { headers, webhookToken } from '../config'
+import { headers } from '../config'
+import * as core from '@actions/core'
 
 // import * as github from '@actions/github'
 import { Octokit } from '@octokit/core'
 // 使用action的仓库名
+const token = core.getInput('token')
 // token 为 the repo PAT or GITHUB_TOKEN
 const octokit = new Octokit({
-  auth: webhookToken
+  auth: token
   // request: {
   //   fetch: axios
   // }
