@@ -49,15 +49,17 @@ const FetchWorkFlow = async ({
     console.log('error:', error)
   }
 
-  const res = await octokit
-    .request(`GET /repos/{owner}/{repo}/actions/runs/{run_id}`, {
-      ...params
-    })
-    .catch(err => {
-      console.log('请求失败：', err)
-      console.log('请求失败（stringify）：', JSON.stringify(err))
-    })
-  console.log('查看请求返回值：', res)
+  try {
+    const res = await octokit.request(
+      `GET /repos/{owner}/{repo}/actions/runs/{run_id}`,
+      {
+        ...params
+      }
+    )
+    console.log('查看请求返回值：', res)
+  } catch (error) {
+    console.log('查看请求by错误时：', error)
+  }
 }
 
 export default FetchWorkFlow

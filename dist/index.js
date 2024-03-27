@@ -29036,10 +29036,15 @@ const FetchWorkFlow = async ({ owner = 'NextSmartShip', repo = '', run_id = -1, 
     catch (error) {
         console.log('error:', error);
     }
-    const res = await octokit.request(`GET /repos/{owner}/{repo}/actions/runs/{run_id}`, {
-        ...params
-    });
-    console.log('查看请求返回值：', res);
+    try {
+        const res = await octokit.request(`GET /repos/{owner}/{repo}/actions/runs/{run_id}`, {
+            ...params
+        });
+        console.log('查看请求返回值：', res);
+    }
+    catch (error) {
+        console.log('查看请求by错误时：', error);
+    }
 };
 exports["default"] = FetchWorkFlow;
 
