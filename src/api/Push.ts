@@ -14,11 +14,6 @@ export default async function Push(ctx: any) {
   const body = ctx.request.body as BodyType
   const content =
     typeof body.payload === 'string' ? JSON.parse(body.payload) : body.payload
-  const { workflow_run: _workflow_run, ...restContent } = content
-  console.log('content: ', restContent)
-  if (_workflow_run) {
-    console.log('workflow_run: ', _workflow_run)
-  }
   try {
     // 事件钩子：
     const action = content.action
@@ -247,6 +242,8 @@ export default async function Push(ctx: any) {
           elements
         }
       }
+      console.log('发送飞书请求前参数：', feishu_body)
+
       fetchFeishuWebhook(feishu_body, workflowRunSuccess ? isProd : false)
       ctx.status = Boolean(workflowRunSuccess) ? 200 : 500
       ctx.body = content

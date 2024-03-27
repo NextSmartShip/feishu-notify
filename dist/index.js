@@ -32525,11 +32525,6 @@ async function Push(ctx) {
     ctx.type = 'application/json';
     const body = ctx.request.body;
     const content = typeof body.payload === 'string' ? JSON.parse(body.payload) : body.payload;
-    const { workflow_run: _workflow_run, ...restContent } = content;
-    console.log('content: ', restContent);
-    if (_workflow_run) {
-        console.log('workflow_run: ', _workflow_run);
-    }
     try {
         // 事件钩子：
         const action = content.action;
@@ -32749,6 +32744,7 @@ async function Push(ctx) {
                     elements
                 }
             };
+            console.log('发送飞书请求前参数：', feishu_body);
             (0, _1.fetchFeishuWebhook)(feishu_body, workflowRunSuccess ? isProd : false);
             ctx.status = Boolean(workflowRunSuccess) ? 200 : 500;
             ctx.body = content;
