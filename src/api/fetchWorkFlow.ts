@@ -6,10 +6,10 @@ import { Octokit } from '@octokit/core'
 // 使用action的仓库名
 // token 为 the repo PAT or GITHUB_TOKEN
 const octokit = new Octokit({
-  auth: webhookToken,
-  request: {
-    fetch: axios
-  }
+  auth: webhookToken
+  // request: {
+  //   fetch: axios
+  // }
 })
 // const octokit = github.getOctokit(webhookToken)
 
