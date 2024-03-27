@@ -29026,7 +29026,8 @@ const FetchWorkFlow = async ({ owner = 'NextSmartShip', repo = '', run_id = -1, 
         repo,
         run_id,
         headers: {
-            ...config_1.headers
+            ...config_1.headers,
+            authorization: `token ${github_token}`
             // Authorization: `Bearer ${github_token}`
         }
     };
