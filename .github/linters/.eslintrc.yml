@@ -80,5 +80,6 @@ rules:
     '@typescript-eslint/space-before-function-paren': 'off',
     '@typescript-eslint/type-annotation-spacing': 'error',
     '@typescript-eslint/unbound-method': 'error',
-    'filenames/match-regex': [1, '^[a-z0-9_]+(.js)?$']
+    'filenames/match-regex': [1, '^[a-z0-9_]+(.js)?$'],
+    'no-extra-boolean-cast': 'off'
   }
