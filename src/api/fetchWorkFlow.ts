@@ -8,7 +8,8 @@ import { Octokit } from '@octokit/core'
 const token = core.getInput('token')
 // token 为 the repo PAT or GITHUB_TOKEN
 const octokit = new Octokit({
-  auth: token
+  auth: token,
+  userAgent: 'https://api.github.com/repos'
   // request: {
   //   fetch: axios
   // }
@@ -48,12 +49,13 @@ const FetchWorkFlow = async ({
     console.log('error:', error)
   }
 
-  return await octokit.request(
+  const res = await octokit.request(
     `GET /repos/{owner}/{repo}/actions/runs/{run_id}`,
     {
       ...params
     }
   )
+  console.log('查看请求返回值：', res)
 }
 
 export default FetchWorkFlow
