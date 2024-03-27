@@ -79,7 +79,7 @@ const FetchWorkFlow = async ({
     // console.log('查看请求返回值.：', res)
     const payload = res.data
     // console.log('查看请求返回值2.：', payload)
-    Push({
+    await Push({
       request: {
         body: {
           payload
