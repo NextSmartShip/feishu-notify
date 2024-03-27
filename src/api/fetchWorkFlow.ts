@@ -17,11 +17,13 @@ interface Props {
   owner?: string
   repo?: string
   run_id?: number
+  github_token?: string
 }
 const FetchWorkFlow = async ({
   owner = 'NextSmartShip',
   repo = '',
   run_id = -1,
+  github_token,
   ...props
 }: Props) => {
   return await octokit.request(
@@ -30,7 +32,10 @@ const FetchWorkFlow = async ({
       owner,
       repo,
       run_id,
-      headers
+      headers: {
+        ...headers,
+        Authorization: `Bearer ${github_token}`
+      }
     }
   )
 }

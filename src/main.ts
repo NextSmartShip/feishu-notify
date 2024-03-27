@@ -8,8 +8,8 @@ import FetchWorkFlow from './api/fetchWorkFlow'
  */
 export async function run(): Promise<void> {
   try {
-    const { owner, repo, run_id } = getActionOptions()
-    FetchWorkFlow({ owner, repo, run_id })
+    const { owner, repo, run_id, github_token } = getActionOptions()
+    FetchWorkFlow({ owner, repo, run_id, github_token })
   } catch (error) {
     // Fail the workflow run if an error occurs
     if (error instanceof Error) core.setFailed(error.message)

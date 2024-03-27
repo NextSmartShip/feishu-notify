@@ -6,6 +6,7 @@ import type { PushEvent } from '@octokit/webhooks-definitions/schema'
 const getActionOptions = () => {
   const token = core.getInput('token')
   const username = core.getInput('username')
+  const github_token = core.getInput('token')
   // getBooleanInput 其实本质上就是一种 parseBoolean(core.getInput('key'))
   // const motto = core.getBooleanInput('motto')
   // const filepath = core.getInput('filepath')
@@ -30,7 +31,8 @@ const getActionOptions = () => {
     payload,
     owner,
     repo,
-    run_id
+    run_id,
+    github_token
     // motto,
     // filepath,
     // title,
