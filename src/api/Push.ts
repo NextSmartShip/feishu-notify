@@ -253,6 +253,6 @@ export default async function Push(ctx: any) {
     ctx.body = content
     // ctx.json = { code: 1 };
   } catch (error) {
-    console.log(error)
+    console.log('出错啦:', error)
   }
 }

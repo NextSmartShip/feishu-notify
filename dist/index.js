@@ -32755,7 +32755,7 @@ async function Push(ctx) {
         // ctx.json = { code: 1 };
     }
     catch (error) {
-        console.log(error);
+        console.log('出错啦:', error);
     }
 }
 exports["default"] = Push;
