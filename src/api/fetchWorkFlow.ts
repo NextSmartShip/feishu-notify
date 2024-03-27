@@ -3,19 +3,18 @@ import { headers } from '../config'
 import * as core from '@actions/core'
 
 // import * as github from '@actions/github'
-import { Octokit } from '@octokit/core'
 // 使用action的仓库名
 const token = core.getInput('token')
 console.log('auth之前查看abctok2en：', JSON.stringify(token))
 
 // token 为 the repo PAT or GITHUB_TOKEN
-const octokit = new Octokit({
-  auth: token,
-  userAgent: 'https://api.github.com/repos'
-  // request: {
-  //   fetch: axios
-  // }
-})
+// const octokit = new Octokit({
+//   auth: token,
+//   userAgent: 'https://api.github.com/repos'
+//   // request: {
+//   //   fetch: axios
+//   // }
+// })
 // const octokit = github.getOctokit(webhookToken)
 
 interface Props {
@@ -53,13 +52,30 @@ const FetchWorkFlow = async ({
   }
 
   try {
-    const res = await octokit.request(
-      `GET /repos/{owner}/{repo}/actions/runs/{run_id}`,
-      {
-        ...params
+    // const res = await octokit.request(
+    //   `GET /repos/{owner}/{repo}/actions/runs/{run_id}`,
+    //   {
+    //     ...params
+    //   }
+    // )
+    const config = {
+      method: 'get',
+      url: `https://api.github.com/repos/${owner}/${repo}/actions/runs/${run_id}`,
+      headers: {
+        Accept: 'application/vnd.github+json',
+        Authorization: `Bearer ${github_token}`,
+        'X-GitHub-Api-Version': '2022-11-28'
       }
-    )
-    console.log('查看请求返回值：', res)
+    }
+
+    const res = await axios.request(config)
+    // .then(response => {
+    //   console.log(JSON.stringify(response.data))
+    // })
+    // .catch(error => {
+    //   console.log(error)
+    // })
+    console.log('查看请求返回值：', JSON.stringify(res))
   } catch (error) {
     console.log('查看请求by错误时：', error)
   }
