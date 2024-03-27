@@ -28,7 +28,7 @@ const FetchWorkFlow = async ({
   github_token,
   ...props
 }: Props) => {
-  console.log('检查环境变量：', JSON.stringify(process.env))
+  console.log('检查环境变量1：', process.env.TOKEN, JSON.stringify(process.env))
   console.log('请求前检查参数：', owner, repo, run_id, github_token)
 
   return await octokit.request(
