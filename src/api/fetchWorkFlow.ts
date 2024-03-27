@@ -36,8 +36,8 @@ const FetchWorkFlow = async ({
     repo,
     run_id,
     headers: {
-      ...headers,
-      Authorization: `Bearer ${github_token}`
+      ...headers
+      // Authorization: `Bearer ${github_token}`
     }
   }
   try {
