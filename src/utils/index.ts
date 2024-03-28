@@ -87,23 +87,27 @@ export const formatCommitsMsg = (commits: FormatCommitsItem[]) => {
 export const getCommits = async (
   _params: ReqPullCommitsByShaParams_Type
 ): Promise<FormatCommitsItem[]> => {
-  const params = formatValue(_params)
-  const result = await fetchCommitsByCurrentCommitSha(
-    params as ReqPullCommitsByShaParams_Type
-  )
+  try {
+    const params = formatValue(_params)
+    const result = await fetchCommitsByCurrentCommitSha(
+      params as ReqPullCommitsByShaParams_Type
+    )
 
-  const commit_url = result[0]?.commits_url
-  const commits = result?.length
-    ? await fetchCommits(commit_url)
-    : await fetchCommit(_params)
-  if (!commits?.length) return []
-  const formatCommits = commits.map(item => {
-    return {
-      message: item.commit.message,
-      html_url: item.html_url
-    }
-  })
-  return formatCommits
+    const commit_url = result[0]?.commits_url
+    const commits = result?.length
+      ? await fetchCommits(commit_url)
+      : await fetchCommit(_params)
+    if (!commits?.length) return []
+    const formatCommits = commits.map(item => {
+      return {
+        message: item.commit.message,
+        html_url: item.html_url
+      }
+    })
+    return formatCommits
+  } catch (error) {
+    return []
+  }
 }
 export const isProd = process.env.NODE_ENV === 'production'
 // 返回是否是周末

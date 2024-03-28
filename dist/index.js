@@ -32521,6 +32521,11 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const _1 = __nccwpck_require__(9343);
 const groupUrls = __importStar(__nccwpck_require__(6373));
 const utils_1 = __nccwpck_require__(6252);
+const canSendMsgToFeishu = (content) => {
+    if (!content || !content.repository || !content.jobs_url)
+        return false;
+    return true;
+};
 async function Push(ctx) {
     ctx.type = 'application/json';
     try {
@@ -32542,6 +32547,7 @@ async function Push(ctx) {
         const head_sha = content.head_sha;
         // 构建的分支：
         const branch = content.head_branch;
+        const workflowRunSuccess = canSendMsgToFeishu(content);
         // 构建的详情页 (当workflow_run不存在时，html_url无法找到)：
         const jobRes = await (0, _1.fetchJobHtmlUrl)(content.jobs_url);
         const { jobs = [] } = jobRes;
@@ -32561,14 +32567,11 @@ async function Push(ctx) {
         const isProd = content.event === 'release' || branch === 'master';
         // 构建环境：
         const buildEnv = isProd ? '生产环境' : '测试环境';
-        const workflowRunSuccess = conclusion === 'success';
-        const commits = workflowRunSuccess
-            ? await (0, utils_1.getCommits)({
-                owner: repository?.owner?.login,
-                repo: repository?.name,
-                commit_sha: head_sha
-            })
-            : [];
+        const commits = await (0, utils_1.getCommits)({
+            owner: repository?.owner?.login,
+            repo: repository?.name,
+            commit_sha: head_sha
+        });
         const handleTime = (0, utils_1.handleDiffTime)(content.run_started_at, content.updated_at);
         const config = {
             wide_screen_mode: true
@@ -32682,7 +32685,7 @@ async function Push(ctx) {
                                     content: '',
                                     tag: 'plain_text'
                                 },
-                                img_key: Boolean(workflowRunSuccess)
+                                img_key: workflowRunSuccess
                                     ? groupUrls.SuccessImgKey
                                     : groupUrls.FailImgKey,
                                 custom_width: 100,
@@ -33281,21 +33284,26 @@ const formatCommitsMsg = (commits) => {
 };
 exports.formatCommitsMsg = formatCommitsMsg;
 const getCommits = async (_params) => {
-    const params = (0, exports.formatValue)(_params);
-    const result = await (0, api_1.fetchCommitsByCurrentCommitSha)(params);
-    const commit_url = result[0]?.commits_url;
-    const commits = result?.length
-        ? await (0, api_1.fetchCommits)(commit_url)
-        : await (0, api_1.fetchCommit)(_params);
-    if (!commits?.length)
+    try {
+        const params = (0, exports.formatValue)(_params);
+        const result = await (0, api_1.fetchCommitsByCurrentCommitSha)(params);
+        const commit_url = result[0]?.commits_url;
+        const commits = result?.length
+            ? await (0, api_1.fetchCommits)(commit_url)
+            : await (0, api_1.fetchCommit)(_params);
+        if (!commits?.length)
+            return [];
+        const formatCommits = commits.map(item => {
+            return {
+                message: item.commit.message,
+                html_url: item.html_url
+            };
+        });
+        return formatCommits;
+    }
+    catch (error) {
         return [];
-    const formatCommits = commits.map(item => {
-        return {
-            message: item.commit.message,
-            html_url: item.html_url
-        };
-    });
-    return formatCommits;
+    }
 };
 exports.getCommits = getCommits;
 exports.isProd = process.env.NODE_ENV === 'production';

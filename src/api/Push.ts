@@ -9,6 +9,11 @@ import {
 
 type BodyType = { payload: Record<string, any> }
 
+const canSendMsgToFeishu = (content: any) => {
+  if (!content || !content.repository || !content.jobs_url) return false
+  return true
+}
+
 export default async function Push(ctx: any) {
   ctx.type = 'application/json'
 
@@ -33,6 +38,7 @@ export default async function Push(ctx: any) {
     const head_sha = content.head_sha
     // 构建的分支：
     const branch = content.head_branch
+    const workflowRunSuccess = canSendMsgToFeishu(content)
     // 构建的详情页 (当workflow_run不存在时，html_url无法找到)：
     const jobRes = await fetchJobHtmlUrl(content.jobs_url)
     const { jobs = [] } = jobRes
@@ -55,14 +61,11 @@ export default async function Push(ctx: any) {
     // 构建环境：
     const buildEnv = isProd ? '生产环境' : '测试环境'
 
-    const workflowRunSuccess = conclusion === 'success'
-    const commits = workflowRunSuccess
-      ? await getCommits({
-          owner: repository?.owner?.login,
-          repo: repository?.name,
-          commit_sha: head_sha
-        })
-      : []
+    const commits = await getCommits({
+      owner: repository?.owner?.login,
+      repo: repository?.name,
+      commit_sha: head_sha
+    })
     const handleTime = handleDiffTime(
       content.run_started_at,
       content.updated_at
@@ -182,7 +185,7 @@ export default async function Push(ctx: any) {
                   content: '',
                   tag: 'plain_text'
                 },
-                img_key: Boolean(workflowRunSuccess)
+                img_key: workflowRunSuccess
                   ? groupUrls.SuccessImgKey
                   : groupUrls.FailImgKey,
                 custom_width: 100,
