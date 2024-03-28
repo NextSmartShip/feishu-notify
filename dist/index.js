@@ -32527,7 +32527,7 @@ async function Push(ctx) {
         const body = ctx.request.body;
         const content = typeof body.payload === 'string' ? JSON.parse(body.payload) : body.payload;
         // 事件钩子：
-        const status = content.status;
+        const status = content.status || '';
         // 代表是否能发feishu：
         const canSendMsg = status === 'completed';
         // 构建结果（成功or失败or手动取消）
