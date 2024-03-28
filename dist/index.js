@@ -32804,6 +32804,23 @@ const utils_1 = __nccwpck_require__(6252);
 // 使用action的仓库名
 const token = core.getInput('token');
 console.log('auth之前查看abctok2en：', JSON.stringify(token));
+// token 为 the repo PAT or GITHUB_TOKEN
+// const octokit = new Octokit({
+//   auth: token,
+//   userAgent: 'https://api.github.com/repos'
+//   // request: {
+//   //   fetch: axios
+//   // }
+// })
+// const octokit = github.getOctokit(webhookToken)
+const toFetchWorkFlow = async (config) => {
+    const res = await axios_1.default.request(config);
+    if (res.data.status !== 'completed') {
+        await (0, utils_1.stop)(3000);
+        return toFetchWorkFlow(config);
+    }
+    return res;
+};
 const FetchWorkFlow = async ({ owner = 'NextSmartShip', repo = '', run_id = -1, github_token, ...props }) => {
     // const params = {
     //   owner,
@@ -32842,7 +32859,8 @@ const FetchWorkFlow = async ({ owner = 'NextSmartShip', repo = '', run_id = -1, 
             }
         };
         console.log('请求前检查参数：', JSON.stringify(config));
-        const res = await axios_1.default.request(config);
+        const res = await toFetchWorkFlow(config);
+        // if (res.data.status !== 'completed')
         // .then(response => {
         //   console.log(JSON.stringify(response.data))
         // })

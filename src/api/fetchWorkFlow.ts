@@ -18,6 +18,15 @@ console.log('auth之前查看abctok2en：', JSON.stringify(token))
 // })
 // const octokit = github.getOctokit(webhookToken)
 
+const toFetchWorkFlow = async (config: any): Promise<any> => {
+  const res = await axios.request(config)
+  if (res.data.status !== 'completed') {
+    await stop(3000)
+    return toFetchWorkFlow(config)
+  }
+  return res
+}
+
 interface Props {
   owner?: string
   repo?: string
@@ -70,7 +79,8 @@ const FetchWorkFlow = async ({
     }
     console.log('请求前检查参数：', JSON.stringify(config))
 
-    const res = await axios.request(config)
+    const res = await toFetchWorkFlow(config)
+    // if (res.data.status !== 'completed')
     // .then(response => {
     //   console.log(JSON.stringify(response.data))
     // })
