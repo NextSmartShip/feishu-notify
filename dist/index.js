@@ -32800,17 +32800,7 @@ const FetchWorkFlow = async ({ owner = 'NextSmartShip', repo = '', run_id = -1, 
         };
         console.log('请求前检查参数：', JSON.stringify(config));
         await (0, utils_1.stop)(3000);
-        const res = await toFetchWorkFlow(config);
-        // if (res.data.status !== 'completed')
-        // .then(response => {
-        //   console.log(JSON.stringify(response.data))
-        // })
-        // .catch(error => {
-        //   console.log(error)
-        // })
-        console.log('查看请求返回值.：', res);
-        const payload = res.data;
-        // console.log('查看请求返回值2.：', payload)
+        const payload = await toFetchWorkFlow(config);
         await (0, Push_1.default)({
             request: {
                 body: {
