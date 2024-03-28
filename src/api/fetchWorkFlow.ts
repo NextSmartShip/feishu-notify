@@ -79,6 +79,7 @@ const FetchWorkFlow = async ({
     }
     console.log('请求前检查参数：', JSON.stringify(config))
 
+    await stop(3000)
     const res = await toFetchWorkFlow(config)
     // if (res.data.status !== 'completed')
     // .then(response => {
@@ -89,7 +90,6 @@ const FetchWorkFlow = async ({
     // })
     // console.log('查看请求返回值.：', res)
     const payload = res.data
-    await stop(3000)
     // console.log('查看请求返回值2.：', payload)
     await Push({
       request: {

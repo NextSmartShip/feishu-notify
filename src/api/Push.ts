@@ -24,7 +24,6 @@ export default async function Push(ctx: any) {
     const conclusion = content.conclusion
     // 否则，代表是手动触发（暂时使用）：
     console.log('by Push...: ', content)
-    if (!canSendMsg || !content) return
 
     // 最新一条提交对象：
     const head_commit = content.head_commit
@@ -54,205 +53,202 @@ export default async function Push(ctx: any) {
     // 构建环境：
     const buildEnv = isProd ? '生产环境' : '测试环境'
 
-    // 代表整个构建成功执行到最后了，即可以发送status给feishu：
-    if (canSendMsg) {
-      const workflowRunSuccess = conclusion === 'success'
-      const commits = workflowRunSuccess
-        ? await getCommits({
-            owner: repository?.owner?.login,
-            repo: repository?.name,
-            commit_sha: head_sha
-          })
-        : []
-      const handleTime = handleDiffTime(
-        content.run_started_at,
-        content.updated_at
-      )
-
-      const config = {
-        wide_screen_mode: true
-      }
-      const header = {
-        template: workflowRunSuccess ? 'green' : 'red',
-        title: {
-          tag: 'plain_text',
-          content: `${cnName} 构建情况（${buildEnv}）：${
-            workflowRunSuccess ? '成功' : '失败'
-          }`
-        }
-      }
-      const previewUrl = getPreviewUrl(content, repository) || '#'
-      const baseMsg = `\n* [${buildDetailMsg}](${buildDetailPageUrl})`
-      const commitMsgs = commits?.length ? formatCommitsMsg(commits) : baseMsg
-      const elements = [
-        {
-          tag: 'div',
-          text: {
-            tag: 'lark_md',
-            content: '<at id=all></at>'
-          }
-        },
-        {
-          tag: 'markdown',
-          content: `[[${repository?.full_name}]点击查看构建详情](${buildDetailPageUrl}) **#${content.id}**`
-        },
-        {
-          tag: 'column_set',
-          flex_mode: 'none',
-          background_style: 'default',
-          columns: [
-            {
-              tag: 'column',
-              width: 'weighted',
-              weight: 1,
-              vertical_align: 'top',
-              elements: [
-                {
-                  tag: 'markdown',
-                  content: `**耗时：**${handleTime}`
-                }
-              ]
-            }
-          ]
-        },
-        {
-          tag: 'column_set',
-          flex_mode: 'none',
-          background_style: 'default',
-          columns: [
-            {
-              tag: 'column',
-              width: 'weighted',
-              weight: 1,
-              vertical_align: 'top',
-              elements: [
-                {
-                  tag: 'markdown',
-                  content: `**构建分支：**${branch}`
-                }
-              ]
-            }
-          ]
-        },
-        {
-          tag: 'column_set',
-          flex_mode: 'none',
-          background_style: 'default',
-          columns: [
-            {
-              tag: 'column',
-              width: 'weighted',
-              weight: 1,
-              vertical_align: 'top',
-              elements: [
-                {
-                  tag: 'markdown',
-                  // "content": "**操作人：** \at所有人<at id=all></at> "
-                  content: `**推送人：**${name}（${email}） `
-                }
-              ]
-            },
-            {
-              tag: 'column',
-              width: 'weighted',
-              weight: 1,
-              vertical_align: 'bottom',
-              elements: [
-                {
-                  tag: 'markdown',
-                  content: `**操作人：**${operator} `
-                }
-              ]
-            }
-          ]
-        },
-        {
-          tag: 'column_set',
-          flex_mode: 'none',
-          background_style: 'default',
-          columns: [
-            {
-              tag: 'column',
-              width: 'weighted',
-              weight: 1,
-              vertical_align: 'top',
-              elements: [
-                {
-                  tag: 'img',
-                  alt: {
-                    content: '',
-                    tag: 'plain_text'
-                  },
-                  img_key: Boolean(workflowRunSuccess)
-                    ? groupUrls.SuccessImgKey
-                    : groupUrls.FailImgKey,
-                  custom_width: 100,
-                  compact_width: true
-                }
-              ]
-            }
-          ]
-        },
-        {
-          tag: 'column_set',
-          flex_mode: 'none',
-          background_style: 'grey',
-          columns: [
-            {
-              tag: 'column',
-              width: 'weighted',
-              weight: 1,
-              vertical_align: 'top',
-              elements: [
-                {
-                  tag: 'markdown',
-                  text_align: 'left',
-                  content: `**Message [(构建链接)](${buildDetailPageUrl})：** ${commitMsgs}`
-                }
-              ]
-            }
-          ]
-        }
-      ]
-      if (previewUrl && previewUrl !== '#') {
-        elements.push({
-          tag: 'column_set',
-          flex_mode: 'none',
-          background_style: 'grey',
-          columns: [
-            {
-              tag: 'column',
-              width: 'weighted',
-              weight: 1,
-              vertical_align: 'top',
-              elements: [
-                {
-                  tag: 'markdown',
-                  text_align: 'left',
-                  content: `**预览地址：** [${previewUrl}](${previewUrl})`
-                }
-              ]
-            }
-          ]
+    const workflowRunSuccess = conclusion === 'success'
+    const commits = workflowRunSuccess
+      ? await getCommits({
+          owner: repository?.owner?.login,
+          repo: repository?.name,
+          commit_sha: head_sha
         })
-      }
-      const feishu_body = {
-        msg_type: 'interactive',
-        card: {
-          config,
-          header,
-          elements
-        }
-      }
-      console.log('发送飞书请求前参数：', feishu_body)
+      : []
+    const handleTime = handleDiffTime(
+      content.run_started_at,
+      content.updated_at
+    )
 
-      fetchFeishuWebhook(feishu_body, workflowRunSuccess ? isProd : false)
-      ctx.status = Boolean(workflowRunSuccess) ? 200 : 500
-      ctx.body = content
-      // ctx.json = { code: !!workflowRunSuccess ? 1 : -1 };
+    const config = {
+      wide_screen_mode: true
     }
-    ctx.status = 200
+    const header = {
+      template: workflowRunSuccess ? 'green' : 'red',
+      title: {
+        tag: 'plain_text',
+        content: `${cnName} 构建情况（${buildEnv}）：${
+          workflowRunSuccess ? '成功' : '失败'
+        }`
+      }
+    }
+    const previewUrl = getPreviewUrl(content, repository) || '#'
+    const baseMsg = `\n* [${buildDetailMsg}](${buildDetailPageUrl})`
+    const commitMsgs = commits?.length ? formatCommitsMsg(commits) : baseMsg
+    const elements = [
+      {
+        tag: 'div',
+        text: {
+          tag: 'lark_md',
+          content: '<at id=all></at>'
+        }
+      },
+      {
+        tag: 'markdown',
+        content: `[[${repository?.full_name}]点击查看构建详情](${buildDetailPageUrl}) **#${content.id}**`
+      },
+      {
+        tag: 'column_set',
+        flex_mode: 'none',
+        background_style: 'default',
+        columns: [
+          {
+            tag: 'column',
+            width: 'weighted',
+            weight: 1,
+            vertical_align: 'top',
+            elements: [
+              {
+                tag: 'markdown',
+                content: `**耗时：**${handleTime}`
+              }
+            ]
+          }
+        ]
+      },
+      {
+        tag: 'column_set',
+        flex_mode: 'none',
+        background_style: 'default',
+        columns: [
+          {
+            tag: 'column',
+            width: 'weighted',
+            weight: 1,
+            vertical_align: 'top',
+            elements: [
+              {
+                tag: 'markdown',
+                content: `**构建分支：**${branch}`
+              }
+            ]
+          }
+        ]
+      },
+      {
+        tag: 'column_set',
+        flex_mode: 'none',
+        background_style: 'default',
+        columns: [
+          {
+            tag: 'column',
+            width: 'weighted',
+            weight: 1,
+            vertical_align: 'top',
+            elements: [
+              {
+                tag: 'markdown',
+                // "content": "**操作人：** \at所有人<at id=all></at> "
+                content: `**推送人：**${name}（${email}） `
+              }
+            ]
+          },
+          {
+            tag: 'column',
+            width: 'weighted',
+            weight: 1,
+            vertical_align: 'bottom',
+            elements: [
+              {
+                tag: 'markdown',
+                content: `**操作人：**${operator} `
+              }
+            ]
+          }
+        ]
+      },
+      {
+        tag: 'column_set',
+        flex_mode: 'none',
+        background_style: 'default',
+        columns: [
+          {
+            tag: 'column',
+            width: 'weighted',
+            weight: 1,
+            vertical_align: 'top',
+            elements: [
+              {
+                tag: 'img',
+                alt: {
+                  content: '',
+                  tag: 'plain_text'
+                },
+                img_key: Boolean(workflowRunSuccess)
+                  ? groupUrls.SuccessImgKey
+                  : groupUrls.FailImgKey,
+                custom_width: 100,
+                compact_width: true
+              }
+            ]
+          }
+        ]
+      },
+      {
+        tag: 'column_set',
+        flex_mode: 'none',
+        background_style: 'grey',
+        columns: [
+          {
+            tag: 'column',
+            width: 'weighted',
+            weight: 1,
+            vertical_align: 'top',
+            elements: [
+              {
+                tag: 'markdown',
+                text_align: 'left',
+                content: `**Message [(构建链接)](${buildDetailPageUrl})：** ${commitMsgs}`
+              }
+            ]
+          }
+        ]
+      }
+    ]
+    if (previewUrl && previewUrl !== '#') {
+      elements.push({
+        tag: 'column_set',
+        flex_mode: 'none',
+        background_style: 'grey',
+        columns: [
+          {
+            tag: 'column',
+            width: 'weighted',
+            weight: 1,
+            vertical_align: 'top',
+            elements: [
+              {
+                tag: 'markdown',
+                text_align: 'left',
+                content: `**预览地址：** [${previewUrl}](${previewUrl})`
+              }
+            ]
+          }
+        ]
+      })
+    }
+    const feishu_body = {
+      msg_type: 'interactive',
+      card: {
+        config,
+        header,
+        elements
+      }
+    }
+    console.log('发送飞书请求前参数：', feishu_body)
+
+    fetchFeishuWebhook(feishu_body, workflowRunSuccess ? isProd : false)
+    ctx.status = Boolean(workflowRunSuccess) ? 200 : 500
     ctx.body = content
+    // ctx.json = { code: !!workflowRunSuccess ? 1 : -1 };
+    // ctx.status = 200
+    // ctx.body = content
     // ctx.json = { code: 1 };
   } catch (error) {
     console.log('出错啦:', error)
