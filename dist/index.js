@@ -32815,10 +32815,10 @@ console.log('auth之前查看abctok2en：', JSON.stringify(token));
 // const octokit = github.getOctokit(webhookToken)
 const toFetchWorkFlow = async (config) => {
     const res = await axios_1.default.request(config);
-    if (res.data.status !== 'completed') {
-        await (0, utils_1.stop)(3000);
-        return toFetchWorkFlow(config);
-    }
+    // if (res.data.status !== 'completed') {
+    //   await stop(3000)
+    //   return toFetchWorkFlow(config)
+    // }
     return res;
 };
 const FetchWorkFlow = async ({ owner = 'NextSmartShip', repo = '', run_id = -1, github_token, ...props }) => {

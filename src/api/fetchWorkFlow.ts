@@ -20,10 +20,10 @@ console.log('auth之前查看abctok2en：', JSON.stringify(token))
 
 const toFetchWorkFlow = async (config: any): Promise<any> => {
   const res = await axios.request(config)
-  if (res.data.status !== 'completed') {
-    await stop(3000)
-    return toFetchWorkFlow(config)
-  }
+  // if (res.data.status !== 'completed') {
+  //   await stop(3000)
+  //   return toFetchWorkFlow(config)
+  // }
   return res
 }
 
