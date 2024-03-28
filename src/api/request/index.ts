@@ -1,6 +1,6 @@
 import * as _Axios from 'axios'
 import { headers } from '../../config'
-import { startWithHttpOrS } from '../../utils'
+import { getToken, startWithHttpOrS } from '../../utils'
 
 const Axios = _Axios.default
 
@@ -19,7 +19,8 @@ axios.interceptors.request.use(
     // @ts-ignore
     _config.headers = {
       // ..._config.headers,
-      ...headers
+      ...headers,
+      Authorization: `token ${getToken()}`
     }
     _config.url = url
     return _config

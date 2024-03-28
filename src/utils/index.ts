@@ -1,3 +1,4 @@
+import * as core from '@actions/core'
 import { networkInterfaces } from 'os'
 import dayjs from 'dayjs'
 import duration from 'dayjs/plugin/duration'
@@ -148,4 +149,8 @@ export const stop = (time: number) => {
       res()
     }, time)
   })
+}
+export const getToken = () => {
+  const token = core.getInput('token')
+  return token
 }

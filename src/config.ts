@@ -45,9 +45,8 @@ export const FailImgKey = 'img_v2_c6a3dadb-0eaa-4e81-803a-eee3d4240ebg'
 // export const webhookToken = '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'
 
 export const headers = {
+  Accept: 'application/vnd.github+json',
   'X-GitHub-Api-Version': '2022-11-28'
-  // Authorization: `Bearer ${webhookToken}`,
-  // 'User-Agent': 'https://api.github.com/repos'
 }
 export const BASE_PARAMS = {
   headers,

@@ -1,12 +1,9 @@
-import axios from 'axios'
-import * as core from '@actions/core'
+import axios from './request'
 import Push from './Push'
 import { stop } from '..//utils'
 
 // import * as github from '@actions/github'
 // 使用action的仓库名
-const token = core.getInput('token')
-console.log('auth之前查看abctok2en：', JSON.stringify(token))
 
 // token 为 the repo PAT or GITHUB_TOKEN
 // const octokit = new Octokit({
@@ -70,12 +67,7 @@ const FetchWorkFlow = async ({
     // )
     const config = {
       method: 'get',
-      url: `https://api.github.com/repos/${owner}/${repo}/actions/runs/${run_id}`,
-      headers: {
-        Accept: 'application/vnd.github+json',
-        Authorization: `token ${github_token}`,
-        'X-GitHub-Api-Version': '2022-11-28'
-      }
+      url: `https://api.github.com/repos/${owner}/${repo}/actions/runs/${run_id}`
     }
     console.log('请求前检查参数：', JSON.stringify(config))
 
