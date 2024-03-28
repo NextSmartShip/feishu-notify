@@ -32527,43 +32527,43 @@ async function Push(ctx) {
         const body = ctx.request.body;
         const content = typeof body.payload === 'string' ? JSON.parse(body.payload) : body.payload;
         // 事件钩子：
-        const action = content.action;
+        const status = content.status;
         // 代表是否能发feishu：
-        const canSendMsg = action === 'completed';
-        // 构建flow对象：
-        const workflow_run = content.workflow_run;
+        const canSendMsg = status === 'completed';
+        // 构建结果（成功or失败or手动取消）
+        const conclusion = content.conclusion;
         // 否则，代表是手动触发（暂时使用）：
-        console.log('by Push...: ', workflow_run, content);
-        if (!canSendMsg || !workflow_run)
+        console.log('by Push...: ', content);
+        if (!canSendMsg || !content)
             return;
         // 最新一条提交对象：
-        const head_commit = workflow_run.head_commit;
+        const head_commit = content.head_commit;
         // 最新一条提交id：
-        const head_sha = workflow_run.head_sha;
+        const head_sha = content.head_sha;
         // 构建的分支：
-        const branch = workflow_run.head_branch;
+        const branch = content.head_branch;
         // 构建的详情页 (当workflow_run不存在时，html_url无法找到)：
-        const jobRes = await (0, _1.fetchJobHtmlUrl)(workflow_run.jobs_url);
+        const jobRes = await (0, _1.fetchJobHtmlUrl)(content.jobs_url);
         const { jobs = [] } = jobRes;
-        const buildDetailPageUrl = jobs?.[0]?.html_url || workflow_run.html_url;
+        const buildDetailPageUrl = jobs?.[0]?.html_url || content.html_url;
         // 构建的title：
         const buildDetailMsg = head_commit?.message?.replace?.(/^.*?\n\n/, '');
         // 项目名称：
         const repository = content?.repository;
         const cnName = groupUrls.projectNameMaps[repository?.name] || 'NSS-项目';
         // // 当前hook操作人
-        const operator = content?.sender?.login;
+        const operator = content?.triggering_actor?.login;
         // 代码推送人-姓名：
         const name = head_commit?.author?.name;
         // 代码推送人-邮箱：
         const email = head_commit?.author?.email;
         // 此次action是Prod还是Test:
-        const isProd = workflow_run.event === 'release' || branch === 'master';
+        const isProd = content.event === 'release' || branch === 'master';
         // 构建环境：
         const buildEnv = isProd ? '生产环境' : '测试环境';
         // 代表整个构建成功执行到最后了，即可以发送status给feishu：
         if (canSendMsg) {
-            const workflowRunSuccess = workflow_run.conclusion === 'success';
+            const workflowRunSuccess = conclusion === 'success';
             const commits = workflowRunSuccess
                 ? await (0, utils_1.getCommits)({
                     owner: repository?.owner?.login,
@@ -32571,7 +32571,7 @@ async function Push(ctx) {
                     commit_sha: head_sha
                 })
                 : [];
-            const handleTime = (0, utils_1.handleDiffTime)(workflow_run.run_started_at, workflow_run.updated_at);
+            const handleTime = (0, utils_1.handleDiffTime)(content.run_started_at, content.updated_at);
             const config = {
                 wide_screen_mode: true
             };
@@ -32582,7 +32582,7 @@ async function Push(ctx) {
                     content: `${cnName} 构建情况（${buildEnv}）：${workflowRunSuccess ? '成功' : '失败'}`
                 }
             };
-            const previewUrl = (0, utils_1.getPreviewUrl)(workflow_run, repository) || '#';
+            const previewUrl = (0, utils_1.getPreviewUrl)(content, repository) || '#';
             const baseMsg = `\n* [${buildDetailMsg}](${buildDetailPageUrl})`;
             const commitMsgs = commits?.length ? (0, utils_1.formatCommitsMsg)(commits) : baseMsg;
             const elements = [
@@ -32595,7 +32595,7 @@ async function Push(ctx) {
                 },
                 {
                     tag: 'markdown',
-                    content: `[[${repository?.full_name}]点击查看构建详情](${buildDetailPageUrl}) **#${workflow_run.id}**`
+                    content: `[[${repository?.full_name}]点击查看构建详情](${buildDetailPageUrl}) **#${content.id}**`
                 },
                 {
                     tag: 'column_set',
@@ -33324,9 +33324,9 @@ exports.handleDiffTime = handleDiffTime;
 const startWithHttpOrS = (str) => str.startsWith('http') || str.startsWith('https');
 exports.startWithHttpOrS = startWithHttpOrS;
 const getPreviewUrl = (workflow_run, project) => {
-    if (workflow_run.name?.indexOf?.('dev') !== -1)
-        return groupUrls.PROJECT_TEST_URL_MAPS[project?.name];
-    return groupUrls.PROJECT_URL_MAPS[project?.name];
+    if (workflow_run.name?.indexOf?.('production') !== -1)
+        return groupUrls.PROJECT_URL_MAPS[project?.name];
+    return groupUrls.PROJECT_TEST_URL_MAPS[project?.name];
 };
 exports.getPreviewUrl = getPreviewUrl;
 const formatValue = (value) => {

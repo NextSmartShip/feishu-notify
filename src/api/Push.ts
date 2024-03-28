@@ -17,26 +17,26 @@ export default async function Push(ctx: any) {
     const content =
       typeof body.payload === 'string' ? JSON.parse(body.payload) : body.payload
     // 事件钩子：
-    const action = content.action
+    const status = content.status
     // 代表是否能发feishu：
-    const canSendMsg = action === 'completed'
-    // 构建flow对象：
-    const workflow_run = content.workflow_run
+    const canSendMsg = status === 'completed'
+    // 构建结果（成功or失败or手动取消）
+    const conclusion = content.conclusion
     // 否则，代表是手动触发（暂时使用）：
-    console.log('by Push...: ', workflow_run, content)
-    if (!canSendMsg || !workflow_run) return
+    console.log('by Push...: ', content)
+    if (!canSendMsg || !content) return
 
     // 最新一条提交对象：
-    const head_commit = workflow_run.head_commit
+    const head_commit = content.head_commit
     // 最新一条提交id：
-    const head_sha = workflow_run.head_sha
+    const head_sha = content.head_sha
     // 构建的分支：
-    const branch = workflow_run.head_branch
+    const branch = content.head_branch
     // 构建的详情页 (当workflow_run不存在时，html_url无法找到)：
-    const jobRes = await fetchJobHtmlUrl(workflow_run.jobs_url)
+    const jobRes = await fetchJobHtmlUrl(content.jobs_url)
     const { jobs = [] } = jobRes
 
-    const buildDetailPageUrl = jobs?.[0]?.html_url || workflow_run.html_url
+    const buildDetailPageUrl = jobs?.[0]?.html_url || content.html_url
     // 构建的title：
     const buildDetailMsg = head_commit?.message?.replace?.(/^.*?\n\n/, '')
 
@@ -44,19 +44,19 @@ export default async function Push(ctx: any) {
     const repository = content?.repository
     const cnName = groupUrls.projectNameMaps[repository?.name] || 'NSS-项目'
     // // 当前hook操作人
-    const operator = content?.sender?.login
+    const operator = content?.triggering_actor?.login
     // 代码推送人-姓名：
     const name = head_commit?.author?.name
     // 代码推送人-邮箱：
     const email = head_commit?.author?.email
     // 此次action是Prod还是Test:
-    const isProd = workflow_run.event === 'release' || branch === 'master'
+    const isProd = content.event === 'release' || branch === 'master'
     // 构建环境：
     const buildEnv = isProd ? '生产环境' : '测试环境'
 
     // 代表整个构建成功执行到最后了，即可以发送status给feishu：
     if (canSendMsg) {
-      const workflowRunSuccess = workflow_run.conclusion === 'success'
+      const workflowRunSuccess = conclusion === 'success'
       const commits = workflowRunSuccess
         ? await getCommits({
             owner: repository?.owner?.login,
@@ -65,8 +65,8 @@ export default async function Push(ctx: any) {
           })
         : []
       const handleTime = handleDiffTime(
-        workflow_run.run_started_at,
-        workflow_run.updated_at
+        content.run_started_at,
+        content.updated_at
       )
 
       const config = {
@@ -81,7 +81,7 @@ export default async function Push(ctx: any) {
           }`
         }
       }
-      const previewUrl = getPreviewUrl(workflow_run, repository) || '#'
+      const previewUrl = getPreviewUrl(content, repository) || '#'
       const baseMsg = `\n* [${buildDetailMsg}](${buildDetailPageUrl})`
       const commitMsgs = commits?.length ? formatCommitsMsg(commits) : baseMsg
       const elements = [
@@ -94,7 +94,7 @@ export default async function Push(ctx: any) {
         },
         {
           tag: 'markdown',
-          content: `[[${repository?.full_name}]点击查看构建详情](${buildDetailPageUrl}) **#${workflow_run.id}**`
+          content: `[[${repository?.full_name}]点击查看构建详情](${buildDetailPageUrl}) **#${content.id}**`
         },
         {
           tag: 'column_set',

@@ -58,9 +58,9 @@ export const startWithHttpOrS = (str: string) =>
   str.startsWith('http') || str.startsWith('https')
 
 export const getPreviewUrl = (workflow_run: any, project: any) => {
-  if (workflow_run.name?.indexOf?.('dev') !== -1)
-    return groupUrls.PROJECT_TEST_URL_MAPS[project?.name]
-  return groupUrls.PROJECT_URL_MAPS[project?.name]
+  if (workflow_run.name?.indexOf?.('production') !== -1)
+    return groupUrls.PROJECT_URL_MAPS[project?.name]
+  return groupUrls.PROJECT_TEST_URL_MAPS[project?.name]
 }
 export const formatValue = (value: any) => {
   const params: Partial<ReqPullCommitsByShaParams_Type> = {}
