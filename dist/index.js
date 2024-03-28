@@ -32533,6 +32533,7 @@ async function Push(ctx) {
         // 构建flow对象：
         const workflow_run = content.workflow_run;
         // 否则，代表是手动触发（暂时使用）：
+        console.log('by Push...: ', workflow_run, content);
         if (!canSendMsg || !workflow_run)
             return;
         // 最新一条提交对象：
@@ -32560,7 +32561,6 @@ async function Push(ctx) {
         const isProd = workflow_run.event === 'release' || branch === 'master';
         // 构建环境：
         const buildEnv = isProd ? '生产环境' : '测试环境';
-        console.log('by Push...: ', workflow_run, content);
         // 代表整个构建成功执行到最后了，即可以发送status给feishu：
         if (canSendMsg) {
             const workflowRunSuccess = workflow_run.conclusion === 'success';
