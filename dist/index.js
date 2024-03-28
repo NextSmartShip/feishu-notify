@@ -32799,6 +32799,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const axios_1 = __importDefault(__nccwpck_require__(8757));
 const core = __importStar(__nccwpck_require__(2186));
 const Push_1 = __importDefault(__nccwpck_require__(2759));
+const utils_1 = __nccwpck_require__(6252);
 // import * as github from '@actions/github'
 // 使用action的仓库名
 const token = core.getInput('token');
@@ -32850,6 +32851,7 @@ const FetchWorkFlow = async ({ owner = 'NextSmartShip', repo = '', run_id = -1, 
         // })
         // console.log('查看请求返回值.：', res)
         const payload = res.data;
+        await (0, utils_1.stop)(3000);
         // console.log('查看请求返回值2.：', payload)
         await (0, Push_1.default)({
             request: {
@@ -33254,7 +33256,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.fetchFeishuWebhook = exports.isWeekend = exports.isProd = exports.getCommits = exports.formatCommitsMsg = exports.formatValue = exports.getPreviewUrl = exports.startWithHttpOrS = exports.handleDiffTime = exports.getPublicIP = void 0;
+exports.stop = exports.fetchFeishuWebhook = exports.isWeekend = exports.isProd = exports.getCommits = exports.formatCommitsMsg = exports.formatValue = exports.getPreviewUrl = exports.startWithHttpOrS = exports.handleDiffTime = exports.getPublicIP = void 0;
 const os_1 = __nccwpck_require__(2037);
 const dayjs_1 = __importDefault(__nccwpck_require__(7401));
 const duration_1 = __importDefault(__nccwpck_require__(5657));
@@ -33377,6 +33379,20 @@ async function fetchFeishuWebhook(body, toBigGroup = false) {
     return result;
 }
 exports.fetchFeishuWebhook = fetchFeishuWebhook;
+/**
+ * @description 模拟等待时间
+ * @param time 等待时间
+ * @returns void
+ */
+const stop = (time) => {
+    return new Promise(res => {
+        const timer = setTimeout(() => {
+            clearTimeout(timer);
+            res();
+        }, time);
+    });
+};
+exports.stop = stop;
 
 
 /***/ }),

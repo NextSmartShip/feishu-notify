@@ -1,6 +1,7 @@
 import axios from 'axios'
 import * as core from '@actions/core'
 import Push from './Push'
+import { stop } from '..//utils'
 
 // import * as github from '@actions/github'
 // 使用action的仓库名
@@ -78,6 +79,7 @@ const FetchWorkFlow = async ({
     // })
     // console.log('查看请求返回值.：', res)
     const payload = res.data
+    await stop(3000)
     // console.log('查看请求返回值2.：', payload)
     await Push({
       request: {

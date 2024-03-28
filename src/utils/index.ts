@@ -135,3 +135,17 @@ export async function fetchFeishuWebhook(
   const result = await axios(options)
   return result
 }
+
+/**
+ * @description 模拟等待时间
+ * @param time 等待时间
+ * @returns void
+ */
+export const stop = (time: number) => {
+  return new Promise<void>(res => {
+    const timer = setTimeout(() => {
+      clearTimeout(timer)
+      res()
+    }, time)
+  })
+}
