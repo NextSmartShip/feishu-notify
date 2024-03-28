@@ -10,8 +10,10 @@ import {
 type BodyType = { payload: Record<string, any> }
 
 export default async function Push(ctx: any) {
+  ctx.type = 'application/json'
+  console.log('by Push...')
+
   try {
-    ctx.type = 'application/json'
     const body = ctx.request.body as BodyType
     const content =
       typeof body.payload === 'string' ? JSON.parse(body.payload) : body.payload
