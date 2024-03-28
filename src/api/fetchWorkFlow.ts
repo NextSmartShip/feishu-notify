@@ -16,7 +16,7 @@ import { stop } from '..//utils'
 // const octokit = github.getOctokit(webhookToken)
 
 const toFetchWorkFlow = async (config: any): Promise<any> => {
-  return axios.request(config)
+  return axios(config)
   // if (res.data.status !== 'completed') {
   //   await stop(3000)
   //   return toFetchWorkFlow(config)
@@ -37,34 +37,7 @@ const FetchWorkFlow = async ({
   github_token,
   ...props
 }: Props) => {
-  // const params = {
-  //   owner,
-  //   repo,
-  //   run_id,
-  //   headers: {
-  //     ...headers,
-  //     authorization: `token ${github_token}`
-  //     // Authorization: `Bearer ${github_token}`
-  //   }
-  // }
-  // try {
-  //   console.log(
-  //     '检查环境变量1：',
-  //     process.env.TOKEN,
-  //     JSON.stringify(process.env)
-  //   )
-  //   console.log('请求前检查参数：', JSON.stringify(params))
-  // } catch (error) {
-  //   console.log('error:', error)
-  // }
-
   try {
-    // const res = await octokit.request(
-    //   `GET /repos/{owner}/{repo}/actions/runs/{run_id}`,
-    //   {
-    //     ...params
-    //   }
-    // )
     const config = {
       method: 'get',
       url: `https://api.github.com/repos/${owner}/${repo}/actions/runs/${run_id}`
@@ -80,7 +53,7 @@ const FetchWorkFlow = async ({
     // .catch(error => {
     //   console.log(error)
     // })
-    // console.log('查看请求返回值.：', res)
+    console.log('查看请求返回值.：', res)
     const payload = res.data
     // console.log('查看请求返回值2.：', payload)
     await Push({
