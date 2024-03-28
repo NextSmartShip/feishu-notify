@@ -16,12 +16,12 @@ import { stop } from '..//utils'
 // const octokit = github.getOctokit(webhookToken)
 
 const toFetchWorkFlow = async (config: any): Promise<any> => {
-  const res = await axios.request(config)
+  return axios.request(config)
   // if (res.data.status !== 'completed') {
   //   await stop(3000)
   //   return toFetchWorkFlow(config)
   // }
-  return res
+  // return res
 }
 
 interface Props {

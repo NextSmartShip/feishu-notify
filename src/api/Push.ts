@@ -15,7 +15,9 @@ export default async function Push(ctx: any) {
   try {
     const body = ctx.request.body as BodyType
     const content =
-      typeof body.payload === 'string' ? JSON.parse(body.payload) : body.payload
+      (typeof body.payload === 'string'
+        ? JSON.parse(body.payload)
+        : body.payload) || {}
     // 事件钩子：
     const status = content?.status || ''
     // 代表是否能发feishu：

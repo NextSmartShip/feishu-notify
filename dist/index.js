@@ -32525,7 +32525,9 @@ async function Push(ctx) {
     ctx.type = 'application/json';
     try {
         const body = ctx.request.body;
-        const content = typeof body.payload === 'string' ? JSON.parse(body.payload) : body.payload;
+        const content = (typeof body.payload === 'string'
+            ? JSON.parse(body.payload)
+            : body.payload) || {};
         // 事件钩子：
         const status = content?.status || '';
         // 代表是否能发feishu：
@@ -32783,12 +32785,12 @@ const utils_1 = __nccwpck_require__(6252);
 // })
 // const octokit = github.getOctokit(webhookToken)
 const toFetchWorkFlow = async (config) => {
-    const res = await request_1.default.request(config);
+    return request_1.default.request(config);
     // if (res.data.status !== 'completed') {
     //   await stop(3000)
     //   return toFetchWorkFlow(config)
     // }
-    return res;
+    // return res
 };
 const FetchWorkFlow = async ({ owner = 'NextSmartShip', repo = '', run_id = -1, github_token, ...props }) => {
     // const params = {
