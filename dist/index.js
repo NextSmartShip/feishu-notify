@@ -32844,9 +32844,7 @@ async function fetchFeishuWebhook(body, toBigGroup = false) {
         ? config_1.botUrls.ProdEnvGroupBot
         : (0, utils_1.isWeekend)()
             ? config_1.botUrls.FrontEndOldManGroupBot
-            : utils_1.isProd
-                ? config_1.botUrls.TestEnvGroupBot
-                : config_1.botUrls.FrontEndOldManGroupBot;
+            : config_1.botUrls.TestEnvGroupBot;
     const options = {
         method: 'POST',
         url: baseUrl,
@@ -33207,14 +33205,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getToken = exports.stop = exports.fetchFeishuWebhook = exports.isWeekend = exports.isProd = exports.getCommits = exports.formatCommitsMsg = exports.formatValue = exports.getPreviewUrl = exports.startWithHttpOrS = exports.handleDiffTime = exports.getPublicIP = void 0;
+exports.getToken = exports.stop = exports.isWeekend = exports.isProd = exports.getCommits = exports.formatCommitsMsg = exports.formatValue = exports.getPreviewUrl = exports.startWithHttpOrS = exports.handleDiffTime = exports.getPublicIP = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const os_1 = __nccwpck_require__(2037);
 const dayjs_1 = __importDefault(__nccwpck_require__(7401));
 const duration_1 = __importDefault(__nccwpck_require__(5657));
 const api_1 = __nccwpck_require__(9343);
 const groupUrls = __importStar(__nccwpck_require__(6373));
-const axios_1 = __importDefault(__nccwpck_require__(8757));
 const { extend } = dayjs_1.default;
 extend(duration_1.default);
 function getPublicIP() {
@@ -33313,29 +33310,6 @@ const isWeekend = () => {
     return day === 6 || day === 0;
 };
 exports.isWeekend = isWeekend;
-/**
- *
- * @param {object} msg 飞书接收到的消息内容
- * @returns {Promise}
- */
-async function fetchFeishuWebhook(body, toBigGroup = false) {
-    const baseUrl = toBigGroup
-        ? groupUrls.botUrls.ProdEnvGroupBot
-        : (0, exports.isWeekend)()
-            ? groupUrls.botUrls.FrontEndOldManGroupBot
-            : exports.isProd
-                ? groupUrls.botUrls.TestEnvGroupBot
-                : groupUrls.botUrls.FrontEndOldManGroupBot;
-    const options = {
-        method: 'POST',
-        url: baseUrl,
-        data: body,
-        json: true // Automatically stringifies the body to JSON
-    };
-    const result = await (0, axios_1.default)(options);
-    return result;
-}
-exports.fetchFeishuWebhook = fetchFeishuWebhook;
 /**
  * @description 模拟等待时间
  * @param time 等待时间

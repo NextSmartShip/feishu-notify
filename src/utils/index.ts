@@ -115,31 +115,6 @@ export const isWeekend = () => {
   const day = new Date().getDay()
   return day === 6 || day === 0
 }
-/**
- *
- * @param {object} msg 飞书接收到的消息内容
- * @returns {Promise}
- */
-export async function fetchFeishuWebhook(
-  body: any,
-  toBigGroup = false
-): Promise<any> {
-  const baseUrl = toBigGroup
-    ? groupUrls.botUrls.ProdEnvGroupBot
-    : isWeekend()
-      ? groupUrls.botUrls.FrontEndOldManGroupBot
-      : isProd
-        ? groupUrls.botUrls.TestEnvGroupBot
-        : groupUrls.botUrls.FrontEndOldManGroupBot
-  const options = {
-    method: 'POST',
-    url: baseUrl,
-    data: body,
-    json: true // Automatically stringifies the body to JSON
-  }
-  const result = await axios(options)
-  return result
-}
 
 /**
  * @description 模拟等待时间

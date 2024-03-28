@@ -22,9 +22,7 @@ export async function fetchFeishuWebhook(
     ? botUrls.ProdEnvGroupBot
     : isWeekend()
       ? botUrls.FrontEndOldManGroupBot
-      : isProd
-        ? botUrls.TestEnvGroupBot
-        : botUrls.FrontEndOldManGroupBot
+      : botUrls.TestEnvGroupBot
   const options = {
     method: 'POST',
     url: baseUrl,
