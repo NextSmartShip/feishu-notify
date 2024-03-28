@@ -11,7 +11,6 @@ type BodyType = { payload: Record<string, any> }
 
 export default async function Push(ctx: any) {
   ctx.type = 'application/json'
-  console.log('by Push...')
 
   try {
     const body = ctx.request.body as BodyType
@@ -53,6 +52,7 @@ export default async function Push(ctx: any) {
     const isProd = workflow_run.event === 'release' || branch === 'master'
     // 构建环境：
     const buildEnv = isProd ? '生产环境' : '测试环境'
+    console.log('by Push...: ', workflow_run, content)
 
     // 代表整个构建成功执行到最后了，即可以发送status给feishu：
     if (canSendMsg) {

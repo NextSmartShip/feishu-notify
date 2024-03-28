@@ -32523,7 +32523,6 @@ const groupUrls = __importStar(__nccwpck_require__(6373));
 const utils_1 = __nccwpck_require__(6252);
 async function Push(ctx) {
     ctx.type = 'application/json';
-    console.log('by Push...');
     try {
         const body = ctx.request.body;
         const content = typeof body.payload === 'string' ? JSON.parse(body.payload) : body.payload;
@@ -32561,6 +32560,7 @@ async function Push(ctx) {
         const isProd = workflow_run.event === 'release' || branch === 'master';
         // 构建环境：
         const buildEnv = isProd ? '生产环境' : '测试环境';
+        console.log('by Push...: ', workflow_run, content);
         // 代表整个构建成功执行到最后了，即可以发送status给feishu：
         if (canSendMsg) {
             const workflowRunSuccess = workflow_run.conclusion === 'success';
