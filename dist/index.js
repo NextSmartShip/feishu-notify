@@ -32661,6 +32661,7 @@ const canSendMsgToFeishu = (content) => {
 async function push(_content) {
     try {
         const content = (typeof _content === 'string' ? JSON.parse(_content) : _content) || {};
+        const run_id = content.run_id;
         // 事件钩子：
         const status = content?.status || '';
         // 代表是否能发feishu：
@@ -32675,20 +32676,21 @@ async function push(_content) {
         const head_sha = content.head_sha;
         // 构建的分支：
         const branch = content.head_branch;
+        const repository = content?.repository;
+        const owner = repository?.owner?.login;
         const workflowRunSuccess = canSendMsgToFeishu(content);
         // 构建的详情页 (当workflow_run不存在时，html_url无法找到)：
         const jobRes = await (0, _1.fetchJobHtmlUrl)(content.jobs_url);
         const durationInfo = await (0, _1.fetchWorkFlowDuration)({
-            owner: content.repository.owner.login,
-            repo: content.repository.name,
-            run_id: content.workflow_run.id
+            owner: owner.login,
+            repo: repository.name,
+            run_id
         });
         const { jobs = [] } = jobRes;
         const buildDetailPageUrl = jobs?.[0]?.html_url || content.html_url;
         // 构建的title：
         const buildDetailMsg = head_commit?.message?.replace?.(/^.*?\n\n/, '');
         // 项目名称：
-        const repository = content?.repository;
         const cnName = groupUrls.projectNameMaps[repository?.name] || 'NSS-项目';
         // // 当前hook操作人
         const operator = content?.triggering_actor?.login;
@@ -32729,7 +32731,7 @@ async function push(_content) {
             },
             {
                 tag: 'markdown',
-                content: `[[${repository?.full_name}]点击查看构建详情](${buildDetailPageUrl}) **#${content.id}**`
+                content: `[[${repository?.full_name}]点击查看构建详情](${buildDetailPageUrl}) **#${run_id}**`
             },
             // 耗时
             {
