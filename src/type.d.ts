@@ -39,4 +39,8 @@ export interface JobType {
 }
 export interface WorkFlowDuration {
   run_duration_ms: number
+  [key: string]: {
+    total_ms: number
+    jsbs: number // job数量
+  }
 }

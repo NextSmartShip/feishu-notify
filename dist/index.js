@@ -6632,6 +6632,20 @@ CombinedStream.prototype._emitError = function(err) {
 
 /***/ }),
 
+/***/ 4761:
+/***/ (function(module) {
+
+!function(t,e){ true?module.exports=e():0}(this,(function(){"use strict";var t={year:0,month:1,day:2,hour:3,minute:4,second:5},e={};return function(n,i,o){var r,a=function(t,n,i){void 0===i&&(i={});var o=new Date(t),r=function(t,n){void 0===n&&(n={});var i=n.timeZoneName||"short",o=t+"|"+i,r=e[o];return r||(r=new Intl.DateTimeFormat("en-US",{hour12:!1,timeZone:t,year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",second:"2-digit",timeZoneName:i}),e[o]=r),r}(n,i);return r.formatToParts(o)},u=function(e,n){for(var i=a(e,n),r=[],u=0;u<i.length;u+=1){var f=i[u],s=f.type,m=f.value,c=t[s];c>=0&&(r[c]=parseInt(m,10))}var d=r[3],l=24===d?0:d,h=r[0]+"-"+r[1]+"-"+r[2]+" "+l+":"+r[4]+":"+r[5]+":000",v=+e;return(o.utc(h).valueOf()-(v-=v%1e3))/6e4},f=i.prototype;f.tz=function(t,e){void 0===t&&(t=r);var n=this.utcOffset(),i=this.toDate(),a=i.toLocaleString("en-US",{timeZone:t}),u=Math.round((i-new Date(a))/1e3/60),f=o(a,{locale:this.$L}).$set("millisecond",this.$ms).utcOffset(15*-Math.round(i.getTimezoneOffset()/15)-u,!0);if(e){var s=f.utcOffset();f=f.add(n-s,"minute")}return f.$x.$timezone=t,f},f.offsetName=function(t){var e=this.$x.$timezone||o.tz.guess(),n=a(this.valueOf(),e,{timeZoneName:t}).find((function(t){return"timezonename"===t.type.toLowerCase()}));return n&&n.value};var s=f.startOf;f.startOf=function(t,e){if(!this.$x||!this.$x.$timezone)return s.call(this,t,e);var n=o(this.format("YYYY-MM-DD HH:mm:ss:SSS"),{locale:this.$L});return s.call(n,t,e).tz(this.$x.$timezone,!0)},o.tz=function(t,e,n){var i=n&&e,a=n||e||r,f=u(+o(),a);if("string"!=typeof t)return o(t).tz(a);var s=function(t,e,n){var i=t-60*e*1e3,o=u(i,n);if(e===o)return[i,e];var r=u(i-=60*(o-e)*1e3,n);return o===r?[i,o]:[t-60*Math.min(o,r)*1e3,Math.max(o,r)]}(o.utc(t,i).valueOf(),f,a),m=s[0],c=s[1],d=o(m).utcOffset(c);return d.$x.$timezone=a,d},o.tz.guess=function(){return Intl.DateTimeFormat().resolvedOptions().timeZone},o.tz.setDefault=function(t){r=t}}}));
+
+/***/ }),
+
+/***/ 4359:
+/***/ (function(module) {
+
+!function(t,i){ true?module.exports=i():0}(this,(function(){"use strict";var t="minute",i=/[+-]\d\d(?::?\d\d)?/g,e=/([+-]|\d\d)/g;return function(s,f,n){var u=f.prototype;n.utc=function(t){var i={date:t,utc:!0,args:arguments};return new f(i)},u.utc=function(i){var e=n(this.toDate(),{locale:this.$L,utc:!0});return i?e.add(this.utcOffset(),t):e},u.local=function(){return n(this.toDate(),{locale:this.$L,utc:!1})};var o=u.parse;u.parse=function(t){t.utc&&(this.$u=!0),this.$utils().u(t.$offset)||(this.$offset=t.$offset),o.call(this,t)};var r=u.init;u.init=function(){if(this.$u){var t=this.$d;this.$y=t.getUTCFullYear(),this.$M=t.getUTCMonth(),this.$D=t.getUTCDate(),this.$W=t.getUTCDay(),this.$H=t.getUTCHours(),this.$m=t.getUTCMinutes(),this.$s=t.getUTCSeconds(),this.$ms=t.getUTCMilliseconds()}else r.call(this)};var a=u.utcOffset;u.utcOffset=function(s,f){var n=this.$utils().u;if(n(s))return this.$u?0:n(this.$offset)?a.call(this):this.$offset;if("string"==typeof s&&(s=function(t){void 0===t&&(t="");var s=t.match(i);if(!s)return null;var f=(""+s[0]).match(e)||["-",0,0],n=f[0],u=60*+f[1]+ +f[2];return 0===u?0:"+"===n?u:-u}(s),null===s))return this;var u=Math.abs(s)<=16?60*s:s,o=this;if(f)return o.$offset=u,o.$u=0===s,o;if(0!==s){var r=this.$u?this.toDate().getTimezoneOffset():-1*this.utcOffset();(o=this.local().add(u+r,t)).$offset=u,o.$x.$localOffset=r}else o=this.utc();return o};var h=u.format;u.format=function(t){var i=t||(this.$u?"YYYY-MM-DDTHH:mm:ss[Z]":"");return h.call(this,i)},u.valueOf=function(){var t=this.$utils().u(this.$offset)?0:this.$offset+(this.$x.$localOffset||this.$d.getTimezoneOffset());return this.$d.valueOf()-6e4*t},u.isUTC=function(){return!!this.$u},u.toISOString=function(){return this.toDate().toISOString()},u.toString=function(){return this.toDate().toUTCString()};var l=u.toDate;u.toDate=function(t){return"s"===t&&this.$offset?n(this.format("YYYY-MM-DD HH:mm:ss:SSS")).toDate():l.call(this)};var c=u.diff;u.diff=function(t,i,e){if(t&&this.$u===t.$u)return c.call(this,t,i,e);var s=this.local(),f=n(t).local();return c.call(s,f,i,e)}}}));
+
+/***/ }),
+
 /***/ 8222:
 /***/ ((module, exports, __nccwpck_require__) => {
 
@@ -32681,12 +32695,6 @@ async function push(_content) {
         const workflowRunSuccess = canSendMsgToFeishu(content);
         // 构建的详情页 (当workflow_run不存在时，html_url无法找到)：
         const jobRes = await (0, _1.fetchJobHtmlUrl)(content.jobs_url);
-        const durationInfo = await (0, _1.fetchWorkFlowDuration)({
-            owner,
-            repo: repository.name,
-            run_id
-        });
-        console.log('毫秒值：', durationInfo.run_duration_ms);
         const { jobs = [] } = jobRes;
         const buildDetailPageUrl = jobs?.[0]?.html_url || content.html_url;
         // 构建的title：
@@ -32708,7 +32716,6 @@ async function push(_content) {
             repo: repository?.name,
             commit_sha: head_sha
         });
-        const displayTime = (0, utils_1.formatDisplayTime)(durationInfo.run_duration_ms);
         const config = {
             wide_screen_mode: true
         };
@@ -32722,6 +32729,14 @@ async function push(_content) {
         const previewUrl = (0, utils_1.getPreviewUrl)(content, repository) || '#';
         const baseMsg = `\n* [${buildDetailMsg}](${buildDetailPageUrl})`;
         const commitMsgs = commits?.length ? (0, utils_1.formatCommitsMsg)(commits) : baseMsg;
+        // duration:
+        // const durationInfo = await fetchWorkFlowDuration({
+        //   owner,
+        //   repo: repository.name,
+        //   run_id
+        // })
+        const currentDayjsTime = (0, utils_1.getCurrentDayjs)(true);
+        const displayTime = (0, utils_1.handleDiffTime)(content.created_at, currentDayjsTime);
         const elements = [
             {
                 tag: 'div',
@@ -33180,14 +33195,18 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getToken = exports.stop = exports.isWeekend = exports.isProd = exports.getCommits = exports.formatCommitsMsg = exports.formatValue = exports.getPreviewUrl = exports.startWithHttpOrS = exports.formatDisplayTime = exports.handleDiffTime = exports.getPublicIP = void 0;
+exports.getToken = exports.stop = exports.isWeekend = exports.isProd = exports.getCommits = exports.formatCommitsMsg = exports.formatValue = exports.getPreviewUrl = exports.startWithHttpOrS = exports.formatDisplayTime = exports.handleDiffTime = exports.getCurrentDayjs = exports.getPublicIP = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const os_1 = __nccwpck_require__(2037);
-const dayjs_1 = __importDefault(__nccwpck_require__(7401));
+const dayjs_1 = __importStar(__nccwpck_require__(7401));
 const duration_1 = __importDefault(__nccwpck_require__(5657));
+const utc_1 = __importDefault(__nccwpck_require__(4359));
+const timezone_1 = __importDefault(__nccwpck_require__(4761));
 const api_1 = __nccwpck_require__(9343);
 const groupUrls = __importStar(__nccwpck_require__(6373));
 const { extend } = dayjs_1.default;
+extend(utc_1.default);
+extend(timezone_1.default);
 extend(duration_1.default);
 function getPublicIP() {
     const ifaces = (0, os_1.networkInterfaces)();
@@ -33218,12 +33237,17 @@ function getPublicIP() {
     }
 }
 exports.getPublicIP = getPublicIP;
+const getCurrentDayjs = (isUtc) => {
+    const currentTime = isUtc ? (0, dayjs_1.default)() : (0, dayjs_1.default)().utc();
+    return currentTime;
+};
+exports.getCurrentDayjs = getCurrentDayjs;
 function handleDiffTime(_start, _end) {
     const start = (0, dayjs_1.default)(_start);
-    const end = (0, dayjs_1.default)(_end);
+    const end = (0, dayjs_1.isDayjs)(_end) ? _end : (0, dayjs_1.default)(_end);
     const diffDuration = dayjs_1.default.duration(end.diff(start));
-    const minutes = Math.floor(diffDuration.asMinutes());
-    const seconds = diffDuration.asSeconds() % 60;
+    const minutes = diffDuration.minutes();
+    const seconds = diffDuration.seconds();
     return `🔧 ${minutes}分钟${seconds}秒`;
 }
 exports.handleDiffTime = handleDiffTime;

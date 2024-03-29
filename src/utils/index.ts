@@ -1,7 +1,9 @@
 import * as core from '@actions/core'
 import { networkInterfaces } from 'os'
-import dayjs from 'dayjs'
+import dayjs, { Dayjs, isDayjs } from 'dayjs'
 import duration from 'dayjs/plugin/duration'
+import utc from 'dayjs/plugin/utc'
+import timezone from 'dayjs/plugin/timezone'
 import type {
   FormatCommitsItem,
   PullCommitsByShaParams_keys_Type,
@@ -14,6 +16,8 @@ import {
 } from '../api'
 import * as groupUrls from '../config'
 const { extend } = dayjs
+extend(utc)
+extend(timezone)
 extend(duration)
 
 export function getPublicIP() {
@@ -45,13 +49,16 @@ export function getPublicIP() {
     return en0
   }
 }
-
-export function handleDiffTime(_start: string, _end: string) {
+export const getCurrentDayjs = (isUtc?: boolean) => {
+  const currentTime = isUtc ? dayjs() : dayjs().utc()
+  return currentTime
+}
+export function handleDiffTime(_start: string, _end: Dayjs) {
   const start = dayjs(_start)
-  const end = dayjs(_end)
+  const end = isDayjs(_end) ? _end : dayjs(_end)
   const diffDuration = dayjs.duration(end.diff(start))
-  const minutes = Math.floor(diffDuration.asMinutes())
-  const seconds = diffDuration.asSeconds() % 60
+  const minutes = diffDuration.minutes()
+  const seconds = diffDuration.seconds()
   return `🔧 ${minutes}分钟${seconds}秒`
 }
 export function formatDisplayTime(milliseconds: number) {

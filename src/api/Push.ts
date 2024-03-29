@@ -4,7 +4,9 @@ import {
   formatCommitsMsg,
   formatDisplayTime,
   getCommits,
-  getPreviewUrl
+  getCurrentDayjs,
+  getPreviewUrl,
+  handleDiffTime
 } from '../utils'
 
 type BodyType = { payload: Record<string, any> }
@@ -39,12 +41,6 @@ export default async function push(_content: any) {
     const workflowRunSuccess = canSendMsgToFeishu(content)
     // 构建的详情页 (当workflow_run不存在时，html_url无法找到)：
     const jobRes = await fetchJobHtmlUrl(content.jobs_url)
-    const durationInfo = await fetchWorkFlowDuration({
-      owner,
-      repo: repository.name,
-      run_id
-    })
-    console.log('毫秒值：', durationInfo.run_duration_ms)
     const { jobs = [] } = jobRes
 
     const buildDetailPageUrl = jobs?.[0]?.html_url || content.html_url
@@ -69,7 +65,6 @@ export default async function push(_content: any) {
       repo: repository?.name,
       commit_sha: head_sha
     })
-    const displayTime = formatDisplayTime(durationInfo.run_duration_ms)
 
     const config = {
       wide_screen_mode: true
@@ -86,6 +81,14 @@ export default async function push(_content: any) {
     const previewUrl = getPreviewUrl(content, repository) || '#'
     const baseMsg = `\n* [${buildDetailMsg}](${buildDetailPageUrl})`
     const commitMsgs = commits?.length ? formatCommitsMsg(commits) : baseMsg
+    // duration:
+    // const durationInfo = await fetchWorkFlowDuration({
+    //   owner,
+    //   repo: repository.name,
+    //   run_id
+    // })
+    const currentDayjsTime = getCurrentDayjs(true)
+    const displayTime = handleDiffTime(content.created_at, currentDayjsTime)
     const elements = [
       {
         tag: 'div',
