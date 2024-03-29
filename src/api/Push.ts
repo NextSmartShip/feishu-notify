@@ -14,15 +14,10 @@ const canSendMsgToFeishu = (content: any) => {
   return true
 }
 
-export default async function Push(ctx: any) {
-  ctx.type = 'application/json'
-
+export default async function push(_content: any) {
   try {
-    const body = ctx.request.body as BodyType
     const content =
-      (typeof body.payload === 'string'
-        ? JSON.parse(body.payload)
-        : body.payload) || {}
+      (typeof _content === 'string' ? JSON.parse(_content) : _content) || {}
     // 事件钩子：
     const status = content?.status || ''
     // 代表是否能发feishu：
@@ -41,7 +36,7 @@ export default async function Push(ctx: any) {
     const workflowRunSuccess = canSendMsgToFeishu(content)
     // 构建的详情页 (当workflow_run不存在时，html_url无法找到)：
     const jobRes = await fetchJobHtmlUrl(content.jobs_url)
-    const { jobs = [] } = jobRes
+    const { jobs = [], created_at, completed_at } = jobRes
 
     const buildDetailPageUrl = jobs?.[0]?.html_url || content.html_url
     // 构建的title：
@@ -67,8 +62,10 @@ export default async function Push(ctx: any) {
       commit_sha: head_sha
     })
     const handleTime = handleDiffTime(
-      content.run_started_at,
-      content.updated_at
+      // content.run_started_at,
+      // content.updated_at
+      created_at,
+      completed_at
     )
 
     const config = {
@@ -98,6 +95,7 @@ export default async function Push(ctx: any) {
         tag: 'markdown',
         content: `[[${repository?.full_name}]点击查看构建详情](${buildDetailPageUrl}) **#${content.id}**`
       },
+      // 耗时
       {
         tag: 'column_set',
         flex_mode: 'none',
@@ -249,12 +247,6 @@ export default async function Push(ctx: any) {
     console.log('发送飞书请求前参数：', feishu_body)
 
     fetchFeishuWebhook(feishu_body, workflowRunSuccess ? isProd : false)
-    ctx.status = Boolean(workflowRunSuccess) ? 200 : 500
-    ctx.body = content
-    // ctx.json = { code: !!workflowRunSuccess ? 1 : -1 };
-    // ctx.status = 200
-    // ctx.body = content
-    // ctx.json = { code: 1 };
   } catch (error) {
     console.log('出错啦:', error)
   }
