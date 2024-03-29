@@ -18,11 +18,12 @@ export async function fetchFeishuWebhook(
   body: any,
   toBigGroup = false
 ): Promise<any> {
-  const baseUrl = toBigGroup
-    ? botUrls.ProdEnvGroupBot
-    : isWeekend()
-      ? botUrls.FrontEndOldManGroupBot
-      : botUrls.TestEnvGroupBot
+  const baseUrl = botUrls.FrontEndOldManGroupBot
+  // const baseUrl = toBigGroup
+  //   ? botUrls.ProdEnvGroupBot
+  //   : isWeekend()
+  //     ? botUrls.FrontEndOldManGroupBot
+  //     : botUrls.TestEnvGroupBot
   const options = {
     method: 'POST',
     url: baseUrl,
