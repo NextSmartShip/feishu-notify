@@ -32674,7 +32674,8 @@ async function push(_content) {
         const workflowRunSuccess = canSendMsgToFeishu(content);
         // 构建的详情页 (当workflow_run不存在时，html_url无法找到)：
         const jobRes = await (0, _1.fetchJobHtmlUrl)(content.jobs_url);
-        const { jobs = [], created_at, completed_at } = jobRes;
+        const { jobs = [] } = jobRes;
+        const { created_at = '', completed_at = '' } = jobs?.[0] || {};
         const buildDetailPageUrl = jobs?.[0]?.html_url || content.html_url;
         // 构建的title：
         const buildDetailMsg = head_commit?.message?.replace?.(/^.*?\n\n/, '');
