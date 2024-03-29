@@ -88,7 +88,7 @@ export default async function push(_content: any) {
     //   run_id
     // })
     const currentDayjsTime = getCurrentDayjs(true)
-    const displayTime = handleDiffTime(content.created_at, currentDayjsTime)
+    const displayTime = handleDiffTime(content.updated_at, currentDayjsTime)
     const elements = [
       {
         tag: 'div',

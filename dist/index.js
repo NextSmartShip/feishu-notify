@@ -32736,7 +32736,7 @@ async function push(_content) {
         //   run_id
         // })
         const currentDayjsTime = (0, utils_1.getCurrentDayjs)(true);
-        const displayTime = (0, utils_1.handleDiffTime)(content.created_at, currentDayjsTime);
+        const displayTime = (0, utils_1.handleDiffTime)(content.updated_at, currentDayjsTime);
         const elements = [
             {
                 tag: 'div',
