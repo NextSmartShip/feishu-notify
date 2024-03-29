@@ -32661,7 +32661,7 @@ const canSendMsgToFeishu = (content) => {
 async function push(_content) {
     try {
         const content = (typeof _content === 'string' ? JSON.parse(_content) : _content) || {};
-        const run_id = content.run_id;
+        const run_id = content.id;
         // 事件钩子：
         const status = content?.status || '';
         // 代表是否能发feishu：
@@ -32682,7 +32682,7 @@ async function push(_content) {
         // 构建的详情页 (当workflow_run不存在时，html_url无法找到)：
         const jobRes = await (0, _1.fetchJobHtmlUrl)(content.jobs_url);
         const durationInfo = await (0, _1.fetchWorkFlowDuration)({
-            owner: owner.login,
+            owner,
             repo: repository.name,
             run_id
         });

@@ -18,7 +18,7 @@ export default async function push(_content: any) {
   try {
     const content =
       (typeof _content === 'string' ? JSON.parse(_content) : _content) || {}
-    const run_id = content.run_id
+    const run_id = content.id
     // 事件钩子：
     const status = content?.status || ''
     // 代表是否能发feishu：
@@ -40,7 +40,7 @@ export default async function push(_content: any) {
     // 构建的详情页 (当workflow_run不存在时，html_url无法找到)：
     const jobRes = await fetchJobHtmlUrl(content.jobs_url)
     const durationInfo = await fetchWorkFlowDuration({
-      owner: owner.login,
+      owner,
       repo: repository.name,
       run_id
     })
