@@ -32686,6 +32686,7 @@ async function push(_content) {
             repo: repository.name,
             run_id
         });
+        console.log('毫秒值：', durationInfo.run_duration_ms);
         const { jobs = [] } = jobRes;
         const buildDetailPageUrl = jobs?.[0]?.html_url || content.html_url;
         // 构建的title：
