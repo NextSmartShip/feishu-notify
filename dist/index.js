@@ -32489,7 +32489,135 @@ function wrappy (fn, cb) {
 
 /***/ }),
 
-/***/ 2759:
+/***/ 9958:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const push_1 = __importDefault(__nccwpck_require__(8021));
+const utils_1 = __nccwpck_require__(6252);
+const _1 = __nccwpck_require__(9343);
+const getWorkFlow = async ({ owner = 'NextSmartShip', repo = '', run_id = -1, ...props }) => {
+    if (!repo || run_id === -1)
+        throw new Error('参数丢失，请检查repo和run_id是否同时传入');
+    try {
+        await (0, utils_1.stop)(3000);
+        const payload = await (0, _1.fetchWorkFlow)({
+            owner,
+            repo,
+            run_id
+        });
+        await (0, push_1.default)(payload);
+    }
+    catch (error) {
+        console.log('查看请求by错误时：', error);
+    }
+};
+exports["default"] = getWorkFlow;
+
+
+/***/ }),
+
+/***/ 9343:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.fetchWorkFlow = exports.fetchJobHtmlUrl = exports.fetchCommit = exports.fetchCommits = exports.fetchCommitsByCurrentCommitSha = exports.fetchFeishuWebhook = void 0;
+const request_1 = __importDefault(__nccwpck_require__(9106));
+const config_1 = __nccwpck_require__(6373);
+const utils_1 = __nccwpck_require__(6252);
+/**
+ *
+ * @param {object} msg 飞书接收到的消息内容
+ * @returns {Promise}
+ */
+async function fetchFeishuWebhook(body, toBigGroup = false) {
+    // const baseUrl = botUrls.FrontEndOldManGroupBot
+    const baseUrl = toBigGroup
+        ? config_1.botUrls.TestEnvGroupBot
+        : (0, utils_1.isWeekend)()
+            ? config_1.botUrls.FrontEndOldManGroupBot
+            : config_1.botUrls.TestEnvGroupBot;
+    const options = {
+        method: 'POST',
+        url: baseUrl,
+        data: body,
+        json: true // Automatically stringifies the body to JSON
+    };
+    const result = await (0, request_1.default)(options);
+    return result;
+}
+exports.fetchFeishuWebhook = fetchFeishuWebhook;
+/**
+ *
+ * @param {String} body.owner
+ * @param {String} body.repo
+ * @param {String} body.commit_sha
+ *
+ * @description 获取当前commit_sha的所有commit信息
+ */
+async function fetchCommitsByCurrentCommitSha(body) {
+    try {
+        const baseUrl = `/repos/${body.owner}/${body.repo}/commits/${body.commit_sha}/pulls`;
+        const url = baseUrl;
+        const params = {
+            method: 'GET',
+            url,
+            ...config_1.BASE_PARAMS
+        };
+        // 将params.url转为json请求数据:
+        return await (0, request_1.default)(params);
+    }
+    catch (error) {
+        console.log('emit by getCommitsByCurrentCommitSha error: ', error);
+        return [];
+    }
+}
+exports.fetchCommitsByCurrentCommitSha = fetchCommitsByCurrentCommitSha;
+async function fetchCommits(url) {
+    return await (0, request_1.default)({
+        method: 'GET',
+        url,
+        ...config_1.BASE_PARAMS
+    });
+}
+exports.fetchCommits = fetchCommits;
+async function fetchCommit(body) {
+    const url = `/repos/${body.owner}/${body.repo}/commits/${body.commit_sha}`;
+    const result = await (0, request_1.default)({
+        method: 'GET',
+        url,
+        ...config_1.BASE_PARAMS
+    });
+    return [result];
+}
+exports.fetchCommit = fetchCommit;
+async function fetchJobHtmlUrl(url) {
+    return await (0, request_1.default)({
+        method: 'GET',
+        url,
+        ...config_1.BASE_PARAMS
+    });
+}
+exports.fetchJobHtmlUrl = fetchJobHtmlUrl;
+async function fetchWorkFlow(params) {
+    return await request_1.default.get(`/repos/${params.owner}/${params.repo}/actions/runs/${params.run_id}`);
+}
+exports.fetchWorkFlow = fetchWorkFlow;
+
+
+/***/ }),
+
+/***/ 8021:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -32526,13 +32654,9 @@ const canSendMsgToFeishu = (content) => {
         return false;
     return true;
 };
-async function Push(ctx) {
-    ctx.type = 'application/json';
+async function push(_content) {
     try {
-        const body = ctx.request.body;
-        const content = (typeof body.payload === 'string'
-            ? JSON.parse(body.payload)
-            : body.payload) || {};
+        const content = (typeof _content === 'string' ? JSON.parse(_content) : _content) || {};
         // 事件钩子：
         const status = content?.status || '';
         // 代表是否能发feishu：
@@ -32550,7 +32674,7 @@ async function Push(ctx) {
         const workflowRunSuccess = canSendMsgToFeishu(content);
         // 构建的详情页 (当workflow_run不存在时，html_url无法找到)：
         const jobRes = await (0, _1.fetchJobHtmlUrl)(content.jobs_url);
-        const { jobs = [] } = jobRes;
+        const { jobs = [], created_at, completed_at } = jobRes;
         const buildDetailPageUrl = jobs?.[0]?.html_url || content.html_url;
         // 构建的title：
         const buildDetailMsg = head_commit?.message?.replace?.(/^.*?\n\n/, '');
@@ -32572,7 +32696,10 @@ async function Push(ctx) {
             repo: repository?.name,
             commit_sha: head_sha
         });
-        const handleTime = (0, utils_1.handleDiffTime)(content.run_started_at, content.updated_at);
+        const handleTime = (0, utils_1.handleDiffTime)(
+        // content.run_started_at,
+        // content.updated_at
+        created_at, completed_at);
         const config = {
             wide_screen_mode: true
         };
@@ -32598,6 +32725,7 @@ async function Push(ctx) {
                 tag: 'markdown',
                 content: `[[${repository?.full_name}]点击查看构建详情](${buildDetailPageUrl}) **#${content.id}**`
             },
+            // 耗时
             {
                 tag: 'column_set',
                 flex_mode: 'none',
@@ -32748,165 +32876,12 @@ async function Push(ctx) {
         };
         console.log('发送飞书请求前参数：', feishu_body);
         (0, _1.fetchFeishuWebhook)(feishu_body, workflowRunSuccess ? isProd : false);
-        ctx.status = Boolean(workflowRunSuccess) ? 200 : 500;
-        ctx.body = content;
-        // ctx.json = { code: !!workflowRunSuccess ? 1 : -1 };
-        // ctx.status = 200
-        // ctx.body = content
-        // ctx.json = { code: 1 };
     }
     catch (error) {
         console.log('出错啦:', error);
     }
 }
-exports["default"] = Push;
-
-
-/***/ }),
-
-/***/ 918:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-const request_1 = __importDefault(__nccwpck_require__(9106));
-const Push_1 = __importDefault(__nccwpck_require__(2759));
-const utils_1 = __nccwpck_require__(6252);
-// import * as github from '@actions/github'
-// 使用action的仓库名
-// token 为 the repo PAT or GITHUB_TOKEN
-// const octokit = new Octokit({
-//   auth: token,
-//   userAgent: 'https://api.github.com/repos'
-//   // request: {
-//   //   fetch: axios
-//   // }
-// })
-// const octokit = github.getOctokit(webhookToken)
-const toFetchWorkFlow = async (config) => {
-    return (0, request_1.default)(config);
-    // if (res.data.status !== 'completed') {
-    //   await stop(3000)
-    //   return toFetchWorkFlow(config)
-    // }
-    // return res
-};
-const FetchWorkFlow = async ({ owner = 'NextSmartShip', repo = '', run_id = -1, github_token, ...props }) => {
-    try {
-        const config = {
-            method: 'get',
-            url: `https://api.github.com/repos/${owner}/${repo}/actions/runs/${run_id}`
-        };
-        console.log('请求前检查参数：', JSON.stringify(config));
-        await (0, utils_1.stop)(3000);
-        const payload = await toFetchWorkFlow(config);
-        await (0, Push_1.default)({
-            request: {
-                body: {
-                    payload
-                }
-            }
-        });
-    }
-    catch (error) {
-        console.log('查看请求by错误时：', error);
-    }
-};
-exports["default"] = FetchWorkFlow;
-
-
-/***/ }),
-
-/***/ 9343:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.fetchJobHtmlUrl = exports.fetchCommit = exports.fetchCommits = exports.fetchCommitsByCurrentCommitSha = exports.fetchFeishuWebhook = void 0;
-const request_1 = __importDefault(__nccwpck_require__(9106));
-const config_1 = __nccwpck_require__(6373);
-const utils_1 = __nccwpck_require__(6252);
-/**
- *
- * @param {object} msg 飞书接收到的消息内容
- * @returns {Promise}
- */
-async function fetchFeishuWebhook(body, toBigGroup = false) {
-    const baseUrl = toBigGroup
-        ? config_1.botUrls.ProdEnvGroupBot
-        : (0, utils_1.isWeekend)()
-            ? config_1.botUrls.FrontEndOldManGroupBot
-            : config_1.botUrls.TestEnvGroupBot;
-    const options = {
-        method: 'POST',
-        url: baseUrl,
-        data: body,
-        json: true // Automatically stringifies the body to JSON
-    };
-    const result = await (0, request_1.default)(options);
-    return result;
-}
-exports.fetchFeishuWebhook = fetchFeishuWebhook;
-/**
- *
- * @param {String} body.owner
- * @param {String} body.repo
- * @param {String} body.commit_sha
- *
- * @description 获取当前commit_sha的所有commit信息
- */
-async function fetchCommitsByCurrentCommitSha(body) {
-    try {
-        const baseUrl = `/repos/${body.owner}/${body.repo}/commits/${body.commit_sha}/pulls`;
-        const url = baseUrl;
-        const params = {
-            method: 'GET',
-            url,
-            ...config_1.BASE_PARAMS
-        };
-        // 将params.url转为json请求数据:
-        return await (0, request_1.default)(params);
-    }
-    catch (error) {
-        console.log('emit by getCommitsByCurrentCommitSha error: ', error);
-        return [];
-    }
-}
-exports.fetchCommitsByCurrentCommitSha = fetchCommitsByCurrentCommitSha;
-async function fetchCommits(url) {
-    return await (0, request_1.default)({
-        method: 'GET',
-        url,
-        ...config_1.BASE_PARAMS
-    });
-}
-exports.fetchCommits = fetchCommits;
-async function fetchCommit(body) {
-    const url = `/repos/${body.owner}/${body.repo}/commits/${body.commit_sha}`;
-    const result = await (0, request_1.default)({
-        method: 'GET',
-        url,
-        ...config_1.BASE_PARAMS
-    });
-    return [result];
-}
-exports.fetchCommit = fetchCommit;
-async function fetchJobHtmlUrl(url) {
-    return await (0, request_1.default)({
-        method: 'GET',
-        url,
-        ...config_1.BASE_PARAMS
-    });
-}
-exports.fetchJobHtmlUrl = fetchJobHtmlUrl;
+exports["default"] = push;
 
 
 /***/ }),
@@ -33076,15 +33051,16 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.run = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const get_action_options_1 = __importDefault(__nccwpck_require__(296));
-const fetchWorkFlow_1 = __importDefault(__nccwpck_require__(918));
+const getWorkFlow_1 = __importDefault(__nccwpck_require__(9958));
 /**
  * The main function for the action.
  * @returns {Promise<void>} Resolves when the action is complete.
  */
 async function run() {
     try {
-        const { owner, repo, run_id, github_token } = (0, get_action_options_1.default)();
-        (0, fetchWorkFlow_1.default)({ owner, repo, run_id, github_token });
+        const { owner, repo, run_id } = (0, get_action_options_1.default)();
+        const params = { owner, repo, run_id };
+        (0, getWorkFlow_1.default)(params);
     }
     catch (error) {
         // Fail the workflow run if an error occurs
@@ -33131,23 +33107,13 @@ const github = __importStar(__nccwpck_require__(5438));
 // import type { UserDefinedOptions } from '../type'
 const getActionOptions = () => {
     const token = core.getInput('token');
-    const token2 = core.getInput('token2');
     const username = core.getInput('username');
     // getBooleanInput 其实本质上就是一种 parseBoolean(core.getInput('key'))
-    // const motto = core.getBooleanInput('motto')
-    // const filepath = core.getInput('filepath')
-    // const title = core.getInput('title')
-    // const includeFork = core.getBooleanInput('includeFork')
-    // const includeArchived = core.getBooleanInput('includeArchived')
-    // const onlyPrivate = core.getBooleanInput('onlyPrivate')
     const payload = github.context.payload;
     const owner = payload.organization?.login;
     const repo = payload.repository?.name;
     const run_id = github.context.runId;
-    // const run_id = 8433332828
-    console.log(`当前事件(token、token2)：${token}, ${token2},run_id: ${run_id}`);
-    core.info(`当前事件：${github.context.eventName}`);
-    // core.info(`当前事件22：${JSON.stringify(github)}`)
+    console.log(`当前事件(eventName、token、run_id)：${token},run_id: ${run_id}`);
     if (github.context.eventName === 'push') {
         const pushPayload = github.context.payload;
         core.info(`The head commit is: ${pushPayload.head_commit}`);

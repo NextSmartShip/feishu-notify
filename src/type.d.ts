@@ -34,4 +34,6 @@ export interface JobItemType {
 export interface JobType {
   total_count: number
   jobs: JobItemType[]
+  created_at: string
+  completed_at: string
 }
