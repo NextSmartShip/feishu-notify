@@ -29,11 +29,11 @@ export type CommitKeysItemType = {
 export interface JobItemType {
   head_sha: string
   html_url: string
+  created_at: string
+  completed_at: string
 }
 
 export interface JobType {
   total_count: number
   jobs: JobItemType[]
-  created_at: string
-  completed_at: string
 }
