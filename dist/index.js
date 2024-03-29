@@ -32531,7 +32531,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.fetchWorkFlow = exports.fetchJobHtmlUrl = exports.fetchCommit = exports.fetchCommits = exports.fetchCommitsByCurrentCommitSha = exports.fetchFeishuWebhook = void 0;
+exports.fetchWorkFlowDuration = exports.fetchWorkFlow = exports.fetchJobHtmlUrl = exports.fetchCommit = exports.fetchCommits = exports.fetchCommitsByCurrentCommitSha = exports.fetchFeishuWebhook = void 0;
 const request_1 = __importDefault(__nccwpck_require__(9106));
 const config_1 = __nccwpck_require__(6373);
 const utils_1 = __nccwpck_require__(6252);
@@ -32613,6 +32613,10 @@ async function fetchWorkFlow(params) {
     return await request_1.default.get(`/repos/${params.owner}/${params.repo}/actions/runs/${params.run_id}`);
 }
 exports.fetchWorkFlow = fetchWorkFlow;
+async function fetchWorkFlowDuration(params) {
+    return await request_1.default.get(`/repos/${params.owner}/${params.repo}/actions/runs/${params.run_id}/timing`);
+}
+exports.fetchWorkFlowDuration = fetchWorkFlowDuration;
 
 
 /***/ }),
@@ -32674,8 +32678,12 @@ async function push(_content) {
         const workflowRunSuccess = canSendMsgToFeishu(content);
         // 构建的详情页 (当workflow_run不存在时，html_url无法找到)：
         const jobRes = await (0, _1.fetchJobHtmlUrl)(content.jobs_url);
+        const durationInfo = await (0, _1.fetchWorkFlowDuration)({
+            owner: content.repository.owner.login,
+            repo: content.repository.name,
+            run_id: content.workflow_run.id
+        });
         const { jobs = [] } = jobRes;
-        const { created_at = '', completed_at = '' } = jobs?.[0] || {};
         const buildDetailPageUrl = jobs?.[0]?.html_url || content.html_url;
         // 构建的title：
         const buildDetailMsg = head_commit?.message?.replace?.(/^.*?\n\n/, '');
@@ -32697,10 +32705,7 @@ async function push(_content) {
             repo: repository?.name,
             commit_sha: head_sha
         });
-        const handleTime = (0, utils_1.handleDiffTime)(
-        // content.run_started_at,
-        // content.updated_at
-        created_at, completed_at);
+        const displayTime = (0, utils_1.formatDisplayTime)(durationInfo.run_duration_ms);
         const config = {
             wide_screen_mode: true
         };
@@ -32740,7 +32745,7 @@ async function push(_content) {
                         elements: [
                             {
                                 tag: 'markdown',
-                                content: `**耗时：**${handleTime}`
+                                content: `**耗时：**${displayTime}`
                             }
                         ]
                     }
@@ -33172,7 +33177,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getToken = exports.stop = exports.isWeekend = exports.isProd = exports.getCommits = exports.formatCommitsMsg = exports.formatValue = exports.getPreviewUrl = exports.startWithHttpOrS = exports.handleDiffTime = exports.getPublicIP = void 0;
+exports.getToken = exports.stop = exports.isWeekend = exports.isProd = exports.getCommits = exports.formatCommitsMsg = exports.formatValue = exports.getPreviewUrl = exports.startWithHttpOrS = exports.formatDisplayTime = exports.handleDiffTime = exports.getPublicIP = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const os_1 = __nccwpck_require__(2037);
 const dayjs_1 = __importDefault(__nccwpck_require__(7401));
@@ -33219,6 +33224,12 @@ function handleDiffTime(_start, _end) {
     return `🔧 ${minutes}分钟${seconds}秒`;
 }
 exports.handleDiffTime = handleDiffTime;
+function formatDisplayTime(milliseconds) {
+    const dayjsDuration = (0, dayjs_1.default)(milliseconds);
+    const result = dayjsDuration.format('mm分ss秒');
+    return result;
+}
+exports.formatDisplayTime = formatDisplayTime;
 const startWithHttpOrS = (str) => str.startsWith('http') || str.startsWith('https');
 exports.startWithHttpOrS = startWithHttpOrS;
 const getPreviewUrl = (workflow_run, project) => {

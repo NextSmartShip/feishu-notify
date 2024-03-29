@@ -1,7 +1,8 @@
-import { fetchFeishuWebhook, fetchJobHtmlUrl } from '.'
+import { fetchFeishuWebhook, fetchJobHtmlUrl, fetchWorkFlowDuration } from '.'
 import * as groupUrls from '../config'
 import {
   formatCommitsMsg,
+  formatDisplayTime,
   getCommits,
   getPreviewUrl,
   handleDiffTime
@@ -36,8 +37,12 @@ export default async function push(_content: any) {
     const workflowRunSuccess = canSendMsgToFeishu(content)
     // 构建的详情页 (当workflow_run不存在时，html_url无法找到)：
     const jobRes = await fetchJobHtmlUrl(content.jobs_url)
+    const durationInfo = await fetchWorkFlowDuration({
+      owner: content.repository.owner.login,
+      repo: content.repository.name,
+      run_id: content.workflow_run.id
+    })
     const { jobs = [] } = jobRes
-    const { created_at = '', completed_at = '' } = jobs?.[0] || {}
 
     const buildDetailPageUrl = jobs?.[0]?.html_url || content.html_url
     // 构建的title：
@@ -62,12 +67,7 @@ export default async function push(_content: any) {
       repo: repository?.name,
       commit_sha: head_sha
     })
-    const handleTime = handleDiffTime(
-      // content.run_started_at,
-      // content.updated_at
-      created_at,
-      completed_at
-    )
+    const displayTime = formatDisplayTime(durationInfo.run_duration_ms)
 
     const config = {
       wide_screen_mode: true
@@ -110,7 +110,7 @@ export default async function push(_content: any) {
             elements: [
               {
                 tag: 'markdown',
-                content: `**耗时：**${handleTime}`
+                content: `**耗时：**${displayTime}`
               }
             ]
           }

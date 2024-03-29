@@ -5,7 +5,8 @@ import type {
   JobType,
   ReqFetchCommitParams_Type,
   ReqPullCommitsByShaParams_Type,
-  ResApiFetchCommitsItem
+  ResApiFetchCommitsItem,
+  WorkFlowDuration
 } from '../type'
 import { isProd, isWeekend } from '../utils'
 
@@ -94,5 +95,14 @@ export async function fetchWorkFlow(params: {
 }): Promise<ResApiFetchCommitsItem[]> {
   return await axios.get(
     `/repos/${params.owner}/${params.repo}/actions/runs/${params.run_id}`
+  )
+}
+export async function fetchWorkFlowDuration(params: {
+  owner: string
+  repo: string
+  run_id: number
+}): Promise<WorkFlowDuration> {
+  return await axios.get(
+    `/repos/${params.owner}/${params.repo}/actions/runs/${params.run_id}/timing`
   )
 }

@@ -37,3 +37,6 @@ export interface JobType {
   total_count: number
   jobs: JobItemType[]
 }
+export interface WorkFlowDuration {
+  run_duration_ms: number
+}

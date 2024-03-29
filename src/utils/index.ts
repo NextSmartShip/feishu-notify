@@ -13,7 +13,6 @@ import {
   fetchCommitsByCurrentCommitSha
 } from '../api'
 import * as groupUrls from '../config'
-import axios from 'axios'
 const { extend } = dayjs
 extend(duration)
 
@@ -54,6 +53,11 @@ export function handleDiffTime(_start: string, _end: string) {
   const minutes = Math.floor(diffDuration.asMinutes())
   const seconds = diffDuration.asSeconds() % 60
   return `🔧 ${minutes}分钟${seconds}秒`
+}
+export function formatDisplayTime(milliseconds: number) {
+  const dayjsDuration = dayjs(milliseconds)
+  const result = dayjsDuration.format('mm分ss秒')
+  return result
 }
 export const startWithHttpOrS = (str: string) =>
   str.startsWith('http') || str.startsWith('https')
