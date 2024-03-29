@@ -15,7 +15,15 @@ axios.interceptors.request.use(
     if (!startWithHttpOrS(url)) {
       url = PRE_URL + url
     }
-    console.log('check old url:', _config.url, ',finally url: ', url)
+    console.log(
+      'check old url:',
+      _config.url,
+      'params: ',
+      _config.params,
+      _config.data,
+      ',finally url: ',
+      url
+    )
     // @ts-ignore
     _config.headers = {
       // ..._config.headers,
