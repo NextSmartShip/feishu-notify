@@ -32683,7 +32683,6 @@ async function push(_content) {
         // 构建结果（成功or失败or手动取消）
         const conclusion = content.conclusion;
         // 否则，代表是手动触发（暂时使用）：
-        console.log('by Push...: ', content);
         // 最新一条提交对象：
         const head_commit = content.head_commit;
         // 最新一条提交id：
@@ -32691,6 +32690,11 @@ async function push(_content) {
         // 构建的分支：
         const branch = content.head_branch;
         const repository = content?.repository;
+        // 此次action是Prod还是Test:
+        const isProd = content.event === 'release' || branch === 'master';
+        console.log('check repository...: ', repository, repository?.name);
+        console.log('check preview url...: ', groupUrls.PROJECT_URL_MAPS[repository?.name], groupUrls.PROJECT_TEST_URL_MAPS[repository?.name]);
+        // console.log('by Push...: ', content)
         const owner = repository?.owner?.login;
         const workflowRunSuccess = canSendMsgToFeishu(content);
         // 构建的详情页 (当workflow_run不存在时，html_url无法找到)：
@@ -32707,8 +32711,6 @@ async function push(_content) {
         const name = head_commit?.author?.name;
         // 代码推送人-邮箱：
         const email = head_commit?.author?.email;
-        // 此次action是Prod还是Test:
-        const isProd = content.event === 'release' || branch === 'master';
         // 构建环境：
         const buildEnv = isProd ? '生产环境' : '测试环境';
         const commits = await (0, utils_1.getCommits)({
@@ -32726,7 +32728,7 @@ async function push(_content) {
                 content: `${cnName} 构建情况（${buildEnv}）：${workflowRunSuccess ? '成功' : '失败'}`
             }
         };
-        const previewUrl = (0, utils_1.getPreviewUrl)(content, repository) || '#';
+        const previewUrl = (0, utils_1.getPreviewUrl)(isProd, repository?.name) || '#';
         const baseMsg = `\n* [${buildDetailMsg}](${buildDetailPageUrl})`;
         const commitMsgs = commits?.length ? (0, utils_1.formatCommitsMsg)(commits) : baseMsg;
         // duration:
@@ -33129,14 +33131,28 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(2186));
 const github = __importStar(__nccwpck_require__(5438));
 // import type { UserDefinedOptions } from '../type'
+const handleMockData = (mockData) => {
+    if (!mockData)
+        return {};
+    const formatDatas = JSON.parse(mockData);
+    return formatDatas;
+};
 const getActionOptions = () => {
     const token = core.getInput('token');
     const username = core.getInput('username');
     // getBooleanInput 其实本质上就是一种 parseBoolean(core.getInput('key'))
     const payload = github.context.payload;
-    const owner = payload.organization?.login;
-    const repo = payload.repository?.name;
-    const run_id = github.context.runId;
+    let owner = payload.organization?.login;
+    let repo = payload.repository?.name;
+    let run_id = github.context.runId;
+    // mock datas:
+    const mockDataByInput = core.getInput('mockData');
+    const mockData = handleMockData(mockDataByInput);
+    if (Object.keys(mockData).length) {
+        owner = mockData.repository.owner.login;
+        repo = mockData.repository.name;
+        run_id = mockData.id;
+    }
     console.log(`当前事件(eventName、token、run_id)：${token},run_id: ${run_id}`);
     if (github.context.eventName === 'push') {
         const pushPayload = github.context.payload;
@@ -33149,7 +33165,9 @@ const getActionOptions = () => {
         owner,
         repo,
         run_id,
-        github_token: token
+        github_token: token,
+        // mock...:
+        mockData
         // motto,
         // filepath,
         // title,
@@ -33259,10 +33277,10 @@ function formatDisplayTime(milliseconds) {
 exports.formatDisplayTime = formatDisplayTime;
 const startWithHttpOrS = (str) => str.startsWith('http') || str.startsWith('https');
 exports.startWithHttpOrS = startWithHttpOrS;
-const getPreviewUrl = (workflow_run, project) => {
-    if (workflow_run.name?.indexOf?.('production') !== -1)
-        return groupUrls.PROJECT_URL_MAPS[project?.name];
-    return groupUrls.PROJECT_TEST_URL_MAPS[project?.name];
+const getPreviewUrl = (isProd, projectName) => {
+    if (isProd)
+        return groupUrls.PROJECT_URL_MAPS[projectName];
+    return groupUrls.PROJECT_TEST_URL_MAPS[projectName];
 };
 exports.getPreviewUrl = getPreviewUrl;
 const formatValue = (value) => {

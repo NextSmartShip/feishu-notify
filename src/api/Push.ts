@@ -28,8 +28,6 @@ export default async function push(_content: any) {
     // 构建结果（成功or失败or手动取消）
     const conclusion = content.conclusion
     // 否则，代表是手动触发（暂时使用）：
-    console.log('by Push...: ', content)
-
     // 最新一条提交对象：
     const head_commit = content.head_commit
     // 最新一条提交id：
@@ -37,6 +35,9 @@ export default async function push(_content: any) {
     // 构建的分支：
     const branch = content.head_branch
     const repository = content?.repository
+    // 此次action是Prod还是Test:
+    const isProd = content.event === 'release' || branch === 'master'
+    console.log('by Push...: ', content)
     const owner = repository?.owner?.login
     const workflowRunSuccess = canSendMsgToFeishu(content)
     // 构建的详情页 (当workflow_run不存在时，html_url无法找到)：
@@ -55,8 +56,6 @@ export default async function push(_content: any) {
     const name = head_commit?.author?.name
     // 代码推送人-邮箱：
     const email = head_commit?.author?.email
-    // 此次action是Prod还是Test:
-    const isProd = content.event === 'release' || branch === 'master'
     // 构建环境：
     const buildEnv = isProd ? '生产环境' : '测试环境'
 
@@ -73,12 +72,11 @@ export default async function push(_content: any) {
       template: workflowRunSuccess ? 'green' : 'red',
       title: {
         tag: 'plain_text',
-        content: `${cnName} 构建情况（${buildEnv}）：${
-          workflowRunSuccess ? '成功' : '失败'
-        }`
+        content: `${cnName} 构建情况（${buildEnv}）：${workflowRunSuccess ? '成功' : '失败'
+          }`
       }
     }
-    const previewUrl = getPreviewUrl(content, repository) || '#'
+    const previewUrl = getPreviewUrl(isProd, repository?.name) || '#'
     const baseMsg = `\n* [${buildDetailMsg}](${buildDetailPageUrl})`
     const commitMsgs = commits?.length ? formatCommitsMsg(commits) : baseMsg
     // duration:

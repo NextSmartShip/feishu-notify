@@ -69,10 +69,9 @@ export function formatDisplayTime(milliseconds: number) {
 export const startWithHttpOrS = (str: string) =>
   str.startsWith('http') || str.startsWith('https')
 
-export const getPreviewUrl = (workflow_run: any, project: any) => {
-  if (workflow_run.name?.indexOf?.('production') !== -1)
-    return groupUrls.PROJECT_URL_MAPS[project?.name]
-  return groupUrls.PROJECT_TEST_URL_MAPS[project?.name]
+export const getPreviewUrl = (isProd: boolean, projectName: string) => {
+  if (isProd) return groupUrls.PROJECT_URL_MAPS[projectName]
+  return groupUrls.PROJECT_TEST_URL_MAPS[projectName]
 }
 export const formatValue = (value: any) => {
   const params: Partial<ReqPullCommitsByShaParams_Type> = {}
