@@ -33272,9 +33272,8 @@ const formatValue = (value) => {
 exports.formatValue = formatValue;
 const formatCommitsMsg = (commits) => {
     let msgs = '';
-    // `* [${buildDetailMsg}](${buildDetailPageUrl})`;
-    for (const { message = '', html_url = '#', author = { login: '' } } of commits) {
-        msgs += `\n* [${message.replace(/\n/g, '')}${author?.login ? `(by: ${author.login})` : ''}](${html_url})`;
+    for (const { message = '', html_url = '#', author = { login: '', html_url: '' } } of commits) {
+        msgs += `\n* [${message.replace(/\n/g, '')}${author?.login ? `(by: [${author.login}](${author.html_url}))` : ''}](${html_url})`;
     }
     return msgs;
 };

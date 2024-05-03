@@ -87,13 +87,12 @@ export const formatValue = (value: any) => {
 
 export const formatCommitsMsg = (commits: FormatCommitsItem[]) => {
   let msgs = ''
-  // `* [${buildDetailMsg}](${buildDetailPageUrl})`;
   for (const {
     message = '',
     html_url = '#',
-    author = { login: '' }
+    author = { login: '', html_url: '' }
   } of commits) {
-    msgs += `\n* [${message.replace(/\n/g, '')}${author?.login ? `(by: ${author.login})` : ''}](${html_url})`
+    msgs += `\n* [${message.replace(/\n/g, '')}${author?.login ? `(by: [${author.login}](${author.html_url}))` : ''}](${html_url})`
   }
   return msgs
 }

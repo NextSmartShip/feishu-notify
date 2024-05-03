@@ -14,12 +14,12 @@ export type PullCommitsByShaParams_keys_Type = CommitKeysType
 export interface ResApiFetchCommitsItem {
   commit: { message: string }
   html_url: string
-  author: { login: string }
+  author: { login: string; html_url: string }
 }
 export interface FormatCommitsItem {
   message: string
   html_url: string
-  author: { login: string }
+  author: { login: string; html_url: string }
 }
 export type CommitKeysItemType = {
   // 分支名
