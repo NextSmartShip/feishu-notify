@@ -18,6 +18,7 @@ export interface ResApiFetchCommitsItem {
 export interface FormatCommitsItem {
   message: string
   html_url: string
+  author: string
 }
 export type CommitKeysItemType = {
   // 分支名

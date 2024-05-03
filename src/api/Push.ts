@@ -22,12 +22,6 @@ export default async function push(_content: any) {
       (typeof _content === 'string' ? JSON.parse(_content) : _content) || {}
     const run_id = content.id
     // 事件钩子：
-    const status = content?.status || ''
-    // 代表是否能发feishu：
-    const canSendMsg = status === 'completed'
-    // 构建结果（成功or失败or手动取消）
-    const conclusion = content.conclusion
-    // 否则，代表是手动触发（暂时使用）：
     // 最新一条提交对象：
     const head_commit = content.head_commit
     // 最新一条提交id：

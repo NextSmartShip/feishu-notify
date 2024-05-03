@@ -88,8 +88,8 @@ export const formatValue = (value: any) => {
 export const formatCommitsMsg = (commits: FormatCommitsItem[]) => {
   let msgs = ''
   // `* [${buildDetailMsg}](${buildDetailPageUrl})`;
-  for (const { message = '', html_url = '#' } of commits) {
-    msgs += `\n* [${message.replace(/\n/g, '')}](${html_url})`
+  for (const { message = '', html_url = '#', author = '' } of commits) {
+    msgs += `\n* [${message.replace(/\n/g, '')}${author ? `(by: ${author})` : ''}](${html_url})`
   }
   return msgs
 }
