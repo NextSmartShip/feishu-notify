@@ -1,4 +1,3 @@
-import axios from './request'
 import push from './push'
 import { stop } from '../utils'
 import { fetchWorkFlow } from '.'

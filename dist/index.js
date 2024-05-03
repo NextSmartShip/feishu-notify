@@ -32677,12 +32677,6 @@ async function push(_content) {
         const content = (typeof _content === 'string' ? JSON.parse(_content) : _content) || {};
         const run_id = content.id;
         // 事件钩子：
-        const status = content?.status || '';
-        // 代表是否能发feishu：
-        const canSendMsg = status === 'completed';
-        // 构建结果（成功or失败or手动取消）
-        const conclusion = content.conclusion;
-        // 否则，代表是手动触发（暂时使用）：
         // 最新一条提交对象：
         const head_commit = content.head_commit;
         // 最新一条提交id：
@@ -32692,9 +32686,7 @@ async function push(_content) {
         const repository = content?.repository;
         // 此次action是Prod还是Test:
         const isProd = content.event === 'release' || branch === 'master';
-        console.log('check repository...: ', repository, repository?.name);
-        console.log('check preview url...: ', groupUrls.PROJECT_URL_MAPS[repository?.name], groupUrls.PROJECT_TEST_URL_MAPS[repository?.name]);
-        // console.log('by Push...: ', content)
+        console.log('by Push...: ', content);
         const owner = repository?.owner?.login;
         const workflowRunSuccess = canSendMsgToFeishu(content);
         // 构建的详情页 (当workflow_run不存在时，html_url无法找到)：
@@ -33131,28 +33123,14 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(2186));
 const github = __importStar(__nccwpck_require__(5438));
 // import type { UserDefinedOptions } from '../type'
-const handleMockData = (mockData) => {
-    if (!mockData)
-        return {};
-    const formatDatas = JSON.parse(mockData);
-    return formatDatas;
-};
 const getActionOptions = () => {
     const token = core.getInput('token');
     const username = core.getInput('username');
     // getBooleanInput 其实本质上就是一种 parseBoolean(core.getInput('key'))
     const payload = github.context.payload;
-    let owner = payload.organization?.login;
-    let repo = payload.repository?.name;
-    let run_id = github.context.runId;
-    // mock datas:
-    const mockDataByInput = core.getInput('mockData');
-    const mockData = handleMockData(mockDataByInput);
-    if (Object.keys(mockData).length) {
-        owner = mockData.repository.owner.login;
-        repo = mockData.repository.name;
-        run_id = mockData.id;
-    }
+    const owner = payload.organization?.login;
+    const repo = payload.repository?.name;
+    const run_id = github.context.runId;
     console.log(`当前事件(eventName、token、run_id)：${token},run_id: ${run_id}`);
     if (github.context.eventName === 'push') {
         const pushPayload = github.context.payload;
@@ -33165,9 +33143,7 @@ const getActionOptions = () => {
         owner,
         repo,
         run_id,
-        github_token: token,
-        // mock...:
-        mockData
+        github_token: token
         // motto,
         // filepath,
         // title,
@@ -33297,8 +33273,8 @@ exports.formatValue = formatValue;
 const formatCommitsMsg = (commits) => {
     let msgs = '';
     // `* [${buildDetailMsg}](${buildDetailPageUrl})`;
-    for (const { message = '', html_url = '#' } of commits) {
-        msgs += `\n* [${message.replace(/\n/g, '')}](${html_url})`;
+    for (const { message = '', html_url = '#', author = { login: '' } } of commits) {
+        msgs += `\n* [${message.replace(/\n/g, '')}${author?.login ? `(by: ${author.login})` : ''}](${html_url})`;
     }
     return msgs;
 };
@@ -33316,7 +33292,8 @@ const getCommits = async (_params) => {
         const formatCommits = commits.map(item => {
             return {
                 message: item.commit.message,
-                html_url: item.html_url
+                html_url: item.html_url,
+                author: item?.author
             };
         });
         return formatCommits;

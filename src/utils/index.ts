@@ -88,8 +88,12 @@ export const formatValue = (value: any) => {
 export const formatCommitsMsg = (commits: FormatCommitsItem[]) => {
   let msgs = ''
   // `* [${buildDetailMsg}](${buildDetailPageUrl})`;
-  for (const { message = '', html_url = '#', author = '' } of commits) {
-    msgs += `\n* [${message.replace(/\n/g, '')}${author ? `(by: ${author})` : ''}](${html_url})`
+  for (const {
+    message = '',
+    html_url = '#',
+    author = { login: '' }
+  } of commits) {
+    msgs += `\n* [${message.replace(/\n/g, '')}${author?.login ? `(by: ${author.login})` : ''}](${html_url})`
   }
   return msgs
 }
@@ -111,7 +115,8 @@ export const getCommits = async (
     const formatCommits = commits.map(item => {
       return {
         message: item.commit.message,
-        html_url: item.html_url
+        html_url: item.html_url,
+        author: item?.author
       }
     })
     return formatCommits

@@ -66,8 +66,9 @@ export default async function push(_content: any) {
       template: workflowRunSuccess ? 'green' : 'red',
       title: {
         tag: 'plain_text',
-        content: `${cnName} 构建情况（${buildEnv}）：${workflowRunSuccess ? '成功' : '失败'
-          }`
+        content: `${cnName} 构建情况（${buildEnv}）：${
+          workflowRunSuccess ? '成功' : '失败'
+        }`
       }
     }
     const previewUrl = getPreviewUrl(isProd, repository?.name) || '#'
