@@ -111,6 +111,8 @@ export const getCommits = async (
       ? await fetchCommits(commit_url)
       : await fetchCommit(_params)
     if (!commits?.length) return []
+    console.log('格式化commit author: ', JSON.stringify(commits))
+
     const formatCommits = commits.map(item => {
       return {
         message: item.commit.message,
