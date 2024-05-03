@@ -33273,7 +33273,7 @@ exports.formatValue = formatValue;
 const formatCommitsMsg = (commits) => {
     let msgs = '';
     for (const { message = '', html_url = '#', author = { login: '', html_url: '' } } of commits) {
-        msgs += `\n* [${message.replace(/\n/g, '')}](${html_url}) ${author?.login ? `(by: [${author.login}](${author.html_url}))` : ''}`;
+        msgs += `\n* [${message?.replace?.(/^.*?\n\n/, '')}](${html_url}) ${author?.login ? `(by: [${author.login}](${author.html_url}))` : ''}`;
     }
     return msgs;
 };
