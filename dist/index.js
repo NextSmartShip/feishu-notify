@@ -32892,7 +32892,7 @@ async function push(_content) {
                 elements
             }
         };
-        console.log('发送飞书请求前参数：', feishu_body);
+        console.log('发送飞书请求前参数：', JSON.stringify(feishu_body));
         (0, _1.fetchFeishuWebhook)(feishu_body, workflowRunSuccess ? isProd : false);
     }
     catch (error) {
