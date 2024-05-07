@@ -32757,17 +32757,10 @@ async function push(_content) {
                         elements: [
                             {
                                 tag: 'markdown',
-                                content: `**耗时：**${displayTime}`
+                                content: `**构建分支：**${branch}`
                             }
                         ]
-                    }
-                ]
-            },
-            {
-                tag: 'column_set',
-                flex_mode: 'none',
-                background_style: 'default',
-                columns: [
+                    },
                     {
                         tag: 'column',
                         width: 'weighted',
@@ -32776,7 +32769,7 @@ async function push(_content) {
                         elements: [
                             {
                                 tag: 'markdown',
-                                content: `**构建分支：**${branch}`
+                                content: `**耗时：**${displayTime}`
                             }
                         ]
                     }
