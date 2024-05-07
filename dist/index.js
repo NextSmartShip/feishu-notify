@@ -32827,6 +32827,7 @@ async function push(_content) {
                         elements: [
                             {
                                 tag: 'img',
+                                mode: 'medium',
                                 alt: {
                                     content: '',
                                     tag: 'plain_text'
