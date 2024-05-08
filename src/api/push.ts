@@ -46,6 +46,8 @@ export default async function push(_content: any) {
     const cnName = groupUrls.projectNameMaps[repository?.name] || 'NSS-项目'
     // // 当前hook操作人
     const operator = content?.triggering_actor?.login
+    // // 当前hook操作人
+    const operatorHtmlUrl = content?.triggering_actor?.html_url
     // 代码推送人-姓名：
     const name = head_commit?.author?.name
     // 代码推送人-邮箱：
@@ -140,7 +142,7 @@ export default async function push(_content: any) {
               {
                 tag: 'markdown',
                 // "content": "**操作人：** \at所有人<at id=all></at> "
-                content: `**推送人：**${name}（${email}） `
+                content: `**推送人：**[${name}](${email}) `
               }
             ]
           },
@@ -152,7 +154,7 @@ export default async function push(_content: any) {
             elements: [
               {
                 tag: 'markdown',
-                content: `**操作人：**${operator} `
+                content: `**操作人：**(${operator})[${operatorHtmlUrl}]`
               }
             ]
           }
