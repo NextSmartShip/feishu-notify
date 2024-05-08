@@ -32803,7 +32803,7 @@ async function push(_content) {
                         elements: [
                             {
                                 tag: 'markdown',
-                                content: `**操作人：**(${operator})[${operatorHtmlUrl}]`
+                                content: `**操作人：**[${operator}](${operatorHtmlUrl})`
                             }
                         ]
                     }

@@ -154,7 +154,7 @@ export default async function push(_content: any) {
             elements: [
               {
                 tag: 'markdown',
-                content: `**操作人：**(${operator})[${operatorHtmlUrl}]`
+                content: `**操作人：**[${operator}](${operatorHtmlUrl})`
               }
             ]
           }
