@@ -76,6 +76,8 @@ export default async function push(_content: any) {
     const previewUrl = getPreviewUrl(isProd, repository?.name) || '#'
     const baseMsg = `\n* [${buildDetailMsg}](${buildDetailPageUrl})`
     const commitMsgs = commits?.length ? formatCommitsMsg(commits) : baseMsg
+    console.log('commitMsgs: ', commitMsgs)
+
     // duration:
     // const durationInfo = await fetchWorkFlowDuration({
     //   owner,

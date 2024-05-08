@@ -32725,6 +32725,7 @@ async function push(_content) {
         const previewUrl = (0, utils_1.getPreviewUrl)(isProd, repository?.name) || '#';
         const baseMsg = `\n* [${buildDetailMsg}](${buildDetailPageUrl})`;
         const commitMsgs = commits?.length ? (0, utils_1.formatCommitsMsg)(commits) : baseMsg;
+        console.log('commitMsgs: ', commitMsgs);
         // duration:
         // const durationInfo = await fetchWorkFlowDuration({
         //   owner,
