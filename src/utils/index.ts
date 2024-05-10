@@ -92,7 +92,7 @@ export const formatCommitsMsg = (commits: FormatCommitsItem[]) => {
   for (const [
     ind,
     { message = '', html_url = '#', author = { login: '', html_url: '' } }
-  ] of commits.reverse().entries()) {
+  ] of commits.entries()) {
     msgs += `\n${nums[ind]} [${message?.replace?.(/^.*?\n\n/, '')}](${html_url}) ${author?.login ? `(by: [${author.login}](${author.html_url}))` : ''}`
   }
   return msgs
