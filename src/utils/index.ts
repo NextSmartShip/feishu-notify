@@ -86,13 +86,14 @@ export const formatValue = (value: any) => {
 }
 
 export const formatCommitsMsg = (commits: FormatCommitsItem[]) => {
-  let msgs = ''
-  for (const {
-    message = '',
-    html_url = '#',
-    author = { login: '', html_url: '' }
-  } of commits) {
-    msgs += `\n* [${message?.replace?.(/^.*?\n\n/, '')}](${html_url}) ${author?.login ? `(by: [${author.login}](${author.html_url}))` : ''}`
+  if (!commits?.length) return ''
+  let msgs = '#'
+  const nums = groupUrls.NumberList
+  for (const [
+    ind,
+    { message = '', html_url = '#', author = { login: '', html_url: '' } }
+  ] of commits.reverse().entries()) {
+    msgs += `\n${nums[ind]} [${message?.replace?.(/^.*?\n\n/, '')}](${html_url}) ${author?.login ? `(by: [${author.login}](${author.html_url}))` : ''}`
   }
   return msgs
 }

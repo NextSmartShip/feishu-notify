@@ -32978,7 +32978,7 @@ exports["default"] = axios;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.BASE_PARAMS = exports.headers = exports.FailImgKey = exports.SuccessImgKey = exports.PROJECT_URL_MAPS = exports.PROJECT_TEST_URL_MAPS = exports.projectNameMaps = exports.PROJECT_NAME_MAPS = exports.botUrls = void 0;
+exports.NumberList = exports.BASE_PARAMS = exports.headers = exports.FailImgKey = exports.SuccessImgKey = exports.PROJECT_URL_MAPS = exports.PROJECT_TEST_URL_MAPS = exports.projectNameMaps = exports.PROJECT_NAME_MAPS = exports.botUrls = void 0;
 exports.botUrls = {
     // 生产构建通知群 (技术部)：
     ProdEnvGroupBot: 'https://open.feishu.cn/open-apis/bot/v2/hook/955695b6-a83b-4335-a5a7-58068361d3bf',
@@ -33027,6 +33027,28 @@ exports.BASE_PARAMS = {
     headers: exports.headers,
     json: true
 };
+exports.NumberList = [
+    '1️⃣',
+    '2️⃣',
+    '3️⃣',
+    '4️⃣',
+    '5️⃣',
+    '6️⃣',
+    '7️⃣',
+    '8️⃣',
+    '9️⃣',
+    '🔟',
+    '1️⃣1️⃣',
+    '1️⃣2️⃣',
+    '1️⃣3️⃣',
+    '1️⃣4️⃣',
+    '1️⃣5️⃣',
+    '1️⃣6️⃣',
+    '1️⃣7️⃣',
+    '1️⃣8️⃣',
+    '1️⃣9️⃣',
+    '2️⃣0️⃣'
+];
 
 
 /***/ }),
@@ -33268,9 +33290,12 @@ const formatValue = (value) => {
 };
 exports.formatValue = formatValue;
 const formatCommitsMsg = (commits) => {
-    let msgs = '';
-    for (const { message = '', html_url = '#', author = { login: '', html_url: '' } } of commits) {
-        msgs += `\n* [${message?.replace?.(/^.*?\n\n/, '')}](${html_url}) ${author?.login ? `(by: [${author.login}](${author.html_url}))` : ''}`;
+    if (!commits?.length)
+        return '';
+    let msgs = '#';
+    const nums = groupUrls.NumberList;
+    for (const [ind, { message = '', html_url = '#', author = { login: '', html_url: '' } }] of commits.reverse().entries()) {
+        msgs += `\n${nums[ind]} [${message?.replace?.(/^.*?\n\n/, '')}](${html_url}) ${author?.login ? `(by: [${author.login}](${author.html_url}))` : ''}`;
     }
     return msgs;
 };
