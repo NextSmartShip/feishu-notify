@@ -87,7 +87,7 @@ export const formatValue = (value: any) => {
 
 export const formatCommitsMsg = (commits: FormatCommitsItem[]) => {
   if (!commits?.length) return ''
-  let msgs = '#'
+  let msgs = ''
   const nums = groupUrls.NumberList
   for (const [
     ind,

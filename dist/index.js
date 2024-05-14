@@ -33292,7 +33292,7 @@ exports.formatValue = formatValue;
 const formatCommitsMsg = (commits) => {
     if (!commits?.length)
         return '';
-    let msgs = '#';
+    let msgs = '';
     const nums = groupUrls.NumberList;
     for (const [ind, { message = '', html_url = '#', author = { login: '', html_url: '' } }] of commits.entries()) {
         msgs += `\n${commits?.length > 1 ? nums[ind] + ' ' : ''}[${message?.replace?.(/^.*?\n\n/, '')}](${html_url}) ${author?.login ? `(by: [${author.login}](${author.html_url}))` : ''}`;
