@@ -93,7 +93,7 @@ export const formatCommitsMsg = (commits: FormatCommitsItem[]) => {
     ind,
     { message = '', html_url = '#', author = { login: '', html_url: '' } }
   ] of commits.entries()) {
-    msgs += `\n${nums[ind]} [${message?.replace?.(/^.*?\n\n/, '')}](${html_url}) ${author?.login ? `(by: [${author.login}](${author.html_url}))` : ''}`
+    msgs += `\n${commits?.length > 1 ? nums[ind] + ' ' : ''}[${message?.replace?.(/^.*?\n\n/, '')}](${html_url}) ${author?.login ? `(by: [${author.login}](${author.html_url}))` : ''}`
   }
   return msgs
 }
