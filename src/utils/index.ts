@@ -87,16 +87,27 @@ export const formatValue = (value: any) => {
 
 export const formatCommitsMsg = (commits: FormatCommitsItem[]) => {
   if (!commits?.length) return ''
-  let msgs = ''
   const nums = groupUrls.NumberList
-  for (const [
-    ind,
-    { message = '', html_url = '#', author = { login: '', html_url: '' } }
-  ] of commits.entries()) {
-    msgs += `\n${commits?.length > 1 ? nums[ind] + ' ' : ''}[${message?.replace?.(/^.*?\n\n/, '')}](${html_url}) ${author?.login ? `(by: [${author.login}](${author.html_url}))` : ''}`
-  }
-  return msgs
+  const msgsArr = commits.map((c, i) => {
+    const {
+      date,
+      message = '',
+      html_url = '#',
+      author = { login: '', html_url: '' }
+    } = c
+    const countNum = commits?.length > 1 ? nums[i] + ' ' : ''
+    const link = html_url
+    const text = message?.replace?.(/^.*?\n\n/, '')
+    const authorText = `${author?.login ? `(by: [${author.login}](${author.html_url}))` : ''}`
+    return `${countNum}[${text}](${link})${authorText}-${date}`
+  })
+  return msgsArr.join('\n')
 }
+export const BASE_FORMAT_RULE = 'YYYY-MM-DD HH:mm:ss'
+export const BASE_FORMAT_ZONE_RULE = 'YYYY-MM-DD HH:mm:ss[Z]'
+
+export const formatDate = (t: string, rule: string = BASE_FORMAT_RULE) =>
+  dayjs(t).format(rule)
 
 export const getCommits = async (
   _params: ReqPullCommitsByShaParams_Type
@@ -116,6 +127,9 @@ export const getCommits = async (
 
     const formatCommits = commits.map(item => {
       return {
+        date: item.commit?.author?.date
+          ? formatDate(item.commit.author.date)
+          : item.commit.author.date,
         message: item.commit.message,
         html_url: item.html_url,
         author: item?.author

@@ -33208,7 +33208,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getToken = exports.stop = exports.isWeekend = exports.isProd = exports.getCommits = exports.formatCommitsMsg = exports.formatValue = exports.getPreviewUrl = exports.startWithHttpOrS = exports.formatDisplayTime = exports.handleDiffTime = exports.getCurrentDayjs = exports.getPublicIP = void 0;
+exports.getToken = exports.stop = exports.isWeekend = exports.isProd = exports.getCommits = exports.formatDate = exports.BASE_FORMAT_ZONE_RULE = exports.BASE_FORMAT_RULE = exports.formatCommitsMsg = exports.formatValue = exports.getPreviewUrl = exports.startWithHttpOrS = exports.formatDisplayTime = exports.handleDiffTime = exports.getCurrentDayjs = exports.getPublicIP = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const os_1 = __nccwpck_require__(2037);
 const dayjs_1 = __importStar(__nccwpck_require__(7401));
@@ -33292,14 +33292,22 @@ exports.formatValue = formatValue;
 const formatCommitsMsg = (commits) => {
     if (!commits?.length)
         return '';
-    let msgs = '';
     const nums = groupUrls.NumberList;
-    for (const [ind, { message = '', html_url = '#', author = { login: '', html_url: '' } }] of commits.entries()) {
-        msgs += `\n${commits?.length > 1 ? nums[ind] + ' ' : ''}[${message?.replace?.(/^.*?\n\n/, '')}](${html_url}) ${author?.login ? `(by: [${author.login}](${author.html_url}))` : ''}`;
-    }
-    return msgs;
+    const msgsArr = commits.map((c, i) => {
+        const { date, message = '', html_url = '#', author = { login: '', html_url: '' } } = c;
+        const countNum = commits?.length > 1 ? nums[i] + ' ' : '';
+        const link = html_url;
+        const text = message?.replace?.(/^.*?\n\n/, '');
+        const authorText = `${author?.login ? `(by: [${author.login}](${author.html_url}))` : ''}`;
+        return `${countNum}[${text}](${link})${authorText}-${date}`;
+    });
+    return msgsArr.join('\n');
 };
 exports.formatCommitsMsg = formatCommitsMsg;
+exports.BASE_FORMAT_RULE = 'YYYY-MM-DD HH:mm:ss';
+exports.BASE_FORMAT_ZONE_RULE = 'YYYY-MM-DD HH:mm:ss[Z]';
+const formatDate = (t, rule = exports.BASE_FORMAT_RULE) => (0, dayjs_1.default)(t).format(rule);
+exports.formatDate = formatDate;
 const getCommits = async (_params) => {
     try {
         const params = (0, exports.formatValue)(_params);
@@ -33313,6 +33321,9 @@ const getCommits = async (_params) => {
         console.log('格式化commit author: ', JSON.stringify(commits));
         const formatCommits = commits.map(item => {
             return {
+                date: item.commit?.author?.date
+                    ? (0, exports.formatDate)(item.commit.author.date)
+                    : item.commit.author.date,
                 message: item.commit.message,
                 html_url: item.html_url,
                 author: item?.author

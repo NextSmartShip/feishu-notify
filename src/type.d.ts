@@ -12,11 +12,15 @@ export type ReqFetchCommitParams_Type = CommitsType
 export type PullCommitsByShaParams_keys_Type = CommitKeysType
 
 export interface ResApiFetchCommitsItem {
-  commit: { message: string }
+  commit: {
+    message: string
+    author: { name: string; email: string; date: string }
+  }
   html_url: string
   author: { login: string; html_url: string }
 }
 export interface FormatCommitsItem {
+  date: string
   message: string
   html_url: string
   author: { login: string; html_url: string }
