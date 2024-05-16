@@ -4,6 +4,7 @@ import dayjs, { Dayjs, isDayjs } from 'dayjs'
 import duration from 'dayjs/plugin/duration'
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
+import isToday from 'dayjs/plugin/isToday'
 import type {
   FormatCommitsItem,
   PullCommitsByShaParams_keys_Type,
@@ -16,6 +17,7 @@ import {
 } from '../api'
 import * as groupUrls from '../config'
 const { extend } = dayjs
+extend(isToday)
 extend(utc)
 extend(timezone)
 extend(duration)
@@ -99,16 +101,22 @@ export const formatCommitsMsg = (commits: FormatCommitsItem[]) => {
     const link = html_url
     const text = message?.replace?.(/^.*?\n\n/, '')
     const authorText = `${author?.login ? `(by: [${author.login}](${author.html_url}))` : ''}`
-    const date = `📅 <font color=red>${_date}</font>`
+    const date = `📅 <font color=Darkorange>${_date}</font>`
     return `${countNum}[${text}](${link})${authorText} - ${date}`
   })
   return msgsArr.join('\n')
 }
+export const FORMAT_TIME_RULE = 'HH:mm:ss'
 export const BASE_FORMAT_RULE = 'YYYY-MM-DD HH:mm:ss'
 export const BASE_FORMAT_ZONE_RULE = 'YYYY-MM-DD HH:mm:ss[Z]'
 
-export const formatDate = (t: string, rule: string = BASE_FORMAT_RULE) =>
-  dayjs(t).format(rule)
+export const formatDate = (t: string, rule: string = BASE_FORMAT_RULE) => {
+  const formatD = dayjs(t)
+  const isToday = formatD.isToday()
+  return isToday
+    ? `今天 ${formatD.format(FORMAT_TIME_RULE)}`
+    : formatD.format(rule)
+}
 
 export const getCommits = async (
   _params: ReqPullCommitsByShaParams_Type

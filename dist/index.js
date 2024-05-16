@@ -6632,6 +6632,13 @@ CombinedStream.prototype._emitError = function(err) {
 
 /***/ }),
 
+/***/ 6502:
+/***/ (function(module) {
+
+!function(e,o){ true?module.exports=o():0}(this,(function(){"use strict";return function(e,o,t){o.prototype.isToday=function(){var e="YYYY-MM-DD",o=t();return this.format(e)===o.format(e)}}}));
+
+/***/ }),
+
 /***/ 4761:
 /***/ (function(module) {
 
@@ -33208,16 +33215,18 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getToken = exports.stop = exports.isWeekend = exports.isProd = exports.getCommits = exports.formatDate = exports.BASE_FORMAT_ZONE_RULE = exports.BASE_FORMAT_RULE = exports.formatCommitsMsg = exports.formatValue = exports.getPreviewUrl = exports.startWithHttpOrS = exports.formatDisplayTime = exports.handleDiffTime = exports.getCurrentDayjs = exports.getPublicIP = void 0;
+exports.getToken = exports.stop = exports.isWeekend = exports.isProd = exports.getCommits = exports.formatDate = exports.BASE_FORMAT_ZONE_RULE = exports.BASE_FORMAT_RULE = exports.FORMAT_TIME_RULE = exports.formatCommitsMsg = exports.formatValue = exports.getPreviewUrl = exports.startWithHttpOrS = exports.formatDisplayTime = exports.handleDiffTime = exports.getCurrentDayjs = exports.getPublicIP = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const os_1 = __nccwpck_require__(2037);
 const dayjs_1 = __importStar(__nccwpck_require__(7401));
 const duration_1 = __importDefault(__nccwpck_require__(5657));
 const utc_1 = __importDefault(__nccwpck_require__(4359));
 const timezone_1 = __importDefault(__nccwpck_require__(4761));
+const isToday_1 = __importDefault(__nccwpck_require__(6502));
 const api_1 = __nccwpck_require__(9343);
 const groupUrls = __importStar(__nccwpck_require__(6373));
 const { extend } = dayjs_1.default;
+extend(isToday_1.default);
 extend(utc_1.default);
 extend(timezone_1.default);
 extend(duration_1.default);
@@ -33299,15 +33308,22 @@ const formatCommitsMsg = (commits) => {
         const link = html_url;
         const text = message?.replace?.(/^.*?\n\n/, '');
         const authorText = `${author?.login ? `(by: [${author.login}](${author.html_url}))` : ''}`;
-        const date = `📅 <font color=red>${_date}</font>`;
+        const date = `📅 <font color=Darkorange>${_date}</font>`;
         return `${countNum}[${text}](${link})${authorText} - ${date}`;
     });
     return msgsArr.join('\n');
 };
 exports.formatCommitsMsg = formatCommitsMsg;
+exports.FORMAT_TIME_RULE = 'HH:mm:ss';
 exports.BASE_FORMAT_RULE = 'YYYY-MM-DD HH:mm:ss';
 exports.BASE_FORMAT_ZONE_RULE = 'YYYY-MM-DD HH:mm:ss[Z]';
-const formatDate = (t, rule = exports.BASE_FORMAT_RULE) => (0, dayjs_1.default)(t).format(rule);
+const formatDate = (t, rule = exports.BASE_FORMAT_RULE) => {
+    const formatD = (0, dayjs_1.default)(t);
+    const isToday = formatD.isToday();
+    return isToday
+        ? `今天 ${formatD.format(exports.FORMAT_TIME_RULE)}`
+        : formatD.format(rule);
+};
 exports.formatDate = formatDate;
 const getCommits = async (_params) => {
     try {
