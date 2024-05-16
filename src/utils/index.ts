@@ -111,9 +111,10 @@ export const BASE_FORMAT_RULE = 'YYYY-MM-DD HH:mm:ss'
 export const BASE_FORMAT_ZONE_RULE = 'YYYY-MM-DD HH:mm:ss[Z]'
 
 export const formatDate = (t: string, rule: string = BASE_FORMAT_RULE) => {
-  const zone = dayjs.tz.guess()
-  console.log('当前时区：', zone)
-  const formatD = dayjs(t).tz()
+  // const zone = dayjs.tz.guess()
+  const mineZone = 'Asia/Shanghai'
+  console.log('当前时区：', mineZone)
+  const formatD = dayjs(t).tz(mineZone)
   const isToday = formatD.isToday()
   return isToday
     ? `今天 ${formatD.format(FORMAT_TIME_RULE)}`

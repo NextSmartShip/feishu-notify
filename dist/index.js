@@ -33319,9 +33319,10 @@ exports.FORMAT_TIME_RULE = 'HH:mm:ss';
 exports.BASE_FORMAT_RULE = 'YYYY-MM-DD HH:mm:ss';
 exports.BASE_FORMAT_ZONE_RULE = 'YYYY-MM-DD HH:mm:ss[Z]';
 const formatDate = (t, rule = exports.BASE_FORMAT_RULE) => {
-    const zone = dayjs_1.default.tz.guess();
-    console.log('当前时区：', zone);
-    const formatD = (0, dayjs_1.default)(t).tz();
+    // const zone = dayjs.tz.guess()
+    const mineZone = 'Asia/Shanghai';
+    console.log('当前时区：', mineZone);
+    const formatD = (0, dayjs_1.default)(t).tz(mineZone);
     const isToday = formatD.isToday();
     return isToday
         ? `今天 ${formatD.format(exports.FORMAT_TIME_RULE)}`
