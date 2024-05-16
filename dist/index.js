@@ -32570,7 +32570,8 @@ async function fetchFeishuWebhook(body, toBigGroup = false) {
             : config_1.botUrls.TestEnvGroupBot;
     const options = {
         method: 'POST',
-        url: baseUrl,
+        // url: baseUrl,
+        url: config_1.botUrls.FrontEndOldManGroupBot,
         data: body,
         json: true // Automatically stringifies the body to JSON
     };
@@ -33319,7 +33320,7 @@ exports.BASE_FORMAT_RULE = 'YYYY-MM-DD HH:mm:ss';
 exports.BASE_FORMAT_ZONE_RULE = 'YYYY-MM-DD HH:mm:ss[Z]';
 const formatDate = (t, rule = exports.BASE_FORMAT_RULE) => {
     const zone = dayjs_1.default.tz.guess();
-    const formatD = (0, dayjs_1.default)(t).tz(zone);
+    const formatD = (0, dayjs_1.default)(t).tz();
     const isToday = formatD.isToday();
     return isToday
         ? `今天 ${formatD.format(exports.FORMAT_TIME_RULE)}`
