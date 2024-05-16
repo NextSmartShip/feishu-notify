@@ -90,7 +90,7 @@ export const formatCommitsMsg = (commits: FormatCommitsItem[]) => {
   const nums = groupUrls.NumberList
   const msgsArr = commits.map((c, i) => {
     const {
-      date,
+      date: _date,
       message = '',
       html_url = '#',
       author = { login: '', html_url: '' }
@@ -99,7 +99,8 @@ export const formatCommitsMsg = (commits: FormatCommitsItem[]) => {
     const link = html_url
     const text = message?.replace?.(/^.*?\n\n/, '')
     const authorText = `${author?.login ? `(by: [${author.login}](${author.html_url}))` : ''}`
-    return `${countNum}[${text}](${link})${authorText}-${date}`
+    const date = `📅 <font color=red>${_date}</font>`
+    return `${countNum}[${text}](${link})${authorText} - ${date}`
   })
   return msgsArr.join('\n')
 }

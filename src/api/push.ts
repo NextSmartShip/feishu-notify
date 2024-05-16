@@ -204,7 +204,7 @@ export default async function push(_content: any) {
               {
                 tag: 'markdown',
                 text_align: 'left',
-                content: `**Message [(构建链接)](${buildDetailPageUrl})：** ${commitMsgs}`
+                content: `**Message [(构建链接)](${buildDetailPageUrl})：** \n${commitMsgs}`
               }
             ]
           }

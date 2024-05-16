@@ -32852,7 +32852,7 @@ async function push(_content) {
                             {
                                 tag: 'markdown',
                                 text_align: 'left',
-                                content: `**Message [(构建链接)](${buildDetailPageUrl})：** ${commitMsgs}`
+                                content: `**Message [(构建链接)](${buildDetailPageUrl})：** \n${commitMsgs}`
                             }
                         ]
                     }
@@ -33294,12 +33294,13 @@ const formatCommitsMsg = (commits) => {
         return '';
     const nums = groupUrls.NumberList;
     const msgsArr = commits.map((c, i) => {
-        const { date, message = '', html_url = '#', author = { login: '', html_url: '' } } = c;
+        const { date: _date, message = '', html_url = '#', author = { login: '', html_url: '' } } = c;
         const countNum = commits?.length > 1 ? nums[i] + ' ' : '';
         const link = html_url;
         const text = message?.replace?.(/^.*?\n\n/, '');
         const authorText = `${author?.login ? `(by: [${author.login}](${author.html_url}))` : ''}`;
-        return `${countNum}[${text}](${link})${authorText}-${date}`;
+        const date = `📅 <font color=red>${_date}</font>`;
+        return `${countNum}[${text}](${link})${authorText} - ${date}`;
     });
     return msgsArr.join('\n');
 };
