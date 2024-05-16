@@ -99,7 +99,7 @@ export const formatCommitsMsg = (commits: FormatCommitsItem[]) => {
     } = c
     const countNum = commits?.length > 1 ? nums[i] + ' ' : ''
     const link = html_url
-    const text = message?.replace?.(/\n\n/g, '')
+    const text = message?.replace?.(/\n\n/g, ' ')
     const authorText = `${author?.login ? `(by: [${author.login}](${author.html_url}))` : ''}`
     const date = ` - 📅 <font color="grey">${_date}</font>`
     return `${countNum}[${text}](${link})${authorText}${date}`
