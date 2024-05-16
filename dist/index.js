@@ -33309,7 +33309,8 @@ const formatCommitsMsg = (commits) => {
         const link = html_url;
         const text = message?.replace?.(/^.*?\n\n/, '');
         const authorText = `${author?.login ? `(by: [${author.login}](${author.html_url}))` : ''}`;
-        const date = `📅 <font color="LightSalmon">${_date}</font>`;
+        // const date = `📅 <font color="LightSalmon">${_date}</font>`
+        const date = `📅 <font color="#FFA07A">${_date}</font>`;
         return `${countNum}[${text}](${link})${authorText} - ${date}`;
     });
     return msgsArr.join('\n');
@@ -33319,7 +33320,7 @@ exports.FORMAT_TIME_RULE = 'HH:mm:ss';
 exports.BASE_FORMAT_RULE = 'YYYY-MM-DD HH:mm:ss';
 exports.BASE_FORMAT_ZONE_RULE = 'YYYY-MM-DD HH:mm:ss[Z]';
 const formatDate = (t, rule = exports.BASE_FORMAT_RULE) => {
-    // const zone = dayjs.tz.guess()
+    const zone = dayjs_1.default.tz.guess();
     const mineZone = 'Asia/Shanghai';
     console.log('当前时区：', mineZone);
     const formatD = (0, dayjs_1.default)(t).tz(mineZone);

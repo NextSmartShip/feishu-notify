@@ -101,7 +101,8 @@ export const formatCommitsMsg = (commits: FormatCommitsItem[]) => {
     const link = html_url
     const text = message?.replace?.(/^.*?\n\n/, '')
     const authorText = `${author?.login ? `(by: [${author.login}](${author.html_url}))` : ''}`
-    const date = `📅 <font color="LightSalmon">${_date}</font>`
+    // const date = `📅 <font color="LightSalmon">${_date}</font>`
+    const date = `📅 <font color="#FFA07A">${_date}</font>`
     return `${countNum}[${text}](${link})${authorText} - ${date}`
   })
   return msgsArr.join('\n')
@@ -111,7 +112,7 @@ export const BASE_FORMAT_RULE = 'YYYY-MM-DD HH:mm:ss'
 export const BASE_FORMAT_ZONE_RULE = 'YYYY-MM-DD HH:mm:ss[Z]'
 
 export const formatDate = (t: string, rule: string = BASE_FORMAT_RULE) => {
-  // const zone = dayjs.tz.guess()
+  const zone = dayjs.tz.guess()
   const mineZone = 'Asia/Shanghai'
   console.log('当前时区：', mineZone)
   const formatD = dayjs(t).tz(mineZone)
