@@ -33309,7 +33309,7 @@ const formatCommitsMsg = (commits) => {
         const link = html_url;
         const text = message?.replace?.(/^.*?\n\n/, '');
         const authorText = `${author?.login ? `(by: [${author.login}](${author.html_url}))` : ''}`;
-        const date = `📅 <font color="Darkorange">${_date}</font>`;
+        const date = `📅 <font color="LightSalmon">${_date}</font>`;
         return `${countNum}[${text}](${link})${authorText} - ${date}`;
     });
     return msgsArr.join('\n');
@@ -33320,6 +33320,7 @@ exports.BASE_FORMAT_RULE = 'YYYY-MM-DD HH:mm:ss';
 exports.BASE_FORMAT_ZONE_RULE = 'YYYY-MM-DD HH:mm:ss[Z]';
 const formatDate = (t, rule = exports.BASE_FORMAT_RULE) => {
     const zone = dayjs_1.default.tz.guess();
+    console.log('当前时区：', zone);
     const formatD = (0, dayjs_1.default)(t).tz();
     const isToday = formatD.isToday();
     return isToday
