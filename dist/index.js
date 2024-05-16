@@ -32570,8 +32570,8 @@ async function fetchFeishuWebhook(body, toBigGroup = false) {
             : config_1.botUrls.TestEnvGroupBot;
     const options = {
         method: 'POST',
-        // url: baseUrl,
-        url: config_1.botUrls.FrontEndOldManGroupBot,
+        url: baseUrl,
+        // url: botUrls.FrontEndOldManGroupBot,
         data: body,
         json: true // Automatically stringifies the body to JSON
     };
@@ -33309,9 +33309,8 @@ const formatCommitsMsg = (commits) => {
         const link = html_url;
         const text = message?.replace?.(/^.*?\n\n/, '');
         const authorText = `${author?.login ? `(by: [${author.login}](${author.html_url}))` : ''}`;
-        // const date = `📅 <font color="LightSalmon">${_date}</font>`
-        const date = `📅 <font color="grey">${_date}</font>`;
-        return `${countNum}[${text}](${link})${authorText} - ${date}`;
+        const date = ` - 📅 <font color="grey">${_date}</font>`;
+        return `${countNum}[${text}](${link})${authorText}${date}`;
     });
     return msgsArr.join('\n');
 };
