@@ -32724,7 +32724,7 @@ async function push(_content) {
             wide_screen_mode: true
         };
         const header = {
-            template: workflowRunSuccess ? 'green' : 'red',
+            template: workflowRunSuccess ? (isProd ? 'green' : 'orange') : 'red',
             title: {
                 tag: 'plain_text',
                 content: `${cnName} 构建情况（${buildEnv}）：${workflowRunSuccess ? '成功' : '失败'}`

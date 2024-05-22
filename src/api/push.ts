@@ -65,7 +65,7 @@ export default async function push(_content: any) {
       wide_screen_mode: true
     }
     const header = {
-      template: workflowRunSuccess ? 'green' : 'red',
+      template: workflowRunSuccess ? (isProd ? 'green' : 'orange') : 'red',
       title: {
         tag: 'plain_text',
         content: `${cnName} 构建情况（${buildEnv}）：${
