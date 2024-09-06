@@ -32742,12 +32742,22 @@ async function push(_content) {
         // })
         const currentDayjsTime = (0, utils_1.getCurrentDayjs)(true);
         const displayTime = (0, utils_1.handleDiffTime)(content.run_started_at, currentDayjsTime);
+        const baseNotifyUsers = [
+            groupUrls.notifyUserMap.gabby_zhou,
+            groupUrls.notifyUserMap.shenglie_zuo
+        ];
+        // 查看当前flow属于谁触发的：
+        const targetUserInfo = groupUrls.notifyUserList.find(n => n.email === email);
+        if (targetUserInfo?.feishu_open_id) {
+            baseNotifyUsers.push(targetUserInfo);
+        }
         const elements = [
             {
                 tag: 'div',
                 text: {
                     tag: 'lark_md',
-                    content: '<at id=all></at>'
+                    // content: '<at id=all></at>'
+                    content: baseNotifyUsers.map(b => `<at id=${b.feishu_open_id}></at>`)
                 }
             },
             {
@@ -32986,7 +32996,7 @@ exports["default"] = axios;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.NumberList = exports.BASE_PARAMS = exports.headers = exports.FailImgKey = exports.SuccessImgKey = exports.PROJECT_URL_MAPS = exports.PROJECT_TEST_URL_MAPS = exports.projectNameMaps = exports.PROJECT_NAME_MAPS = exports.botUrls = void 0;
+exports.NumberList = exports.BASE_PARAMS = exports.headers = exports.FailImgKey = exports.SuccessImgKey = exports.PROJECT_URL_MAPS = exports.PROJECT_TEST_URL_MAPS = exports.projectNameMaps = exports.PROJECT_NAME_MAPS = exports.notifyUserMap = exports.notifyUserList = exports.UsersEnum = exports.botUrls = void 0;
 exports.botUrls = {
     // 生产构建通知群 (技术部)：
     ProdEnvGroupBot: 'https://open.feishu.cn/open-apis/bot/v2/hook/955695b6-a83b-4335-a5a7-58068361d3bf',
@@ -32995,6 +33005,57 @@ exports.botUrls = {
     // 前端群
     FrontEndOldManGroupBot: 'https://open.feishu.cn/open-apis/bot/v2/hook/b0a6dd9b-2602-43bc-b6d8-59935f864362'
 };
+// eslint-disable-next-line no-shadow
+var UsersEnum;
+(function (UsersEnum) {
+    UsersEnum["jiaqiang_wu"] = "jiaqiang_wu";
+    UsersEnum["henry_zheng"] = "henry_zheng";
+    UsersEnum["shenglie_zuo"] = "shenglie_zuo";
+    UsersEnum["gabby_zhou"] = "gabby_zhou";
+})(UsersEnum || (exports.UsersEnum = UsersEnum = {}));
+// 定义需要通知的人（open_id):
+exports.notifyUserList = [
+    // jiaqiang.wu@nextsmartship.com
+    {
+        name: UsersEnum.jiaqiang_wu,
+        email: 'jiaqiang.wu@nextsmartship.com',
+        github_login_id: '24938685',
+        feishu_open_id: 'ou_2b1b9f5f8f4e9d8d3b2a4f3b0b2d3d6d',
+        feishu_union_id: 'on_bf7001b962845c5e09b9e1a9e096ee2f',
+        feishu_user_id: '7bdc9d5b'
+    },
+    // henry.zheng@nextsmartship.com
+    {
+        name: UsersEnum.henry_zheng,
+        email: 'henry.zheng@nextsmartship.com',
+        github_login_id: '143984317',
+        feishu_open_id: 'ou_8a15662f718827f0f9e7cc59618e9e7f',
+        feishu_union_id: 'on_4a732d4de876c205084f2898f25e7f25',
+        feishu_user_id: 'gd72gb22'
+    },
+    // shenglie.zuo@nextsmartship.com
+    {
+        name: UsersEnum.shenglie_zuo,
+        email: 'shenglie.zuo@nextsmartship.com',
+        github_login_id: '',
+        feishu_open_id: 'ou_449abdd622eb240c517da84e566d174e',
+        feishu_union_id: 'on_ff9d72150b3ea8e82f25589ae336056a',
+        feishu_user_id: '3d3a4b36'
+    },
+    // gabby.zhou@nextsmartship.com
+    {
+        name: UsersEnum.gabby_zhou,
+        email: 'gabby.zhou@nextsmartship.com',
+        github_login_id: '',
+        feishu_open_id: 'ou_9914b1620efd8188ec0a5b3e29576231',
+        feishu_union_id: 'on_bfc13931199f04bd3a1bbd5c56f021f6',
+        feishu_user_id: '2c3f6848'
+    }
+];
+exports.notifyUserMap = exports.notifyUserList.reduce((acc, cur) => {
+    acc[cur.name] = cur;
+    return acc;
+}, {});
 exports.PROJECT_NAME_MAPS = {
     WMS_MOBILE_UI: 'wms-mobile-ui',
     WMS_UI: 'wms-ui',
@@ -33305,6 +33366,7 @@ const formatCommitsMsg = (commits) => {
     const nums = groupUrls.NumberList;
     const msgsArr = commits.map((c, i) => {
         const { date: _date, message = '', html_url = '#', author = { login: '', html_url: '' } } = c;
+        // eslint-disable-next-line prefer-template
         const countNum = commits?.length > 1 ? nums[i] + ' ' : '';
         const link = html_url;
         const text = message?.replace?.(/\n\n/g, ' ');
@@ -33323,8 +33385,8 @@ const formatDate = (t, rule = exports.BASE_FORMAT_RULE) => {
     const mineZone = 'Asia/Shanghai';
     console.log('当前时区：', mineZone);
     const formatD = (0, dayjs_1.default)(t).tz(mineZone);
-    const isToday = formatD.isToday();
-    return isToday
+    const _isToday = formatD.isToday();
+    return _isToday
         ? `今天 ${formatD.format(exports.FORMAT_TIME_RULE)}`
         : formatD.format(rule);
 };

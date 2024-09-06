@@ -86,12 +86,23 @@ export default async function push(_content: any) {
     // })
     const currentDayjsTime = getCurrentDayjs(true)
     const displayTime = handleDiffTime(content.run_started_at, currentDayjsTime)
+    const baseNotifyUsers = [
+      groupUrls.notifyUserMap.gabby_zhou,
+      groupUrls.notifyUserMap.shenglie_zuo
+    ]
+    // 查看当前flow属于谁触发的：
+    const targetUserInfo = groupUrls.notifyUserList.find(n => n.email === email)
+    if (targetUserInfo?.feishu_open_id) {
+      baseNotifyUsers.push(targetUserInfo)
+    }
+
     const elements = [
       {
         tag: 'div',
         text: {
           tag: 'lark_md',
-          content: '<at id=all></at>'
+          // content: '<at id=all></at>'
+          content: baseNotifyUsers.map(b => `<at id=${b.feishu_open_id}></at>`)
         }
       },
       {

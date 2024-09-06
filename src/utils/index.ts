@@ -97,6 +97,7 @@ export const formatCommitsMsg = (commits: FormatCommitsItem[]) => {
       html_url = '#',
       author = { login: '', html_url: '' }
     } = c
+    // eslint-disable-next-line prefer-template
     const countNum = commits?.length > 1 ? nums[i] + ' ' : ''
     const link = html_url
     const text = message?.replace?.(/\n\n/g, ' ')
@@ -115,8 +116,8 @@ export const formatDate = (t: string, rule: string = BASE_FORMAT_RULE) => {
   const mineZone = 'Asia/Shanghai'
   console.log('当前时区：', mineZone)
   const formatD = dayjs(t).tz(mineZone)
-  const isToday = formatD.isToday()
-  return isToday
+  const _isToday = formatD.isToday()
+  return _isToday
     ? `今天 ${formatD.format(FORMAT_TIME_RULE)}`
     : formatD.format(rule)
 }
