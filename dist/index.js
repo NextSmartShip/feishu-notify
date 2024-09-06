@@ -32751,13 +32751,19 @@ async function push(_content) {
         if (targetUserInfo?.feishu_open_id) {
             baseNotifyUsers.push(targetUserInfo);
         }
+        for (let _i = 0; _i < baseNotifyUsers.length; _i++) {
+            const b = baseNotifyUsers[_i];
+            console.log('baseNotifyUsers: ', b);
+        }
         const elements = [
             {
                 tag: 'div',
                 text: {
                     tag: 'lark_md',
                     // content: '<at id=all></at>'
-                    content: baseNotifyUsers.map(b => `<at id=${b.feishu_open_id}></at>`)
+                    content: baseNotifyUsers
+                        .map(b => `<at id=${b.feishu_open_id}></at>`)
+                        .join(' ')
                 }
             },
             {

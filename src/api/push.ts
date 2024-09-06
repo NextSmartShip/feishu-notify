@@ -95,6 +95,10 @@ export default async function push(_content: any) {
     if (targetUserInfo?.feishu_open_id) {
       baseNotifyUsers.push(targetUserInfo)
     }
+    for (let _i = 0; _i < baseNotifyUsers.length; _i++) {
+      const b = baseNotifyUsers[_i]
+      console.log('baseNotifyUsers: ', b)
+    }
 
     const elements = [
       {
@@ -102,7 +106,9 @@ export default async function push(_content: any) {
         text: {
           tag: 'lark_md',
           // content: '<at id=all></at>'
-          content: baseNotifyUsers.map(b => `<at id=${b.feishu_open_id}></at>`)
+          content: baseNotifyUsers
+            .map(b => `<at id=${b.feishu_open_id}></at>`)
+            .join(' ')
         }
       },
       {
