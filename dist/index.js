@@ -33277,7 +33277,11 @@ const getActionOptions = async () => {
     let repo = payload?.repository?.name ||
         core.getInput('repo') ||
         github.context.repo.repo;
-    const run_id = github.context.runId || core.getInput('run_id') || Date.now();
+    // 在本地环境中，优先使用传入的 run_id，避免使用 github.context.runId 的默认值
+    const inputRunId = core.getInput('run_id');
+    const run_id = isGitHubActions
+        ? github.context.runId || inputRunId || Date.now()
+        : inputRunId || github.context.runId || Date.now();
     console.log(`运行环境: ${isGitHubActions ? 'GitHub Actions' : '本地环境'}`);
     console.log(`参数信息 - owner: ${owner}, repo: ${repo}, run_id: ${run_id}, environment: ${environment}`);
     // 本地环境：通过 API 获取 workflow 数据
