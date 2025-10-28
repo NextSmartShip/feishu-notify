@@ -21,6 +21,18 @@ inputs:
     description: 'Deployment environment: local, test, or production'
     required: false
     default: 'production'
+  owner:
+    description: 'Repository owner (for local testing, auto-injected in GitHub Actions)'
+    required: false
+    default: ''
+  repo:
+    description: 'Repository name (for local testing, auto-injected in GitHub Actions)'
+    required: false
+    default: ''
+  run_id:
+    description: 'Workflow run ID (for local testing, auto-injected in GitHub Actions)'
+    required: false
+    default: ''
 
 # Define your outputs here.
 outputs:
