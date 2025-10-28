@@ -36,6 +36,10 @@ inputs:
       'Workflow run ID (for local testing, auto-injected in GitHub Actions)'
     required: false
     default: ''
+  status:
+      description: '通知类型（success、failure、all、none），决定是否发送通知'
+      required: false
+      default: 'success'
 
 # Define your outputs here.
 outputs:
