@@ -17,6 +17,10 @@ inputs:
     description: 'github token'
     required: true
     default: ${{ github.token }}
+  environment:
+    description: 'Deployment environment: local, test, or production'
+    required: false
+    default: 'production'
 
 # Define your outputs here.
 outputs:

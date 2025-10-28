@@ -8,8 +8,8 @@ import getWorkFlow from './api/getWorkFlow'
  */
 export async function run(): Promise<void> {
   try {
-    const { owner, repo, run_id } = getActionOptions()
-    const params = { owner, repo, run_id }
+    const { owner, repo, run_id, environment } = getActionOptions()
+    const params = { owner, repo, run_id, environment }
     getWorkFlow(params)
   } catch (error) {
     // Fail the workflow run if an error occurs

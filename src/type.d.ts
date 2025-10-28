@@ -50,3 +50,6 @@ export interface WorkFlowDuration {
     jsbs: number // job数量
   }
 }
+
+// Environment types
+export type EnvironmentType = 'local' | 'test' | 'production'

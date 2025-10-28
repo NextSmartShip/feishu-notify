@@ -1,5 +1,6 @@
 import { fetchFeishuWebhook, fetchJobHtmlUrl, fetchWorkFlowDuration } from '.'
 import * as groupUrls from '../config'
+import type { EnvironmentType } from '../type'
 import {
   formatCommitsMsg,
   formatDisplayTime,
@@ -16,7 +17,10 @@ const canSendMsgToFeishu = (content: any) => {
   return true
 }
 
-export default async function push(_content: any) {
+export default async function push(
+  _content: any,
+  environment: EnvironmentType = 'production'
+) {
   try {
     const content =
       (typeof _content === 'string' ? JSON.parse(_content) : _content) || {}
@@ -260,7 +264,10 @@ export default async function push(_content: any) {
     }
     console.log('发送飞书请求前参数：', JSON.stringify(feishu_body))
 
-    fetchFeishuWebhook(feishu_body, workflowRunSuccess ? isProd : false)
+    // 发送飞书通知
+    // environment: 'local' | 'test' | 'production'
+    // workflowRunSuccess: 工作流是否成功
+    fetchFeishuWebhook(feishu_body, environment, workflowRunSuccess)
   } catch (error) {
     console.log('出错啦:', error)
   }

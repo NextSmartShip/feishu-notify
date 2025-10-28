@@ -1,7 +1,8 @@
 export const botUrls = {
   // 生产构建通知群 (技术部)：
   ProdEnvGroupBot:
-    'https://open.feishu.cn/open-apis/bot/v2/hook/955695b6-a83b-4335-a5a7-58068361d3bf',
+    // 'https://open.feishu.cn/open-apis/bot/v2/hook/955695b6-a83b-4335-a5a7-58068361d3bf',
+    'https://open.feishu.cn/open-apis/bot/v2/hook/83f5973a-2f5d-4d6b-8721-dd917fd42291',
   // test构建通知群
   TestEnvGroupBot:
     'https://open.feishu.cn/open-apis/bot/v2/hook/83f5973a-2f5d-4d6b-8721-dd917fd42291',
