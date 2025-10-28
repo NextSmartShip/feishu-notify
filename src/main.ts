@@ -8,7 +8,7 @@ import getWorkFlow from './api/getWorkFlow'
  */
 export async function run(): Promise<void> {
   try {
-    const { owner, repo, run_id, environment } = getActionOptions()
+    const { owner, repo, run_id, environment } = await getActionOptions()
     const params = { owner, repo, run_id, environment }
     getWorkFlow(params)
   } catch (error) {
