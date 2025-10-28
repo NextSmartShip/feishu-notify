@@ -32523,8 +32523,8 @@ const push_1 = __importDefault(__nccwpck_require__(8021));
 const utils_1 = __nccwpck_require__(6252);
 const _1 = __nccwpck_require__(9343);
 const config_1 = __nccwpck_require__(6373);
-const getWorkFlow = async ({ owner = 'NextSmartShip', repo = '', run_id = -1, environment = config_1.Environment.Production, ...props }) => {
-    if (!repo || run_id === -1)
+const getWorkFlow = async ({ owner = 'NextSmartShip', repo = '', run_id = '-1', environment = config_1.Environment.Production, ...props }) => {
+    if (!repo || run_id === '-1')
         throw new Error('参数丢失，请检查repo和run_id是否同时传入');
     try {
         await (0, utils_1.stop)(3000);
@@ -33268,9 +33268,14 @@ const getActionOptions = () => {
     const environment = core.getInput('environment') || config_1.Environment.Test;
     // getBooleanInput 其实本质上就是一种 parseBoolean(core.getInput('key'))
     const payload = github.context.payload;
-    const owner = payload.organization?.login;
-    const repo = payload.repository?.name;
-    const run_id = github.context.runId;
+    // 优先使用 GitHub Actions 自动注入的值，如果没有则使用手动传入的值（用于本地测试）
+    const owner = payload.organization?.login ||
+        core.getInput('owner') ||
+        github.context.repo.owner;
+    const repo = payload.repository?.name ||
+        core.getInput('repo') ||
+        github.context.repo.repo;
+    const run_id = github.context.runId || core.getInput('run_id') || Date.now();
     console.log(`当前事件(eventName、token、run_id)：${token},run_id: ${run_id}`);
     console.log(`环境参数(environment): ${environment}`);
     if (github.context.eventName === 'push') {

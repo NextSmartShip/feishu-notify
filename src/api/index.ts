@@ -133,7 +133,7 @@ export async function fetchJobHtmlUrl(url: string): Promise<JobType> {
 export async function fetchWorkFlow(params: {
   owner: string
   repo: string
-  run_id: number
+  run_id: number | string
 }): Promise<ResApiFetchCommitsItem[]> {
   return await axios.get(
     `/repos/${params.owner}/${params.repo}/actions/runs/${params.run_id}`

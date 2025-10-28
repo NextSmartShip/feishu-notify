@@ -6,17 +6,17 @@ import { Environment } from '../config'
 interface Props {
   owner?: string
   repo?: string
-  run_id?: number
+  run_id?: number | string
   environment?: string
 }
 const getWorkFlow = async ({
   owner = 'NextSmartShip',
   repo = '',
-  run_id = -1,
+  run_id = '-1',
   environment = Environment.Production,
   ...props
 }: Props) => {
-  if (!repo || run_id === -1)
+  if (!repo || run_id === '-1')
     throw new Error('参数丢失，请检查repo和run_id是否同时传入')
 
   try {

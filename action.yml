@@ -22,15 +22,18 @@ inputs:
     required: false
     default: 'production'
   owner:
-    description: 'Repository owner (for local testing, auto-injected in GitHub Actions)'
+    description:
+      'Repository owner (for local testing, auto-injected in GitHub Actions)'
     required: false
     default: ''
   repo:
-    description: 'Repository name (for local testing, auto-injected in GitHub Actions)'
+    description:
+      'Repository name (for local testing, auto-injected in GitHub Actions)'
     required: false
     default: ''
   run_id:
-    description: 'Workflow run ID (for local testing, auto-injected in GitHub Actions)'
+    description:
+      'Workflow run ID (for local testing, auto-injected in GitHub Actions)'
     required: false
     default: ''
 
