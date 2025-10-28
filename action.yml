@@ -37,9 +37,9 @@ inputs:
     required: false
     default: ''
   status:
-      description: '通知类型（success、failure、all、none），决定是否发送通知'
-      required: false
-      default: 'success'
+    description: '通知类型（success、failure、all、none），决定是否发送通知'
+    required: false
+    default: 'success'
 
 # Define your outputs here.
 outputs:
