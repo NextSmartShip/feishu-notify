@@ -32522,7 +32522,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const push_1 = __importDefault(__nccwpck_require__(8021));
 const utils_1 = __nccwpck_require__(6252);
 const _1 = __nccwpck_require__(9343);
-const getWorkFlow = async ({ owner = 'NextSmartShip', repo = '', run_id = -1, ...props }) => {
+const config_1 = __nccwpck_require__(6373);
+const getWorkFlow = async ({ owner = 'NextSmartShip', repo = '', run_id = -1, environment = config_1.Environment.Production, ...props }) => {
     if (!repo || run_id === -1)
         throw new Error('参数丢失，请检查repo和run_id是否同时传入');
     try {
@@ -32532,7 +32533,7 @@ const getWorkFlow = async ({ owner = 'NextSmartShip', repo = '', run_id = -1, ..
             repo,
             run_id
         });
-        await (0, push_1.default)(payload);
+        await (0, push_1.default)(payload, environment);
     }
     catch (error) {
         console.log('查看请求by错误时：', error);
@@ -32557,26 +32558,54 @@ const request_1 = __importDefault(__nccwpck_require__(9106));
 const config_1 = __nccwpck_require__(6373);
 const utils_1 = __nccwpck_require__(6252);
 /**
- *
- * @param {object} msg 飞书接收到的消息内容
+ * 获取目标飞书群组 URL
+ * @param {string} environment 环境类型: 'local' | 'test' | 'production'
+ * @param {boolean} workflowSuccess 工作流是否成功
+ * @returns {object} 包含 url 和 description 的对象
+ */
+function getTargetBotUrl(environment, workflowSuccess) {
+    // 环境策略映射
+    const envStrategies = {
+        local: {
+            url: config_1.botUrls.FrontEndOldManGroupBot,
+            description: '🧪 本地环境：消息将发送到前端老人群'
+        },
+        test: {
+            url: config_1.botUrls.TestEnvGroupBot,
+            description: '🔧 测试环境：消息将发送到测试群'
+        },
+        production: {
+            url: workflowSuccess
+                ? config_1.botUrls.ProdEnvGroupBot
+                : (0, utils_1.isWeekend)()
+                    ? config_1.botUrls.FrontEndOldManGroupBot
+                    : config_1.botUrls.TestEnvGroupBot,
+            description: workflowSuccess
+                ? '� 生产环境：消息将发送到生产构建通知群'
+                : (0, utils_1.isWeekend)()
+                    ? '📅 生产环境（周末）：消息将发送到前端老人群'
+                    : '🔧 生产环境（工作日）：消息将发送到测试群'
+        }
+    };
+    return envStrategies[environment];
+}
+/**
+ * 发送消息到飞书群组
+ * @param {object} body 飞书接收到的消息内容（卡片消息体）
+ * @param {string} environment 环境类型: 'local' | 'test' | 'production'
+ * @param {boolean} workflowSuccess 工作流是否成功（默认 true）
  * @returns {Promise}
  */
-async function fetchFeishuWebhook(body, toBigGroup = false) {
-    // const baseUrl = botUrls.FrontEndOldManGroupBot
-    const baseUrl = toBigGroup
-        ? config_1.botUrls.TestEnvGroupBot
-        : (0, utils_1.isWeekend)()
-            ? config_1.botUrls.FrontEndOldManGroupBot
-            : config_1.botUrls.TestEnvGroupBot;
-    const options = {
+async function fetchFeishuWebhook(body, environment = 'production', workflowSuccess = true) {
+    const { url, description } = getTargetBotUrl(environment, workflowSuccess);
+    console.log(description);
+    const requestOptions = {
         method: 'POST',
-        url: baseUrl,
-        // url: botUrls.FrontEndOldManGroupBot,
+        url,
         data: body,
-        json: true // Automatically stringifies the body to JSON
+        json: true
     };
-    const result = await (0, request_1.default)(options);
-    return result;
+    return await (0, request_1.default)(requestOptions);
 }
 exports.fetchFeishuWebhook = fetchFeishuWebhook;
 /**
@@ -32680,7 +32709,7 @@ const canSendMsgToFeishu = (content) => {
         return false;
     return true;
 };
-async function push(_content) {
+async function push(_content, environment = 'production') {
     try {
         const content = (typeof _content === 'string' ? JSON.parse(_content) : _content) || {};
         const run_id = content.id;
@@ -32914,7 +32943,10 @@ async function push(_content) {
             }
         };
         console.log('发送飞书请求前参数：', JSON.stringify(feishu_body));
-        (0, _1.fetchFeishuWebhook)(feishu_body, workflowRunSuccess ? isProd : false);
+        // 发送飞书通知
+        // environment: 'local' | 'test' | 'production'
+        // workflowRunSuccess: 工作流是否成功
+        (0, _1.fetchFeishuWebhook)(feishu_body, environment, workflowRunSuccess);
     }
     catch (error) {
         console.log('出错啦:', error);
@@ -33002,10 +33034,22 @@ exports["default"] = axios;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.NumberList = exports.BASE_PARAMS = exports.headers = exports.FailImgKey = exports.SuccessImgKey = exports.PROJECT_URL_MAPS = exports.PROJECT_TEST_URL_MAPS = exports.projectNameMaps = exports.PROJECT_NAME_MAPS = exports.notifyUserMap = exports.notifyUserList = exports.UsersEnum = exports.botUrls = void 0;
+exports.NumberList = exports.BASE_PARAMS = exports.headers = exports.FailImgKey = exports.SuccessImgKey = exports.PROJECT_URL_MAPS = exports.PROJECT_TEST_URL_MAPS = exports.projectNameMaps = exports.PROJECT_NAME_MAPS = exports.notifyUserMap = exports.notifyUserList = exports.UsersEnum = exports.botUrls = exports.Environment = void 0;
+/**
+ * 环境类型枚举
+ */
+// eslint-disable-next-line no-shadow
+var Environment;
+(function (Environment) {
+    Environment["Local"] = "local";
+    Environment["Test"] = "test";
+    Environment["Production"] = "production";
+})(Environment || (exports.Environment = Environment = {}));
 exports.botUrls = {
     // 生产构建通知群 (技术部)：
-    ProdEnvGroupBot: 'https://open.feishu.cn/open-apis/bot/v2/hook/955695b6-a83b-4335-a5a7-58068361d3bf',
+    ProdEnvGroupBot: 
+    // 'https://open.feishu.cn/open-apis/bot/v2/hook/955695b6-a83b-4335-a5a7-58068361d3bf',
+    'https://open.feishu.cn/open-apis/bot/v2/hook/83f5973a-2f5d-4d6b-8721-dd917fd42291',
     // test构建通知群
     TestEnvGroupBot: 'https://open.feishu.cn/open-apis/bot/v2/hook/83f5973a-2f5d-4d6b-8721-dd917fd42291',
     // 前端群
@@ -33170,8 +33214,8 @@ const getWorkFlow_1 = __importDefault(__nccwpck_require__(9958));
  */
 async function run() {
     try {
-        const { owner, repo, run_id } = (0, get_action_options_1.default)();
-        const params = { owner, repo, run_id };
+        const { owner, repo, run_id, environment } = (0, get_action_options_1.default)();
+        const params = { owner, repo, run_id, environment };
         (0, getWorkFlow_1.default)(params);
     }
     catch (error) {
@@ -33216,16 +33260,19 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(2186));
 const github = __importStar(__nccwpck_require__(5438));
+const config_1 = __nccwpck_require__(6373);
 // import type { UserDefinedOptions } from '../type'
 const getActionOptions = () => {
     const token = core.getInput('token');
     const username = core.getInput('username');
+    const environment = core.getInput('environment') || config_1.Environment.Test;
     // getBooleanInput 其实本质上就是一种 parseBoolean(core.getInput('key'))
     const payload = github.context.payload;
     const owner = payload.organization?.login;
     const repo = payload.repository?.name;
     const run_id = github.context.runId;
     console.log(`当前事件(eventName、token、run_id)：${token},run_id: ${run_id}`);
+    console.log(`环境参数(environment): ${environment}`);
     if (github.context.eventName === 'push') {
         const pushPayload = github.context.payload;
         core.info(`The head commit is: ${pushPayload.head_commit}`);
@@ -33233,6 +33280,7 @@ const getActionOptions = () => {
     return {
         token,
         username,
+        environment,
         payload,
         owner,
         repo,

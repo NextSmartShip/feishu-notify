@@ -1,3 +1,13 @@
+/**
+ * 环境类型枚举
+ */
+// eslint-disable-next-line no-shadow
+export enum Environment {
+  Local = 'local',
+  Test = 'test',
+  Production = 'production'
+}
+
 export const botUrls = {
   // 生产构建通知群 (技术部)：
   ProdEnvGroupBot:

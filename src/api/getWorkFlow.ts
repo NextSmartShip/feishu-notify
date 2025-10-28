@@ -1,6 +1,7 @@
 import push from './push'
 import { stop } from '../utils'
 import { fetchWorkFlow } from '.'
+import { Environment } from '../config'
 
 interface Props {
   owner?: string
@@ -12,7 +13,7 @@ const getWorkFlow = async ({
   owner = 'NextSmartShip',
   repo = '',
   run_id = -1,
-  environment = 'production',
+  environment = Environment.Production,
   ...props
 }: Props) => {
   if (!repo || run_id === -1)
@@ -25,7 +26,7 @@ const getWorkFlow = async ({
       repo,
       run_id
     })
-    await push(payload, environment)
+    await push(payload, environment as Environment)
   } catch (error) {
     console.log('查看请求by错误时：', error)
   }

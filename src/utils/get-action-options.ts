@@ -1,12 +1,13 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
 import type { PushEvent } from '@octokit/webhooks-definitions/schema'
+import { Environment } from '../config'
 // import type { UserDefinedOptions } from '../type'
 
 const getActionOptions = () => {
   const token = core.getInput('token')
   const username = core.getInput('username')
-  const environment = core.getInput('environment') || 'test'
+  const environment = core.getInput('environment') || Environment.Test
   // getBooleanInput 其实本质上就是一种 parseBoolean(core.getInput('key'))
   const payload = github.context.payload as PushEvent
   const owner = payload.organization?.login
