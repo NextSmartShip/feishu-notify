@@ -19,7 +19,8 @@ const canSendMsgToFeishu = (content: any) => {
 
 export default async function push(
   _content: any,
-  environment: EnvironmentType = 'production'
+  environment: EnvironmentType = 'production',
+  status?: string
 ) {
   try {
     const content =
@@ -37,7 +38,8 @@ export default async function push(
     const isProd = content.event === 'release' || branch === 'master'
     console.log('by Push...: ', content)
     const owner = repository?.owner?.login
-    const workflowRunSuccess = canSendMsgToFeishu(content)
+    const workflowRunSuccess =
+      status === 'success' && canSendMsgToFeishu(content)
     // 构建的详情页 (当workflow_run不存在时，html_url无法找到)：
     const jobRes = await fetchJobHtmlUrl(content.jobs_url)
     const { jobs = [] } = jobRes

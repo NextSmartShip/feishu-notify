@@ -8,12 +8,14 @@ interface Props {
   repo?: string
   run_id?: number | string
   environment?: string
+  status?: string
 }
 const getWorkFlow = async ({
   owner = 'NextSmartShip',
   repo = '',
   run_id = '-1',
   environment = Environment.Production,
+  status,
   ...props
 }: Props) => {
   if (!repo || run_id === '-1')
@@ -26,7 +28,7 @@ const getWorkFlow = async ({
       repo,
       run_id
     })
-    await push(payload, environment as Environment)
+    await push(payload, environment as Environment, status)
   } catch (error) {
     console.log('查看请求by错误时：', error)
   }

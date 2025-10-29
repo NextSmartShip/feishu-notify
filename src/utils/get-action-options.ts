@@ -8,6 +8,7 @@ const getActionOptions = async () => {
   const token = core.getInput('token')
   const username = core.getInput('username')
   const environment = core.getInput('environment') || Environment.Test
+  const status = core.getInput('status')
 
   // 判断是否在 GitHub Actions 环境中
   const isGitHubActions = !!github.context.payload.repository
@@ -69,6 +70,7 @@ const getActionOptions = async () => {
     token,
     username,
     environment,
+    status,
     payload,
     owner,
     repo,

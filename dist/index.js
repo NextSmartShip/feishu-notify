@@ -32523,7 +32523,7 @@ const push_1 = __importDefault(__nccwpck_require__(8021));
 const utils_1 = __nccwpck_require__(6252);
 const _1 = __nccwpck_require__(9343);
 const config_1 = __nccwpck_require__(6373);
-const getWorkFlow = async ({ owner = 'NextSmartShip', repo = '', run_id = '-1', environment = config_1.Environment.Production, ...props }) => {
+const getWorkFlow = async ({ owner = 'NextSmartShip', repo = '', run_id = '-1', environment = config_1.Environment.Production, status, ...props }) => {
     if (!repo || run_id === '-1')
         throw new Error('参数丢失，请检查repo和run_id是否同时传入');
     try {
@@ -32533,7 +32533,7 @@ const getWorkFlow = async ({ owner = 'NextSmartShip', repo = '', run_id = '-1', 
             repo,
             run_id
         });
-        await (0, push_1.default)(payload, environment);
+        await (0, push_1.default)(payload, environment, status);
     }
     catch (error) {
         console.log('查看请求by错误时：', error);
@@ -32709,7 +32709,7 @@ const canSendMsgToFeishu = (content) => {
         return false;
     return true;
 };
-async function push(_content, environment = 'production') {
+async function push(_content, environment = 'production', status) {
     try {
         const content = (typeof _content === 'string' ? JSON.parse(_content) : _content) || {};
         const run_id = content.id;
@@ -32725,7 +32725,7 @@ async function push(_content, environment = 'production') {
         const isProd = content.event === 'release' || branch === 'master';
         console.log('by Push...: ', content);
         const owner = repository?.owner?.login;
-        const workflowRunSuccess = canSendMsgToFeishu(content);
+        const workflowRunSuccess = status === 'success' && canSendMsgToFeishu(content);
         // 构建的详情页 (当workflow_run不存在时，html_url无法找到)：
         const jobRes = await (0, _1.fetchJobHtmlUrl)(content.jobs_url);
         const { jobs = [] } = jobRes;
@@ -33214,8 +33214,8 @@ const getWorkFlow_1 = __importDefault(__nccwpck_require__(9958));
  */
 async function run() {
     try {
-        const { owner, repo, run_id, environment } = await (0, get_action_options_1.default)();
-        const params = { owner, repo, run_id, environment };
+        const { owner, repo, run_id, environment, status } = await (0, get_action_options_1.default)();
+        const params = { owner, repo, run_id, environment, status };
         (0, getWorkFlow_1.default)(params);
     }
     catch (error) {
@@ -33266,6 +33266,7 @@ const getActionOptions = async () => {
     const token = core.getInput('token');
     const username = core.getInput('username');
     const environment = core.getInput('environment') || config_1.Environment.Test;
+    const status = core.getInput('status');
     // 判断是否在 GitHub Actions 环境中
     const isGitHubActions = !!github.context.payload.repository;
     let payload = isGitHubActions ? github.context.payload : null;
@@ -33312,6 +33313,7 @@ const getActionOptions = async () => {
         token,
         username,
         environment,
+        status,
         payload,
         owner,
         repo,
