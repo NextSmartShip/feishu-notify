@@ -83,13 +83,6 @@ export default async function push(
     const baseMsg = `\n* [${buildDetailMsg}](${buildDetailPageUrl})`
     const commitMsgs = commits?.length ? formatCommitsMsg(commits) : baseMsg
     console.log('commitMsgs: ', commitMsgs)
-
-    // duration:
-    // const durationInfo = await fetchWorkFlowDuration({
-    //   owner,
-    //   repo: repository.name,
-    //   run_id
-    // })
     const currentDayjsTime = getCurrentDayjs(true)
     const displayTime = handleDiffTime(content.run_started_at, currentDayjsTime)
     const baseNotifyUsers = [

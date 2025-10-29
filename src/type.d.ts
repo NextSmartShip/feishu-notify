@@ -11,6 +11,13 @@ export type ReqPullCommitsByShaParams_Type = CommitsType
 export type ReqFetchCommitParams_Type = CommitsType
 export type PullCommitsByShaParams_keys_Type = CommitKeysType
 
+// ·/repos/{owner}/{repo}/actions/runs· 返回值类型
+export interface ResApiFetchWorkFlowItem {
+  id: number
+  status: WorkFlowStatus
+  conclusion: WorkFlowConclusion
+}
+
 export interface ResApiFetchCommitsItem {
   commit: {
     message: string
@@ -53,3 +60,19 @@ export interface WorkFlowDuration {
 
 // Environment types
 export type EnvironmentType = 'local' | 'test' | 'production'
+
+// WorkFlow types
+export type WorkFlowStatus =
+  | 'queued'
+  | 'in_progress'
+  | 'completed'
+  | 'requested'
+  | 'waiting'
+export type WorkFlowConclusion =
+  | 'success'
+  | 'failure'
+  | 'neutral'
+  | 'cancelled'
+  | 'skipped'
+  | 'timed_out'
+  | 'action_required'

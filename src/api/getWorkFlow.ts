@@ -22,12 +22,22 @@ const getWorkFlow = async ({
     throw new Error('参数丢失，请检查repo和run_id是否同时传入')
 
   try {
-    await stop(3000)
-    const payload = await fetchWorkFlow({
+    let payload = await fetchWorkFlow({
       owner,
       repo,
       run_id
     })
+
+    console.log('当前状态：', payload.status, payload.conclusion)
+    while (payload.status !== 'completed') {
+      await stop(3000)
+      payload = await fetchWorkFlow({
+        owner,
+        repo,
+        run_id
+      })
+    }
+
     await push(payload, environment as Environment, status)
   } catch (error) {
     console.log('查看请求by错误时：', error)

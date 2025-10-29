@@ -32527,12 +32527,20 @@ const getWorkFlow = async ({ owner = 'NextSmartShip', repo = '', run_id = '-1', 
     if (!repo || run_id === '-1')
         throw new Error('参数丢失，请检查repo和run_id是否同时传入');
     try {
-        await (0, utils_1.stop)(3000);
-        const payload = await (0, _1.fetchWorkFlow)({
+        let payload = await (0, _1.fetchWorkFlow)({
             owner,
             repo,
             run_id
         });
+        console.log('当前状态：', payload.status, payload.conclusion);
+        while (payload.status !== 'completed') {
+            await (0, utils_1.stop)(3000);
+            payload = await (0, _1.fetchWorkFlow)({
+                owner,
+                repo,
+                run_id
+            });
+        }
         await (0, push_1.default)(payload, environment, status);
     }
     catch (error) {
@@ -32763,12 +32771,6 @@ async function push(_content, environment = 'production', status) {
         const baseMsg = `\n* [${buildDetailMsg}](${buildDetailPageUrl})`;
         const commitMsgs = commits?.length ? (0, utils_1.formatCommitsMsg)(commits) : baseMsg;
         console.log('commitMsgs: ', commitMsgs);
-        // duration:
-        // const durationInfo = await fetchWorkFlowDuration({
-        //   owner,
-        //   repo: repository.name,
-        //   run_id
-        // })
         const currentDayjsTime = (0, utils_1.getCurrentDayjs)(true);
         const displayTime = (0, utils_1.handleDiffTime)(content.run_started_at, currentDayjsTime);
         const baseNotifyUsers = [
