@@ -1,27 +1,9 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-echo "🔍 Running pre-commit checks..."
-
 # 格式化代码
 echo "📝 Formatting code..."
-npm run format:write
-
-# 运行 Lint
-echo "🔍 Running linter..."
-npm run lint
-
-# 运行测试
-echo "🧪 Running tests..."
-npm run test
-
-# 生成覆盖率徽章
-echo "📊 Generating coverage badge..."
-npm run coverage
-
-# 重新构建 dist
-echo "📦 Building dist..."
-npm run package
+npm run all
 
 # 自动添加构建后的 dist 目录到 git
 echo "✅ Adding dist to git..."

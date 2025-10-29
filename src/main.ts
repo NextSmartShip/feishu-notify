@@ -1,6 +1,6 @@
 import * as core from '@actions/core'
-import getActionOptions from './utils/get-action-options'
 import getWorkFlow from './api/getWorkFlow'
+import getActionOptions from './utils/get-action-options'
 
 /**
  * The main function for the action.
