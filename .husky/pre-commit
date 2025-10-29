@@ -1,12 +1,1 @@
-#!/usr/bin/env sh
-. "$(dirname -- "$0")/_/husky.sh"
-
-# 格式化代码
-echo "📝 Formatting code..."
-npm run all
-
-# 自动添加构建后的 dist 目录到 git
-echo "✅ Adding dist to git..."
-git add dist/
-
-echo "✨ Pre-commit checks completed!"
+npm test

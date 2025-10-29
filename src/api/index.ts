@@ -1,16 +1,15 @@
-import { BASE_PARAMS, botUrls } from '../config'
+import { BASE_PARAMS, botUrls, EnvironmentEnum } from '../config';
 import type {
   CommitKeysItemType,
-  EnvironmentType,
   JobType,
   ReqFetchCommitParams_Type,
   ReqPullCommitsByShaParams_Type,
   ResApiFetchCommitsItem,
   ResApiFetchWorkFlowItem,
   WorkFlowDuration
-} from '../type'
-import { isWeekend } from '../utils'
-import axios from './request'
+} from '../type';
+import { isWeekend } from '../utils';
+import axios from './request';
 
 /**
  * 获取目标飞书群组 URL
@@ -19,23 +18,23 @@ import axios from './request'
  * @returns {object} 包含 url 和 description 的对象
  */
 function getTargetBotUrl(
-  environment: EnvironmentType,
+  environment: EnvironmentEnum,
   workflowSuccess: boolean
 ): { url: string; description: string } {
   // 环境策略映射
   const envStrategies: Record<
-    EnvironmentType,
+    EnvironmentEnum,
     { url: string; description: string }
   > = {
-    local: {
+    [EnvironmentEnum.LOCAL]: {
       url: botUrls.FrontEndOldManGroupBot,
       description: '🧪 本地环境：消息将发送到前端老人群'
     },
-    test: {
+    [EnvironmentEnum.TEST]: {
       url: botUrls.TestEnvGroupBot,
       description: '🔧 测试环境：消息将发送到测试群'
     },
-    production: {
+    [EnvironmentEnum.PRODUCTION]: {
       url: workflowSuccess
         ? botUrls.ProdEnvGroupBot
         : isWeekend()
@@ -47,9 +46,9 @@ function getTargetBotUrl(
           ? '📅 生产环境（周末）：消息将发送到前端老人群'
           : '🔧 生产环境（工作日）：消息将发送到测试群'
     }
-  }
+  };
 
-  return envStrategies[environment]
+  return envStrategies[environment];
 }
 
 /**
@@ -61,21 +60,21 @@ function getTargetBotUrl(
  */
 export function fetchFeishuWebhook(
   body: any,
-  environment: EnvironmentType = 'production',
+  environment: EnvironmentEnum = EnvironmentEnum.PRODUCTION,
   workflowSuccess = true
 ): Promise<any> {
-  const { url, description } = getTargetBotUrl(environment, workflowSuccess)
+  const { url, description } = getTargetBotUrl(environment, workflowSuccess);
 
-  console.log(description)
+  console.log(description);
 
   const requestOptions = {
     method: 'POST',
     url,
     data: body,
     json: true
-  }
+  };
 
-  return axios(requestOptions)
+  return axios(requestOptions);
 }
 /**
  *
@@ -89,19 +88,19 @@ export async function fetchCommitsByCurrentCommitSha(
   body: ReqPullCommitsByShaParams_Type
 ): Promise<CommitKeysItemType[]> {
   try {
-    const baseUrl = `/repos/${body.owner}/${body.repo}/commits/${body.commit_sha}/pulls`
-    const url = baseUrl
+    const baseUrl = `/repos/${body.owner}/${body.repo}/commits/${body.commit_sha}/pulls`;
+    const url = baseUrl;
     const params = {
       method: 'GET',
       url,
       ...BASE_PARAMS
-    }
+    };
 
     // 将params.url转为json请求数据:
-    return await axios(params)
+    return await axios(params);
   } catch (error) {
-    console.log('emit by getCommitsByCurrentCommitSha error: ', error)
-    return []
+    console.log('emit by getCommitsByCurrentCommitSha error: ', error);
+    return [];
   }
 }
 export function fetchCommits(url: string): Promise<ResApiFetchCommitsItem[]> {
@@ -109,37 +108,37 @@ export function fetchCommits(url: string): Promise<ResApiFetchCommitsItem[]> {
     method: 'GET',
     url,
     ...BASE_PARAMS
-  })
+  });
 }
 export async function fetchCommit(
   body: ReqFetchCommitParams_Type
 ): Promise<ResApiFetchCommitsItem[]> {
-  const url = `/repos/${body.owner}/${body.repo}/commits/${body.commit_sha}`
+  const url = `/repos/${body.owner}/${body.repo}/commits/${body.commit_sha}`;
   const result = await axios<any, Promise<ResApiFetchCommitsItem>>({
     method: 'GET',
     url,
     ...BASE_PARAMS
-  })
-  return [result]
+  });
+  return [result];
 }
 
 export function fetchWorkFlow(params: {
-  owner: string
-  repo: string
-  run_id: number | string
+  owner: string;
+  repo: string;
+  run_id: number | string;
 }): Promise<ResApiFetchWorkFlowItem> {
   return axios.get(
     `/repos/${params.owner}/${params.repo}/actions/runs/${params.run_id}`
-  )
+  );
 }
 export function fetchWorkFlowDuration(params: {
-  owner: string
-  repo: string
-  run_id: number
+  owner: string;
+  repo: string;
+  run_id: number;
 }): Promise<WorkFlowDuration> {
   return axios.get(
     `/repos/${params.owner}/${params.repo}/actions/runs/${params.run_id}/timing`
-  )
+  );
 }
 
 export function fetchJobHtmlUrl(url: string): Promise<JobType> {
@@ -147,14 +146,14 @@ export function fetchJobHtmlUrl(url: string): Promise<JobType> {
     method: 'GET',
     url,
     ...BASE_PARAMS
-  })
+  });
 }
 export function fetchJobs(params: {
-  owner: string
-  repo: string
-  run_id: string | number
+  owner: string;
+  repo: string;
+  run_id: string | number;
 }): Promise<JobType> {
   return axios.get(
     `/repos/${params.owner}/${params.repo}/actions/runs/${params.run_id}/jobs`
-  )
+  );
 }

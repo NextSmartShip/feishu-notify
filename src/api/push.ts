@@ -1,74 +1,73 @@
-import { fetchFeishuWebhook, fetchJobHtmlUrl } from '.'
-import * as groupUrls from '../config'
-import type { EnvironmentType } from '../type'
+import { fetchFeishuWebhook, fetchJobHtmlUrl } from '.';
+import * as groupUrls from '../config';
 import {
   formatCommitsMsg,
   getCommits,
   getCurrentDayjs,
   getPreviewUrl,
   handleDiffTime
-} from '../utils'
+} from '../utils';
 
-type BodyType = { payload: Record<string, any> }
+type BodyType = { payload: Record<string, any> };
 
 const canSendMsgToFeishu = (content: any) => {
-  if (!content || !content.repository || !content.jobs_url) return false
-  return true
-}
+  if (!content || !content.repository || !content.jobs_url) return false;
+  return true;
+};
 
 export default async function push(
   _content: any,
-  environment: EnvironmentType = 'production',
+  environment = groupUrls.EnvironmentEnum.PRODUCTION,
   status?: string
 ) {
   try {
     const content =
-      (typeof _content === 'string' ? JSON.parse(_content) : _content) || {}
-    const run_id = content.id
+      (typeof _content === 'string' ? JSON.parse(_content) : _content) || {};
+    const run_id = content.id;
     // 事件钩子：
     // 最新一条提交对象：
-    const head_commit = content.head_commit
+    const head_commit = content.head_commit;
     // 最新一条提交id：
-    const head_sha = content.head_sha
+    const head_sha = content.head_sha;
     // 构建的分支：
-    const branch = content.head_branch
-    const repository = content?.repository
+    const branch = content.head_branch;
+    const repository = content?.repository;
     // 此次action是Prod还是Test:
-    const isProd = content.event === 'release' || branch === 'master'
-    console.log('by Push...: ', content)
-    const owner = repository?.owner?.login
+    const isProd = content.event === 'release' || branch === 'master';
+    console.log('by Push...: ', content);
+    const owner = repository?.owner?.login;
     const workflowRunSuccess =
-      status === 'success' && canSendMsgToFeishu(content)
+      status === 'success' && canSendMsgToFeishu(content);
     // 构建的详情页 (当workflow_run不存在时，html_url无法找到)：
-    const jobRes = await fetchJobHtmlUrl(content.jobs_url)
-    const { jobs = [] } = jobRes
+    const jobRes = await fetchJobHtmlUrl(content.jobs_url);
+    const { jobs = [] } = jobRes;
 
-    const buildDetailPageUrl = jobs?.[0]?.html_url || content.html_url
+    const buildDetailPageUrl = jobs?.[0]?.html_url || content.html_url;
     // 构建的title：
-    const buildDetailMsg = head_commit?.message?.replace?.(/^.*?\n\n/, '')
+    const buildDetailMsg = head_commit?.message?.replace?.(/^.*?\n\n/, '');
 
     // 项目名称：
-    const cnName = groupUrls.projectNameMaps[repository?.name] || 'NSS-项目'
+    const cnName = groupUrls.projectNameMaps[repository?.name] || 'NSS-项目';
     // // 当前hook操作人
-    const operator = content?.triggering_actor?.login
+    const operator = content?.triggering_actor?.login;
     // // 当前hook操作人
-    const operatorHtmlUrl = content?.triggering_actor?.html_url
+    const operatorHtmlUrl = content?.triggering_actor?.html_url;
     // 代码推送人-姓名：
-    const name = head_commit?.author?.name
+    const name = head_commit?.author?.name;
     // 代码推送人-邮箱：
-    const email = head_commit?.author?.email
+    const email = head_commit?.author?.email;
     // 构建环境：
-    const buildEnv = isProd ? '生产环境' : '测试环境'
+    const buildEnv = isProd ? '生产环境' : '测试环境';
 
     const commits = await getCommits({
       owner: repository?.owner?.login,
       repo: repository?.name,
       commit_sha: head_sha
-    })
+    });
 
     const config = {
       wide_screen_mode: true
-    }
+    };
     const header = {
       template: workflowRunSuccess ? (isProd ? 'green' : 'orange') : 'red',
       title: {
@@ -77,25 +76,30 @@ export default async function push(
           workflowRunSuccess ? '成功' : '失败'
         }`
       }
-    }
-    const previewUrl = getPreviewUrl(isProd, repository?.name) || '#'
-    const baseMsg = `\n* [${buildDetailMsg}](${buildDetailPageUrl})`
-    const commitMsgs = commits?.length ? formatCommitsMsg(commits) : baseMsg
-    console.log('commitMsgs: ', commitMsgs)
-    const currentDayjsTime = getCurrentDayjs(true)
-    const displayTime = handleDiffTime(content.run_started_at, currentDayjsTime)
+    };
+    const previewUrl = getPreviewUrl(isProd, repository?.name) || '#';
+    const baseMsg = `\n* [${buildDetailMsg}](${buildDetailPageUrl})`;
+    const commitMsgs = commits?.length ? formatCommitsMsg(commits) : baseMsg;
+    console.log('commitMsgs: ', commitMsgs);
+    const currentDayjsTime = getCurrentDayjs(true);
+    const displayTime = handleDiffTime(
+      content.run_started_at,
+      currentDayjsTime
+    );
     const baseNotifyUsers = [
       groupUrls.notifyUserMap.gabby_zhou,
       groupUrls.notifyUserMap.shenglie_zuo
-    ]
+    ];
     // 查看当前flow属于谁触发的：
-    const targetUserInfo = groupUrls.notifyUserList.find(n => n.email === email)
+    const targetUserInfo = groupUrls.notifyUserList.find(
+      n => n.email === email
+    );
     if (targetUserInfo?.feishu_open_id) {
-      baseNotifyUsers.push(targetUserInfo)
+      baseNotifyUsers.push(targetUserInfo);
     }
     for (let _i = 0; _i < baseNotifyUsers.length; _i++) {
-      const b = baseNotifyUsers[_i]
-      console.log('baseNotifyUsers: ', b)
+      const b = baseNotifyUsers[_i];
+      console.log('baseNotifyUsers: ', b);
     }
 
     const elements = [
@@ -225,7 +229,7 @@ export default async function push(
           }
         ]
       }
-    ]
+    ];
     if (previewUrl && previewUrl !== '#') {
       elements.push({
         tag: 'column_set',
@@ -246,7 +250,7 @@ export default async function push(
             ]
           }
         ]
-      })
+      });
     }
     const feishu_body = {
       msg_type: 'interactive',
@@ -255,14 +259,14 @@ export default async function push(
         header,
         elements
       }
-    }
-    console.log('发送飞书请求前参数：', JSON.stringify(feishu_body))
+    };
+    console.log('发送飞书请求前参数：', JSON.stringify(feishu_body));
 
     // 发送飞书通知
     // environment: 'local' | 'test' | 'production'
     // workflowRunSuccess: 工作流是否成功
-    fetchFeishuWebhook(feishu_body, environment, workflowRunSuccess)
+    fetchFeishuWebhook(feishu_body, environment, workflowRunSuccess);
   } catch (error) {
-    console.log('出错啦:', error)
+    console.log('出错啦:', error);
   }
 }

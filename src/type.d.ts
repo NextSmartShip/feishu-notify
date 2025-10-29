@@ -2,67 +2,64 @@
 // * @param {String} body.repo
 // * @param {String} body.commit_sha
 export interface CommitsType {
-  owner: string
-  repo: string
-  commit_sha: string
+  owner: string;
+  repo: string;
+  commit_sha: string;
 }
-export type CommitKeysType = keyof CommitsType
-export type ReqPullCommitsByShaParams_Type = CommitsType
-export type ReqFetchCommitParams_Type = CommitsType
-export type PullCommitsByShaParams_keys_Type = CommitKeysType
+export type CommitKeysType = keyof CommitsType;
+export type ReqPullCommitsByShaParams_Type = CommitsType;
+export type ReqFetchCommitParams_Type = CommitsType;
+export type PullCommitsByShaParams_keys_Type = CommitKeysType;
 
 // ·/repos/{owner}/{repo}/actions/runs· 返回值类型
 export interface ResApiFetchWorkFlowItem {
-  id: number
-  status: WorkFlowStatus
-  conclusion: WorkFlowConclusion
+  id: number;
+  status: WorkFlowStatus;
+  conclusion: WorkFlowConclusion;
 }
 
 export interface ResApiFetchCommitsItem {
   commit: {
-    message: string
-    author: { name: string; email: string; date: string }
-  }
-  html_url: string
-  author: { login: string; html_url: string }
+    message: string;
+    author: { name: string; email: string; date: string };
+  };
+  html_url: string;
+  author: { login: string; html_url: string };
 }
 export interface FormatCommitsItem {
-  date: string
-  message: string
-  html_url: string
-  author: { login: string; html_url: string }
+  date: string;
+  message: string;
+  html_url: string;
+  author: { login: string; html_url: string };
 }
 export type CommitKeysItemType = {
   // 分支名
-  title: string
-  commits_url: string
-}
+  title: string;
+  commits_url: string;
+};
 
 // Jobs:
 export interface JobItemType {
-  head_sha: string
-  html_url: string
-  created_at: string
-  completed_at: string
-  name: string
-  status: WorkFlowStatus
-  conclusion: WorkFlowConclusion
+  head_sha: string;
+  html_url: string;
+  created_at: string;
+  completed_at: string;
+  name: string;
+  status: WorkFlowStatus;
+  conclusion: WorkFlowConclusion;
 }
 
 export interface JobType {
-  total_count: number
-  jobs: JobItemType[]
+  total_count: number;
+  jobs: JobItemType[];
 }
 export interface WorkFlowDuration {
-  run_duration_ms: number
+  run_duration_ms: number;
   [key: string]: {
-    total_ms: number
-    jsbs: number // job数量
-  }
+    total_ms: number;
+    jsbs: number; // job数量
+  };
 }
-
-// Environment types
-export type EnvironmentType = 'local' | 'test' | 'production'
 
 // WorkFlow types
 export type WorkFlowStatus =
@@ -70,7 +67,7 @@ export type WorkFlowStatus =
   | 'in_progress'
   | 'completed'
   | 'requested'
-  | 'waiting'
+  | 'waiting';
 export type WorkFlowConclusion =
   | 'success'
   | 'failure'
@@ -78,4 +75,4 @@ export type WorkFlowConclusion =
   | 'cancelled'
   | 'skipped'
   | 'timed_out'
-  | 'action_required'
+  | 'action_required';
