@@ -47,6 +47,11 @@ function getTargetBotUrl(
           : '🔧 生产环境（工作日）：消息将发送到测试群'
     }
   };
+  console.log(
+    '获取飞书机器人url信息：',
+    JSON.stringify(envStrategies),
+    environment
+  );
 
   return envStrategies[environment];
 }
