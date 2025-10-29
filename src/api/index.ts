@@ -1,4 +1,3 @@
-import axios from 'axios'
 import { BASE_PARAMS, botUrls } from '../config'
 import type {
   CommitKeysItemType,
@@ -11,6 +10,7 @@ import type {
   WorkFlowDuration
 } from '../type'
 import { isWeekend } from '../utils'
+import axios from './request'
 
 /**
  * 获取目标飞书群组 URL

@@ -32567,9 +32567,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.fetchJobs = exports.fetchJobHtmlUrl = exports.fetchWorkFlowDuration = exports.fetchWorkFlow = exports.fetchCommit = exports.fetchCommits = exports.fetchCommitsByCurrentCommitSha = exports.fetchFeishuWebhook = void 0;
-const axios_1 = __importDefault(__nccwpck_require__(8757));
 const config_1 = __nccwpck_require__(6373);
 const utils_1 = __nccwpck_require__(6252);
+const request_1 = __importDefault(__nccwpck_require__(9106));
 /**
  * 获取目标飞书群组 URL
  * @param {string} environment 环境类型: 'local' | 'test' | 'production'
@@ -32618,7 +32618,7 @@ function fetchFeishuWebhook(body, environment = 'production', workflowSuccess = 
         data: body,
         json: true
     };
-    return (0, axios_1.default)(requestOptions);
+    return (0, request_1.default)(requestOptions);
 }
 exports.fetchFeishuWebhook = fetchFeishuWebhook;
 /**
@@ -32639,7 +32639,7 @@ async function fetchCommitsByCurrentCommitSha(body) {
             ...config_1.BASE_PARAMS
         };
         // 将params.url转为json请求数据:
-        return await (0, axios_1.default)(params);
+        return await (0, request_1.default)(params);
     }
     catch (error) {
         console.log('emit by getCommitsByCurrentCommitSha error: ', error);
@@ -32648,7 +32648,7 @@ async function fetchCommitsByCurrentCommitSha(body) {
 }
 exports.fetchCommitsByCurrentCommitSha = fetchCommitsByCurrentCommitSha;
 function fetchCommits(url) {
-    return (0, axios_1.default)({
+    return (0, request_1.default)({
         method: 'GET',
         url,
         ...config_1.BASE_PARAMS
@@ -32657,7 +32657,7 @@ function fetchCommits(url) {
 exports.fetchCommits = fetchCommits;
 async function fetchCommit(body) {
     const url = `/repos/${body.owner}/${body.repo}/commits/${body.commit_sha}`;
-    const result = await (0, axios_1.default)({
+    const result = await (0, request_1.default)({
         method: 'GET',
         url,
         ...config_1.BASE_PARAMS
@@ -32666,15 +32666,15 @@ async function fetchCommit(body) {
 }
 exports.fetchCommit = fetchCommit;
 function fetchWorkFlow(params) {
-    return axios_1.default.get(`/repos/${params.owner}/${params.repo}/actions/runs/${params.run_id}`);
+    return request_1.default.get(`/repos/${params.owner}/${params.repo}/actions/runs/${params.run_id}`);
 }
 exports.fetchWorkFlow = fetchWorkFlow;
 function fetchWorkFlowDuration(params) {
-    return axios_1.default.get(`/repos/${params.owner}/${params.repo}/actions/runs/${params.run_id}/timing`);
+    return request_1.default.get(`/repos/${params.owner}/${params.repo}/actions/runs/${params.run_id}/timing`);
 }
 exports.fetchWorkFlowDuration = fetchWorkFlowDuration;
 function fetchJobHtmlUrl(url) {
-    return (0, axios_1.default)({
+    return (0, request_1.default)({
         method: 'GET',
         url,
         ...config_1.BASE_PARAMS
@@ -32682,7 +32682,7 @@ function fetchJobHtmlUrl(url) {
 }
 exports.fetchJobHtmlUrl = fetchJobHtmlUrl;
 function fetchJobs(params) {
-    return axios_1.default.get(`/repos/${params.owner}/${params.repo}/actions/runs/${params.run_id}/jobs`);
+    return request_1.default.get(`/repos/${params.owner}/${params.repo}/actions/runs/${params.run_id}/jobs`);
 }
 exports.fetchJobs = fetchJobs;
 
@@ -32964,6 +32964,77 @@ async function push(_content, environment = 'production', status) {
     }
 }
 exports["default"] = push;
+
+
+/***/ }),
+
+/***/ 9106:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const _Axios = __importStar(__nccwpck_require__(8757));
+const config_1 = __nccwpck_require__(6373);
+const utils_1 = __nccwpck_require__(6252);
+const Axios = _Axios.default;
+const PRE_URL = 'https://api.github.com';
+const axios = Axios.create({
+// baseURL: PRE_URL,
+});
+axios.interceptors.request.use(_config => {
+    if (!_config?.url)
+        throw new Error('url不存在');
+    let url = _config.url;
+    if (!(0, utils_1.startWithHttpOrS)(url)) {
+        url = PRE_URL + url;
+    }
+    console.log('check old url:', _config.url, 'params: ', _config.params, _config.data, ',finally url: ', url);
+    // @ts-ignore
+    _config.headers = {
+        // ..._config.headers,
+        ...config_1.headers,
+        Authorization: `token ${(0, utils_1.getToken)()}`
+    };
+    _config.url = url;
+    return _config;
+}, _err => {
+    console.log('emit by before request error: ', _err);
+    return Promise.reject(_err);
+});
+axios.interceptors.response.use(_res => {
+    const { data } = _res;
+    console.log('check data by response: ', data);
+    return data;
+}, _err => {
+    const _errData = _err?.response?.data;
+    console.log('emit by after request error: ', _errData);
+    return Promise.reject(_errData);
+});
+exports["default"] = axios;
 
 
 /***/ }),
