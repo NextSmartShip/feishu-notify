@@ -32533,7 +32533,10 @@ const getWorkFlow = async ({ owner, repo, run_id, environment, status, ...props 
                 repo,
                 run_id
             });
-            const buildJob = jobsResponse.jobs.find(job => job.name === 'build');
+            const buildJob = jobsResponse.jobs.find(job => {
+                console.log('获取每个job的状态：', job.name, JSON.stringify(job));
+                return job.name === 'build';
+            });
             if (buildJob && buildJob.status === 'completed') {
                 buildJobCompleted = true;
             }
@@ -32579,15 +32582,15 @@ const request_1 = __importDefault(__nccwpck_require__(9106));
 function getTargetBotUrl(environment, workflowSuccess) {
     // 环境策略映射
     const envStrategies = {
-        local: {
+        [config_1.EnvironmentEnum.LOCAL]: {
             url: config_1.botUrls.FrontEndOldManGroupBot,
             description: '🧪 本地环境：消息将发送到前端老人群'
         },
-        test: {
+        [config_1.EnvironmentEnum.TEST]: {
             url: config_1.botUrls.TestEnvGroupBot,
             description: '🔧 测试环境：消息将发送到测试群'
         },
-        production: {
+        [config_1.EnvironmentEnum.PRODUCTION]: {
             url: workflowSuccess
                 ? config_1.botUrls.ProdEnvGroupBot
                 : (0, utils_1.isWeekend)()
@@ -32600,6 +32603,7 @@ function getTargetBotUrl(environment, workflowSuccess) {
                     : '🔧 生产环境（工作日）：消息将发送到测试群'
         }
     };
+    console.log('获取飞书机器人url信息：', JSON.stringify(envStrategies), environment);
     return envStrategies[environment];
 }
 /**
@@ -32609,7 +32613,7 @@ function getTargetBotUrl(environment, workflowSuccess) {
  * @param {boolean} workflowSuccess 工作流是否成功（默认 true）
  * @returns {Promise}
  */
-function fetchFeishuWebhook(body, environment = 'production', workflowSuccess = true) {
+function fetchFeishuWebhook(body, environment = config_1.EnvironmentEnum.PRODUCTION, workflowSuccess = true) {
     const { url, description } = getTargetBotUrl(environment, workflowSuccess);
     console.log(description);
     const requestOptions = {
@@ -32726,7 +32730,7 @@ const canSendMsgToFeishu = (content) => {
         return false;
     return true;
 };
-async function push(_content, environment = 'production', status) {
+async function push(_content, environment = groupUrls.EnvironmentEnum.PRODUCTION, status) {
     try {
         const content = (typeof _content === 'string' ? JSON.parse(_content) : _content) || {};
         const run_id = content.id;
@@ -33045,17 +33049,13 @@ exports["default"] = axios;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.NumberList = exports.BASE_PARAMS = exports.headers = exports.FailImgKey = exports.SuccessImgKey = exports.PROJECT_URL_MAPS = exports.PROJECT_TEST_URL_MAPS = exports.projectNameMaps = exports.PROJECT_NAME_MAPS = exports.notifyUserMap = exports.notifyUserList = exports.UsersEnum = exports.botUrls = exports.Environment = void 0;
-/**
- * 环境类型枚举
- */
-// eslint-disable-next-line no-shadow
-var Environment;
-(function (Environment) {
-    Environment["Local"] = "local";
-    Environment["Test"] = "test";
-    Environment["Production"] = "production";
-})(Environment || (exports.Environment = Environment = {}));
+exports.NumberList = exports.BASE_PARAMS = exports.headers = exports.FailImgKey = exports.SuccessImgKey = exports.PROJECT_URL_MAPS = exports.PROJECT_TEST_URL_MAPS = exports.projectNameMaps = exports.PROJECT_NAME_MAPS = exports.notifyUserMap = exports.notifyUserList = exports.UsersEnum = exports.botUrls = exports.EnvironmentEnum = void 0;
+var EnvironmentEnum;
+(function (EnvironmentEnum) {
+    EnvironmentEnum["LOCAL"] = "LOCAL";
+    EnvironmentEnum["TEST"] = "TEST";
+    EnvironmentEnum["PRODUCTION"] = "PRODUCTION";
+})(EnvironmentEnum || (exports.EnvironmentEnum = EnvironmentEnum = {}));
 exports.botUrls = {
     // 生产构建通知群 (技术部)：
     ProdEnvGroupBot: 
@@ -33227,7 +33227,7 @@ async function run() {
     try {
         const { owner, repo, run_id, environment, status } = await (0, get_action_options_1.default)();
         const params = { owner, repo, run_id, environment, status };
-        (0, getWorkFlow_1.default)(params);
+        await (0, getWorkFlow_1.default)(params);
     }
     catch (error) {
         // Fail the workflow run if an error occurs
@@ -33276,7 +33276,7 @@ const config_1 = __nccwpck_require__(6373);
 const getActionOptions = async () => {
     const token = core.getInput('token');
     const username = core.getInput('username');
-    const environment = core.getInput('environment') || config_1.Environment.Test;
+    const environment = core.getInput('environment') || config_1.EnvironmentEnum.TEST;
     const status = core.getInput('status');
     // 判断是否在 GitHub Actions 环境中
     const isGitHubActions = !!github.context.payload.repository;
@@ -33300,7 +33300,11 @@ const getActionOptions = async () => {
     if (!isGitHubActions && owner && repo && typeof run_id === 'string') {
         try {
             core.info('正在通过 GitHub API 获取 workflow 数据...');
-            const workflowData = (await (0, api_1.fetchWorkFlow)({ owner, repo, run_id }));
+            const workflowData = (await (0, api_1.fetchWorkFlow)({
+                owner,
+                repo,
+                run_id
+            }));
             if (workflowData) {
                 owner = workflowData.repository?.owner?.login || owner;
                 repo = workflowData.repository?.name || repo;

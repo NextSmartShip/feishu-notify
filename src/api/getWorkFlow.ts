@@ -1,4 +1,4 @@
-import { EnvironmentEnum } from 'src/config';
+import { EnvironmentEnum } from '../config';
 import { stop } from '../utils';
 import { fetchJobs, fetchWorkFlow } from './index';
 import push from './push';

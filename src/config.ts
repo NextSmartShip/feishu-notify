@@ -1,3 +1,9 @@
+export enum EnvironmentEnum {
+  LOCAL = 'LOCAL',
+  TEST = 'TEST',
+  PRODUCTION = 'PRODUCTION'
+}
+
 export const botUrls = {
   // 生产构建通知群 (技术部)：
   ProdEnvGroupBot:
@@ -138,8 +144,3 @@ export const NumberList = [
   '1️⃣9️⃣',
   '2️⃣0️⃣'
 ];
-export enum EnvironmentEnum {
-  LOCAL = 'LOCAL',
-  TEST = 'TEST',
-  PRODUCTION = 'PRODUCTION'
-}

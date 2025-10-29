@@ -1,1 +1,13 @@
-npm test
+# 执行检查、流程
+echo "🧪: 检查代码..."
+npm run all
+
+# 重新构建 dist
+echo "📦 Building dist..."
+npm run package
+
+# 自动添加构建后的 dist 目录到 git
+echo "✅ Adding dist to git..."
+git add dist/
+
+echo "✨ Pre-commit checks completed!"
