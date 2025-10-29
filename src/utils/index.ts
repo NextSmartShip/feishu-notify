@@ -1,21 +1,21 @@
 import * as core from '@actions/core'
-import { networkInterfaces } from 'os'
 import dayjs, { Dayjs, isDayjs } from 'dayjs'
 import duration from 'dayjs/plugin/duration'
-import utc from 'dayjs/plugin/utc'
-import timezone from 'dayjs/plugin/timezone'
 import isToday from 'dayjs/plugin/isToday'
-import type {
-  FormatCommitsItem,
-  PullCommitsByShaParams_keys_Type,
-  ReqPullCommitsByShaParams_Type
-} from '../type'
+import timezone from 'dayjs/plugin/timezone'
+import utc from 'dayjs/plugin/utc'
+import { networkInterfaces } from 'os'
 import {
   fetchCommit,
   fetchCommits,
   fetchCommitsByCurrentCommitSha
 } from '../api'
 import * as groupUrls from '../config'
+import type {
+  FormatCommitsItem,
+  PullCommitsByShaParams_keys_Type,
+  ReqPullCommitsByShaParams_Type
+} from '../type'
 const { extend } = dayjs
 extend(isToday)
 extend(utc)

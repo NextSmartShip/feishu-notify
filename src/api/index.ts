@@ -1,4 +1,4 @@
-import axios from './request'
+import axios from 'axios'
 import { BASE_PARAMS, botUrls } from '../config'
 import type {
   CommitKeysItemType,
@@ -59,7 +59,7 @@ function getTargetBotUrl(
  * @param {boolean} workflowSuccess 工作流是否成功（默认 true）
  * @returns {Promise}
  */
-export async function fetchFeishuWebhook(
+export function fetchFeishuWebhook(
   body: any,
   environment: EnvironmentType = 'production',
   workflowSuccess = true
@@ -75,7 +75,7 @@ export async function fetchFeishuWebhook(
     json: true
   }
 
-  return await axios(requestOptions)
+  return axios(requestOptions)
 }
 /**
  *
@@ -104,10 +104,8 @@ export async function fetchCommitsByCurrentCommitSha(
     return []
   }
 }
-export async function fetchCommits(
-  url: string
-): Promise<ResApiFetchCommitsItem[]> {
-  return await axios({
+export function fetchCommits(url: string): Promise<ResApiFetchCommitsItem[]> {
+  return axios({
     method: 'GET',
     url,
     ...BASE_PARAMS
@@ -124,28 +122,39 @@ export async function fetchCommit(
   })
   return [result]
 }
-export async function fetchJobHtmlUrl(url: string): Promise<JobType> {
-  return await axios({
+
+export function fetchWorkFlow(params: {
+  owner: string
+  repo: string
+  run_id: number | string
+}): Promise<ResApiFetchWorkFlowItem> {
+  return axios.get(
+    `/repos/${params.owner}/${params.repo}/actions/runs/${params.run_id}`
+  )
+}
+export function fetchWorkFlowDuration(params: {
+  owner: string
+  repo: string
+  run_id: number
+}): Promise<WorkFlowDuration> {
+  return axios.get(
+    `/repos/${params.owner}/${params.repo}/actions/runs/${params.run_id}/timing`
+  )
+}
+
+export function fetchJobHtmlUrl(url: string): Promise<JobType> {
+  return axios({
     method: 'GET',
     url,
     ...BASE_PARAMS
   })
 }
-export async function fetchWorkFlow(params: {
+export function fetchJobs(params: {
   owner: string
   repo: string
-  run_id: number | string
-}): Promise<ResApiFetchWorkFlowItem> {
-  return await axios.get(
-    `/repos/${params.owner}/${params.repo}/actions/runs/${params.run_id}`
-  )
-}
-export async function fetchWorkFlowDuration(params: {
-  owner: string
-  repo: string
-  run_id: number
-}): Promise<WorkFlowDuration> {
-  return await axios.get(
-    `/repos/${params.owner}/${params.repo}/actions/runs/${params.run_id}/timing`
+  run_id: string | number
+}): Promise<JobType> {
+  return axios.get(
+    `/repos/${params.owner}/${params.repo}/actions/runs/${params.run_id}/jobs`
   )
 }

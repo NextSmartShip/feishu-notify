@@ -1,8 +1,8 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
 import type { PushEvent } from '@octokit/webhooks-definitions/schema'
-import { Environment } from '../config'
 import { fetchWorkFlow } from '../api'
+import { Environment } from '../config'
 
 const getActionOptions = async () => {
   const token = core.getInput('token')

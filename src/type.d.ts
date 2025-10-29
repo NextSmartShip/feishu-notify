@@ -44,6 +44,9 @@ export interface JobItemType {
   html_url: string
   created_at: string
   completed_at: string
+  name: string
+  status: WorkFlowStatus
+  conclusion: WorkFlowConclusion
 }
 
 export interface JobType {

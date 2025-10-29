@@ -1,20 +1,21 @@
-import push from './push'
-import { stop } from '../utils'
-import { fetchWorkFlow } from '.'
 import { Environment } from '../config'
+import { stop } from '../utils'
+import { fetchJobs, fetchWorkFlow } from './index'
+import push from './push'
 
 interface Props {
-  owner?: string
-  repo?: string
-  run_id?: number | string
-  environment?: string
+  owner: string
+  repo: string
+  run_id: string | number
+  environment: string
   status?: string
 }
+
 const getWorkFlow = async ({
-  owner = 'NextSmartShip',
-  repo = '',
-  run_id = '-1',
-  environment = Environment.Production,
+  owner,
+  repo,
+  run_id,
+  environment,
   status,
   ...props
 }: Props) => {
@@ -22,21 +23,27 @@ const getWorkFlow = async ({
     throw new Error('参数丢失，请检查repo和run_id是否同时传入')
 
   try {
-    let payload = await fetchWorkFlow({
-      owner,
-      repo,
-      run_id
-    })
-
-    console.log('当前状态：', payload.status, payload.conclusion)
-    while (payload.status !== 'completed') {
-      await stop(3000)
-      payload = await fetchWorkFlow({
+    let buildJobCompleted = false
+    while (!buildJobCompleted) {
+      const jobsResponse = await fetchJobs({
         owner,
         repo,
         run_id
       })
+      const buildJob = jobsResponse.jobs.find(job => job.name === 'build')
+
+      if (buildJob && buildJob.status === 'completed') {
+        buildJobCompleted = true
+      } else {
+        await stop(3000)
+      }
     }
+
+    const payload = await fetchWorkFlow({
+      owner,
+      repo,
+      run_id
+    })
 
     await push(payload, environment as Environment, status)
   } catch (error) {

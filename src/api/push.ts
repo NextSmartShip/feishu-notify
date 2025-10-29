@@ -1,9 +1,8 @@
-import { fetchFeishuWebhook, fetchJobHtmlUrl, fetchWorkFlowDuration } from '.'
+import { fetchFeishuWebhook, fetchJobHtmlUrl } from '.'
 import * as groupUrls from '../config'
 import type { EnvironmentType } from '../type'
 import {
   formatCommitsMsg,
-  formatDisplayTime,
   getCommits,
   getCurrentDayjs,
   getPreviewUrl,
