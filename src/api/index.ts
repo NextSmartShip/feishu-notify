@@ -17,11 +17,11 @@ import { isProd, isWeekend } from '../utils'
  */
 export async function fetchFeishuWebhook(
   body: any,
-  toBigGroup = false
+  isProdEnv = false
 ): Promise<any> {
-  // const baseUrl = botUrls.FrontEndOldManGroupBot
-  const baseUrl = toBigGroup
-    ? botUrls.TestEnvGroupBot
+  // isProdEnv=true → 生产群；false → 测试群（周末走前端群）
+  const baseUrl = isProdEnv
+    ? botUrls.ProdEnvGroupBot
     : isWeekend()
       ? botUrls.FrontEndOldManGroupBot
       : botUrls.TestEnvGroupBot

@@ -33,7 +33,12 @@ export default async function push(_content: any) {
     const isProd = content.event === 'release' || branch === 'master'
     console.log('by Push...: ', content)
     const owner = repository?.owner?.login
-    const workflowRunSuccess = canSendMsgToFeishu(content)
+    if (!canSendMsgToFeishu(content)) {
+      console.log('缺少必要字段，跳过通知')
+      return
+    }
+    // 使用 GitHub API 的 conclusion 字段判断构建结果
+    const workflowRunSuccess = content.conclusion === 'success'
     // 构建的详情页 (当workflow_run不存在时，html_url无法找到)：
     const jobRes = await fetchJobHtmlUrl(content.jobs_url)
     const { jobs = [] } = jobRes
@@ -260,7 +265,8 @@ export default async function push(_content: any) {
     }
     console.log('发送飞书请求前参数：', JSON.stringify(feishu_body))
 
-    fetchFeishuWebhook(feishu_body, workflowRunSuccess ? isProd : false)
+    // 无论成功/失败，都按环境路由：生产 → ProdEnvGroupBot，测试 → TestEnvGroupBot
+    fetchFeishuWebhook(feishu_body, isProd)
   } catch (error) {
     console.log('出错啦:', error)
   }
