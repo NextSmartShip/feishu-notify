@@ -1,6 +1,6 @@
 import * as core from '@actions/core'
-import getActionOptions from './utils/get-action-options'
-import getWorkFlow from './api/getWorkFlow'
+import getActionOptions from './action-options'
+import getWorkFlow from './api/workflow'
 
 /**
  * The main function for the action.
@@ -8,9 +8,10 @@ import getWorkFlow from './api/getWorkFlow'
  */
 export async function run(): Promise<void> {
   try {
-    const { owner, repo, run_id } = getActionOptions()
-    const params = { owner, repo, run_id }
-    getWorkFlow(params)
+    const { owner, repo, run_id, targetGroup, workflowRunJson } =
+      getActionOptions()
+    const params = { owner, repo, run_id, targetGroup, workflowRunJson }
+    await getWorkFlow(params)
   } catch (error) {
     // Fail the workflow run if an error occurs
     if (error instanceof Error) core.setFailed(error.message)

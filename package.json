@@ -32,6 +32,8 @@
     "lint": "npx eslint . -c ./.github/linters/.eslintrc.yml",
     "package": "npx ncc build src/index.ts -o dist --source-map --license licenses.txt",
     "package:watch": "npm run package -- --watch",
+    "test:notify:failure": "bash script/local-notify-smoke.sh failure",
+    "test:notify:success": "bash script/local-notify-smoke.sh success",
     "test": "npx jest",
     "all": "npm run format:write && npm run lint && npm run test && npm run coverage && npm run package",
     "pre-commit": "npm run all"

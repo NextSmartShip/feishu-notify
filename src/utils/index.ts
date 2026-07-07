@@ -8,14 +8,12 @@ import isToday from 'dayjs/plugin/isToday'
 import type {
   FormatCommitsItem,
   PullCommitsByShaParams_keys_Type,
-  ReqPullCommitsByShaParams_Type
-} from '../type'
-import {
-  fetchCommit,
-  fetchCommits,
-  fetchCommitsByCurrentCommitSha
-} from '../api'
+  ReqPullCommitsByShaParams_Type,
+  WorkflowRunHeadCommit
+} from '../types'
+import { fetchCommit } from '../api'
 import * as groupUrls from '../config'
+
 const { extend } = dayjs
 extend(isToday)
 extend(utc)
@@ -51,10 +49,12 @@ export function getPublicIP() {
     return en0
   }
 }
+
 export const getCurrentDayjs = (isUtc?: boolean) => {
   const currentTime = isUtc ? dayjs() : dayjs().utc()
   return currentTime
 }
+
 export function handleDiffTime(_start: string, _end: Dayjs) {
   const start = dayjs(_start)
   const end = isDayjs(_end) ? _end : dayjs(_end)
@@ -63,11 +63,13 @@ export function handleDiffTime(_start: string, _end: Dayjs) {
   const seconds = diffDuration.seconds()
   return `🔧 ${minutes}分钟${seconds}秒`
 }
+
 export function formatDisplayTime(milliseconds: number) {
   const dayjsDuration = dayjs(milliseconds)
   const result = dayjsDuration.format('mm分ss秒')
   return result
 }
+
 export const startWithHttpOrS = (str: string) =>
   str.startsWith('http') || str.startsWith('https')
 
@@ -75,6 +77,7 @@ export const getPreviewUrl = (isProd: boolean, projectName: string) => {
   if (isProd) return groupUrls.PROJECT_URL_MAPS[projectName]
   return groupUrls.PROJECT_TEST_URL_MAPS[projectName]
 }
+
 export const formatValue = (value: any) => {
   const params: Partial<ReqPullCommitsByShaParams_Type> = {}
   const keys = Object.keys(value)
@@ -107,12 +110,12 @@ export const formatCommitsMsg = (commits: FormatCommitsItem[]) => {
   })
   return msgsArr.join('\n')
 }
+
 export const FORMAT_TIME_RULE = 'HH:mm:ss'
 export const BASE_FORMAT_RULE = 'YYYY-MM-DD HH:mm:ss'
 export const BASE_FORMAT_ZONE_RULE = 'YYYY-MM-DD HH:mm:ss[Z]'
 
 export const formatDate = (t: string, rule: string = BASE_FORMAT_RULE) => {
-  const zone = dayjs.tz.guess()
   const mineZone = 'Asia/Shanghai'
   console.log('当前时区：', mineZone)
   const formatD = dayjs(t).tz(mineZone)
@@ -122,38 +125,63 @@ export const formatDate = (t: string, rule: string = BASE_FORMAT_RULE) => {
     : formatD.format(rule)
 }
 
+const getCommitHtmlUrl = ({
+  owner,
+  repo,
+  commit_sha
+}: ReqPullCommitsByShaParams_Type) =>
+  `https://github.com/${owner}/${repo}/commit/${commit_sha}`
+
+const formatHeadCommit = (
+  headCommit: WorkflowRunHeadCommit,
+  params: ReqPullCommitsByShaParams_Type
+): FormatCommitsItem => {
+  const authorName =
+    headCommit.author?.username || headCommit.author?.name || ''
+  const commitDate = headCommit.author?.date || headCommit.timestamp || ''
+
+  return {
+    date: commitDate ? formatDate(commitDate) : '',
+    message: headCommit.message || '',
+    html_url: getCommitHtmlUrl(params),
+    author: {
+      login: authorName,
+      html_url: ''
+    }
+  }
+}
+
+const formatApiCommit = (item: any): FormatCommitsItem => {
+  return {
+    date: item.commit?.author?.date
+      ? formatDate(item.commit.author.date)
+      : item.commit.author.date,
+    message: item.commit.message,
+    html_url: item.html_url,
+    author: item?.author
+  }
+}
+
 export const getCommits = async (
   _params: ReqPullCommitsByShaParams_Type
 ): Promise<FormatCommitsItem[]> => {
   try {
-    const params = formatValue(_params)
-    const result = await fetchCommitsByCurrentCommitSha(
-      params as ReqPullCommitsByShaParams_Type
-    )
+    if (_params.head_commit?.message) {
+      return [formatHeadCommit(_params.head_commit, _params)]
+    }
 
-    const commit_url = result[0]?.commits_url
-    const commits = result?.length
-      ? await fetchCommits(commit_url)
-      : await fetchCommit(_params)
+    const commits = await fetchCommit(_params)
     if (!commits?.length) return []
     console.log('格式化commit author: ', JSON.stringify(commits))
 
-    const formatCommits = commits.map(item => {
-      return {
-        date: item.commit?.author?.date
-          ? formatDate(item.commit.author.date)
-          : item.commit.author.date,
-        message: item.commit.message,
-        html_url: item.html_url,
-        author: item?.author
-      }
-    })
-    return formatCommits
+    return commits.map(formatApiCommit)
   } catch (error) {
     return []
   }
 }
+
 export const isProd = process.env.NODE_ENV === 'production'
+
 // 返回是否是周末
 export const isWeekend = () => {
   const day = new Date().getDay()
@@ -173,6 +201,7 @@ export const stop = (time: number) => {
     }, time)
   })
 }
+
 export const getToken = () => {
   const token = core.getInput('token')
   return token

@@ -5,6 +5,7 @@ export interface CommitsType {
   owner: string
   repo: string
   commit_sha: string
+  head_commit?: WorkflowRunHeadCommit
 }
 export type CommitKeysType = keyof CommitsType
 export type ReqPullCommitsByShaParams_Type = CommitsType
@@ -25,18 +26,29 @@ export interface FormatCommitsItem {
   html_url: string
   author: { login: string; html_url: string }
 }
-export type CommitKeysItemType = {
-  // 分支名
-  title: string
-  commits_url: string
+
+export interface WorkflowRunHeadCommit {
+  message?: string
+  timestamp?: string
+  author?: {
+    name?: string
+    email?: string
+    date?: string
+    username?: string
+  }
 }
+
+export type TargetGroup = 'auto' | 'personal'
 
 // Jobs:
 export interface JobItemType {
-  head_sha: string
+  name?: string
+  status?: string
+  conclusion?: string | null
+  head_sha?: string
   html_url: string
-  created_at: string
-  completed_at: string
+  created_at?: string
+  completed_at?: string
 }
 
 export interface JobType {
@@ -45,8 +57,10 @@ export interface JobType {
 }
 export interface WorkFlowDuration {
   run_duration_ms: number
-  [key: string]: {
-    total_ms: number
-    jsbs: number // job数量
-  }
+  [key: string]:
+    | number
+    | {
+        total_ms: number
+        jsbs: number // job数量
+      }
 }

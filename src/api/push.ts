@@ -1,22 +1,44 @@
-import { fetchFeishuWebhook, fetchJobHtmlUrl, fetchWorkFlowDuration } from '.'
+import { fetchFeishuWebhook, fetchJobHtmlUrl } from '.'
 import * as groupUrls from '../config'
 import {
   formatCommitsMsg,
-  formatDisplayTime,
   getCommits,
   getCurrentDayjs,
   getPreviewUrl,
   handleDiffTime
 } from '../utils'
+import type { JobItemType, TargetGroup } from '../types'
 
-type BodyType = { payload: Record<string, any> }
-
-const canSendMsgToFeishu = (content: any) => {
-  if (!content || !content.repository || !content.jobs_url) return false
-  return true
+interface PushOptions {
+  targetGroup?: TargetGroup
 }
 
-export default async function push(_content: any) {
+const failureConclusions = [
+  'failure',
+  'cancelled',
+  'timed_out',
+  'action_required'
+]
+
+const getWorkflowRunSuccess = (content: any, jobs: JobItemType[]) => {
+  const completedJobs = jobs.filter(job => job.status === 'completed')
+  const hasFailedJob = completedJobs.some(job =>
+    failureConclusions.includes(job.conclusion || '')
+  )
+
+  if (hasFailedJob) return false
+  if (content?.conclusion === 'success') return true
+
+  return (
+    completedJobs.length > 0 &&
+    completedJobs.every(job => job.conclusion === 'success')
+  )
+}
+
+export default async function push(
+  _content: any,
+  { targetGroup = 'auto' }: PushOptions = {}
+) {
   try {
     const content =
       (typeof _content === 'string' ? JSON.parse(_content) : _content) || {}
@@ -32,11 +54,12 @@ export default async function push(_content: any) {
     // 此次action是Prod还是Test:
     const isProd = content.event === 'release' || branch === 'master'
     console.log('by Push...: ', content)
-    const owner = repository?.owner?.login
-    const workflowRunSuccess = canSendMsgToFeishu(content)
     // 构建的详情页 (当workflow_run不存在时，html_url无法找到)：
-    const jobRes = await fetchJobHtmlUrl(content.jobs_url)
+    const jobRes = Array.isArray(content.jobs)
+      ? { jobs: content.jobs }
+      : await fetchJobHtmlUrl(content.jobs_url)
     const { jobs = [] } = jobRes
+    const workflowRunSuccess = getWorkflowRunSuccess(content, jobs)
 
     const buildDetailPageUrl = jobs?.[0]?.html_url || content.html_url
     // 构建的title：
@@ -55,11 +78,14 @@ export default async function push(_content: any) {
     // 构建环境：
     const buildEnv = isProd ? '生产环境' : '测试环境'
 
-    const commits = await getCommits({
-      owner: repository?.owner?.login,
-      repo: repository?.name,
-      commit_sha: head_sha
-    })
+    const commits = head_sha
+      ? await getCommits({
+          owner: repository?.owner?.login,
+          repo: repository?.name,
+          commit_sha: head_sha,
+          head_commit
+        })
+      : []
 
     const config = {
       wide_screen_mode: true
@@ -95,8 +121,7 @@ export default async function push(_content: any) {
     if (targetUserInfo?.feishu_open_id) {
       baseNotifyUsers.push(targetUserInfo)
     }
-    for (let _i = 0; _i < baseNotifyUsers.length; _i++) {
-      const b = baseNotifyUsers[_i]
+    for (const b of baseNotifyUsers) {
       console.log('baseNotifyUsers: ', b)
     }
 
@@ -260,7 +285,10 @@ export default async function push(_content: any) {
     }
     console.log('发送飞书请求前参数：', JSON.stringify(feishu_body))
 
-    fetchFeishuWebhook(feishu_body, workflowRunSuccess ? isProd : false)
+    await fetchFeishuWebhook(feishu_body, {
+      targetGroup,
+      toBigGroup: workflowRunSuccess ? isProd : false
+    })
   } catch (error) {
     console.log('出错啦:', error)
   }

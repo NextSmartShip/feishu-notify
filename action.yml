@@ -17,6 +17,14 @@ inputs:
     description: 'github token'
     required: true
     default: ${{ github.token }}
+  target-group:
+    description: 'Notification target group. Use personal for test runs.'
+    required: false
+    default: 'auto'
+  workflow-run-json:
+    description: 'Workflow run JSON for local test runs.'
+    required: false
+    default: ''
 
 # Define your outputs here.
 outputs:

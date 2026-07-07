@@ -1,14 +1,18 @@
 import axios from './request'
 import { BASE_PARAMS, botUrls } from '../config'
 import type {
-  CommitKeysItemType,
   JobType,
   ReqFetchCommitParams_Type,
-  ReqPullCommitsByShaParams_Type,
   ResApiFetchCommitsItem,
+  TargetGroup,
   WorkFlowDuration
-} from '../type'
-import { isProd, isWeekend } from '../utils'
+} from '../types'
+import { isWeekend } from '../utils'
+
+interface FetchFeishuWebhookOptions {
+  targetGroup?: TargetGroup
+  toBigGroup?: boolean
+}
 
 /**
  *
@@ -17,59 +21,31 @@ import { isProd, isWeekend } from '../utils'
  */
 export async function fetchFeishuWebhook(
   body: any,
-  toBigGroup = false
+  webhookOptions: FetchFeishuWebhookOptions | boolean = {}
 ): Promise<any> {
+  const normalizedOptions =
+    typeof webhookOptions === 'boolean'
+      ? { toBigGroup: webhookOptions }
+      : webhookOptions
+  const { targetGroup = 'auto', toBigGroup = false } = normalizedOptions
   // const baseUrl = botUrls.FrontEndOldManGroupBot
-  const baseUrl = toBigGroup
-    ? botUrls.TestEnvGroupBot
-    : isWeekend()
+  const baseUrl =
+    targetGroup === 'personal'
       ? botUrls.FrontEndOldManGroupBot
-      : botUrls.TestEnvGroupBot
-  const options = {
+      : toBigGroup
+        ? botUrls.TestEnvGroupBot
+        : isWeekend()
+          ? botUrls.FrontEndOldManGroupBot
+          : botUrls.TestEnvGroupBot
+  const requestOptions = {
     method: 'POST',
     url: baseUrl,
     // url: botUrls.FrontEndOldManGroupBot,
     data: body,
     json: true // Automatically stringifies the body to JSON
   }
-  const result = await axios(options)
+  const result = await axios(requestOptions)
   return result
-}
-/**
- *
- * @param {String} body.owner
- * @param {String} body.repo
- * @param {String} body.commit_sha
- *
- * @description 获取当前commit_sha的所有commit信息
- */
-export async function fetchCommitsByCurrentCommitSha(
-  body: ReqPullCommitsByShaParams_Type
-): Promise<CommitKeysItemType[]> {
-  try {
-    const baseUrl = `/repos/${body.owner}/${body.repo}/commits/${body.commit_sha}/pulls`
-    const url = baseUrl
-    const params = {
-      method: 'GET',
-      url,
-      ...BASE_PARAMS
-    }
-
-    // 将params.url转为json请求数据:
-    return await axios(params)
-  } catch (error) {
-    console.log('emit by getCommitsByCurrentCommitSha error: ', error)
-    return []
-  }
-}
-export async function fetchCommits(
-  url: string
-): Promise<ResApiFetchCommitsItem[]> {
-  return await axios({
-    method: 'GET',
-    url,
-    ...BASE_PARAMS
-  })
 }
 export async function fetchCommit(
   body: ReqFetchCommitParams_Type

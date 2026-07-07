@@ -1,11 +1,19 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
 import type { PushEvent } from '@octokit/webhooks-definitions/schema'
-// import type { UserDefinedOptions } from '../type'
+import type { TargetGroup } from './types'
+
+const normalizeTargetGroup = (value: string): TargetGroup => {
+  if (!value || value === 'auto') return 'auto'
+  if (value === 'personal') return 'personal'
+  throw new Error('target-group 仅支持 auto 或 personal')
+}
 
 const getActionOptions = () => {
   const token = core.getInput('token')
   const username = core.getInput('username')
+  const targetGroup = normalizeTargetGroup(core.getInput('target-group'))
+  const workflowRunJson = core.getInput('workflow-run-json')
   // getBooleanInput 其实本质上就是一种 parseBoolean(core.getInput('key'))
   const payload = github.context.payload as PushEvent
   const owner = payload.organization?.login
@@ -24,6 +32,8 @@ const getActionOptions = () => {
     owner,
     repo,
     run_id,
+    targetGroup,
+    workflowRunJson,
     github_token: token
     // motto,
     // filepath,
