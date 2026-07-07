@@ -19,6 +19,7 @@ export enum UsersEnum {
 }
 export interface NotifyUserItemType {
   name: UsersEnum
+  email: string
   github_login_id: string
   feishu_open_id: string
   feishu_union_id: string

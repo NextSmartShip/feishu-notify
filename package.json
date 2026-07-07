@@ -32,6 +32,7 @@
     "lint": "npx eslint . -c ./.github/linters/.eslintrc.yml",
     "package": "npx ncc build src/index.ts -o dist --source-map --license licenses.txt",
     "package:watch": "npm run package -- --watch",
+    "test:notify:openid": "pnpm dlx tsx script/local-openid-smoke.ts",
     "test:notify:failure": "bash script/local-notify-smoke.sh failure",
     "test:notify:success": "bash script/local-notify-smoke.sh success",
     "test": "npx jest",

@@ -143,6 +143,24 @@ pnpm run test:notify:failure
 pnpm run test:notify:success
 ```
 
+如果要单独校验配置里的飞书 `open_id` 是否有效，可以发送一条只 `@`
+单个目标用户的本地测试消息：
+
+```bash
+# 校验全部 4 个配置用户
+pnpm run test:notify:openid -- all
+
+# 只校验单个用户
+pnpm run test:notify:openid -- jiaqiang_wu
+pnpm run test:notify:openid -- henry_zheng
+pnpm run test:notify:openid -- shenglie_zuo
+pnpm run test:notify:openid -- gabby_zhou
+```
+
+以上命令会实际发送到 `target-group: personal` 对应的飞书群，但每条消息只会 `@`
+当前目标用户，方便定位是哪一个 `open_id` 失效。若飞书返回非成功
+`code`，命令会以非零状态退出并打印具体错误。
+
 以上命令会临时创建
 `.github/workflows/local-notify-smoke.yml`，执行结束后自动删除。
 
