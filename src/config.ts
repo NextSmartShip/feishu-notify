@@ -32,7 +32,7 @@ export const notifyUserList = [
     name: UsersEnum.jiaqiang_wu,
     email: 'jiaqiang.wu@nextsmartship.com',
     github_login_id: '24938685',
-    feishu_open_id: 'ou_2b1b9f5f8f4e9d8d3b2a4f3b0b2d3d6d',
+    feishu_open_id: 'ou_7e57f1df77cdadca33485693a5b941db',
     feishu_union_id: 'on_bf7001b962845c5e09b9e1a9e096ee2f',
     feishu_user_id: '7bdc9d5b'
   },
@@ -41,7 +41,7 @@ export const notifyUserList = [
     name: UsersEnum.henry_zheng,
     email: 'henry.zheng@nextsmartship.com',
     github_login_id: '143984317',
-    feishu_open_id: 'ou_8a15662f718827f0f9e7cc59618e9e7f',
+    feishu_open_id: 'ou_4f549e882a2e4903ffa10c46004826dc',
     feishu_union_id: 'on_4a732d4de876c205084f2898f25e7f25',
     feishu_user_id: 'gd72gb22'
   },
@@ -50,7 +50,7 @@ export const notifyUserList = [
     name: UsersEnum.shenglie_zuo,
     email: 'shenglie.zuo@nextsmartship.com',
     github_login_id: '',
-    feishu_open_id: 'ou_449abdd622eb240c517da84e566d174e',
+    feishu_open_id: 'ou_65a386303a0ae33215b57a9736000a24',
     feishu_union_id: 'on_ff9d72150b3ea8e82f25589ae336056a',
     feishu_user_id: '3d3a4b36'
   },
@@ -59,7 +59,7 @@ export const notifyUserList = [
     name: UsersEnum.gabby_zhou,
     email: 'gabby.zhou@nextsmartship.com',
     github_login_id: '',
-    feishu_open_id: 'ou_9914b1620efd8188ec0a5b3e29576231',
+    feishu_open_id: 'ou_00667c9d1390ed0ab2d03ad99881df6c',
     feishu_union_id: 'on_bfc13931199f04bd3a1bbd5c56f021f6',
     feishu_user_id: '2c3f6848'
   }
