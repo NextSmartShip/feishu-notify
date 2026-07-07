@@ -35209,6 +35209,20 @@ const getWorkflowRunSuccess = (content, jobs) => {
     return (completedJobs.length > 0 &&
         completedJobs.every(job => job.conclusion === 'success'));
 };
+const getNotifyUsers = (email, workflowRunSuccess) => {
+    const targetUserInfo = groupUrls.notifyUserList.find(n => n.email === email);
+    if (!workflowRunSuccess) {
+        return [targetUserInfo || groupUrls.notifyUserMap.jiaqiang_wu];
+    }
+    const baseNotifyUsers = [
+        groupUrls.notifyUserMap.gabby_zhou,
+        groupUrls.notifyUserMap.shenglie_zuo
+    ];
+    if (targetUserInfo?.feishu_open_id) {
+        baseNotifyUsers.push(targetUserInfo);
+    }
+    return baseNotifyUsers;
+};
 async function push(_content, { targetGroup = 'auto' } = {}) {
     try {
         const content = (typeof _content === 'string' ? JSON.parse(_content) : _content) || {};
@@ -35275,16 +35289,8 @@ async function push(_content, { targetGroup = 'auto' } = {}) {
         // })
         const currentDayjsTime = (0, utils_1.getCurrentDayjs)(true);
         const displayTime = (0, utils_1.handleDiffTime)(content.run_started_at, currentDayjsTime);
-        const baseNotifyUsers = [
-            groupUrls.notifyUserMap.gabby_zhou,
-            groupUrls.notifyUserMap.shenglie_zuo
-        ];
-        // 查看当前flow属于谁触发的：
-        const targetUserInfo = groupUrls.notifyUserList.find(n => n.email === email);
-        if (targetUserInfo?.feishu_open_id) {
-            baseNotifyUsers.push(targetUserInfo);
-        }
-        for (const b of baseNotifyUsers) {
+        const notifyUsers = getNotifyUsers(email, workflowRunSuccess);
+        for (const b of notifyUsers) {
             console.log('baseNotifyUsers: ', b);
         }
         const elements = [
@@ -35293,7 +35299,7 @@ async function push(_content, { targetGroup = 'auto' } = {}) {
                 text: {
                     tag: 'lark_md',
                     // content: '<at id=all></at>'
-                    content: baseNotifyUsers
+                    content: notifyUsers
                         .map(b => `<at id=${b.feishu_open_id}></at>`)
                         .join(' ')
                 }

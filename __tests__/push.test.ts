@@ -57,7 +57,7 @@ describe('push', () => {
     mockGetCommits.mockResolvedValue([])
   })
 
-  it('sends a failure card when any completed workflow job failed', async () => {
+  it('mentions only the push author when a workflow job fails', async () => {
     mockFetchJobHtmlUrl.mockResolvedValue({
       total_count: 1,
       jobs: [
@@ -73,16 +73,52 @@ describe('push', () => {
     await push(baseWorkflowRun, { targetGroup: 'personal' })
 
     const body = mockFetchFeishuWebhook.mock.calls[0][0]
+    const atContent = body.card.elements[0].text.content
 
     expect(body.card.header.template).toBe('red')
     expect(body.card.header.title.content).toContain('失败')
     expect(JSON.stringify(body)).toContain('img_v2_c6a3dadb')
+    expect(atContent).toBe('<at id=ou_7e57f1df77cdadca33485693a5b941db></at>')
     expect(mockFetchFeishuWebhook).toHaveBeenCalledWith(
       body,
       expect.objectContaining({
         targetGroup: 'personal',
         toBigGroup: false
       })
+    )
+  })
+
+  it('falls back to jiaqiang_wu when a failed workflow push author is not configured', async () => {
+    mockFetchJobHtmlUrl.mockResolvedValue({
+      total_count: 1,
+      jobs: [
+        {
+          name: 'build',
+          status: 'completed',
+          conclusion: 'failure',
+          html_url: 'https://github.com/job/1'
+        }
+      ]
+    })
+
+    await push(
+      {
+        ...baseWorkflowRun,
+        head_commit: {
+          ...baseWorkflowRun.head_commit,
+          author: {
+            name: 'Unknown User',
+            email: 'unknown.user@nextsmartship.com'
+          }
+        }
+      },
+      { targetGroup: 'personal' }
+    )
+
+    const body = mockFetchFeishuWebhook.mock.calls[0][0]
+
+    expect(body.card.elements[0].text.content).toBe(
+      '<at id=ou_7e57f1df77cdadca33485693a5b941db></at>'
     )
   })
 

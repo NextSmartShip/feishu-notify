@@ -35,6 +35,28 @@ const getWorkflowRunSuccess = (content: any, jobs: JobItemType[]) => {
   )
 }
 
+const getNotifyUsers = (
+  email: string | undefined,
+  workflowRunSuccess: boolean
+) => {
+  const targetUserInfo = groupUrls.notifyUserList.find(n => n.email === email)
+
+  if (!workflowRunSuccess) {
+    return [targetUserInfo || groupUrls.notifyUserMap.jiaqiang_wu]
+  }
+
+  const baseNotifyUsers = [
+    groupUrls.notifyUserMap.gabby_zhou,
+    groupUrls.notifyUserMap.shenglie_zuo
+  ]
+
+  if (targetUserInfo?.feishu_open_id) {
+    baseNotifyUsers.push(targetUserInfo)
+  }
+
+  return baseNotifyUsers
+}
+
 export default async function push(
   _content: any,
   { targetGroup = 'auto' }: PushOptions = {}
@@ -112,16 +134,8 @@ export default async function push(
     // })
     const currentDayjsTime = getCurrentDayjs(true)
     const displayTime = handleDiffTime(content.run_started_at, currentDayjsTime)
-    const baseNotifyUsers = [
-      groupUrls.notifyUserMap.gabby_zhou,
-      groupUrls.notifyUserMap.shenglie_zuo
-    ]
-    // 查看当前flow属于谁触发的：
-    const targetUserInfo = groupUrls.notifyUserList.find(n => n.email === email)
-    if (targetUserInfo?.feishu_open_id) {
-      baseNotifyUsers.push(targetUserInfo)
-    }
-    for (const b of baseNotifyUsers) {
+    const notifyUsers = getNotifyUsers(email, workflowRunSuccess)
+    for (const b of notifyUsers) {
       console.log('baseNotifyUsers: ', b)
     }
 
@@ -131,7 +145,7 @@ export default async function push(
         text: {
           tag: 'lark_md',
           // content: '<at id=all></at>'
-          content: baseNotifyUsers
+          content: notifyUsers
             .map(b => `<at id=${b.feishu_open_id}></at>`)
             .join(' ')
         }
