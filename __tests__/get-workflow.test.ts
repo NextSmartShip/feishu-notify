@@ -34,12 +34,16 @@ describe('getWorkFlow', () => {
       repo: 'wms-ui',
       run_id: 123,
       targetGroup: 'personal',
-      workflowRunJson: JSON.stringify(workflowRun)
+      workflowRunJson: JSON.stringify(workflowRun),
+      ref: 'refs/tags/v236',
+      refType: 'tag'
     })
 
     expect(mockFetchWorkFlow).not.toHaveBeenCalled()
     expect(mockPush).toHaveBeenCalledWith(workflowRun, {
-      targetGroup: 'personal'
+      targetGroup: 'personal',
+      ref: 'refs/tags/v236',
+      refType: 'tag'
     })
   })
 })

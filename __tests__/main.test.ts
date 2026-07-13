@@ -29,6 +29,8 @@ describe('run', () => {
       run_id: 123,
       targetGroup: 'auto',
       workflowRunJson: '',
+      ref: 'refs/tags/v236',
+      refType: 'tag',
       github_token: 'github-token'
     })
   })
@@ -53,5 +55,11 @@ describe('run', () => {
     await runPromise
 
     expect(mockGetWorkFlow).toHaveBeenCalledTimes(1)
+    expect(mockGetWorkFlow).toHaveBeenCalledWith(
+      expect.objectContaining({
+        ref: 'refs/tags/v236',
+        refType: 'tag'
+      })
+    )
   })
 })

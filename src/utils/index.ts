@@ -7,11 +7,14 @@ import timezone from 'dayjs/plugin/timezone'
 import isToday from 'dayjs/plugin/isToday'
 import type {
   FormatCommitsItem,
+  FormatCommitsResult,
   PullCommitsByShaParams_keys_Type,
   ReqPullCommitsByShaParams_Type,
+  RepositoryTagItem,
+  ResApiFetchCommitsItem,
   WorkflowRunHeadCommit
 } from '../types'
-import { fetchCommit } from '../api'
+import { fetchCommit, fetchCompareCommits, fetchRepositoryTags } from '../api'
 import * as groupUrls from '../config'
 
 const { extend } = dayjs
@@ -101,7 +104,7 @@ export const formatCommitsMsg = (commits: FormatCommitsItem[]) => {
       author = { login: '', html_url: '' }
     } = c
     // eslint-disable-next-line prefer-template
-    const countNum = commits?.length > 1 ? nums[i] + ' ' : ''
+    const countNum = commits?.length > 1 ? `${nums[i] || `${i + 1}.`} ` : ''
     const link = html_url
     const text = message?.replace?.(/\n\n/g, ' ')
     const authorText = `${author?.login ? `(by: [${author.login}](${author.html_url}))` : ''}`
@@ -162,21 +165,130 @@ const formatApiCommit = (item: any): FormatCommitsItem => {
   }
 }
 
-export const getCommits = async (
-  _params: ReqPullCommitsByShaParams_Type
-): Promise<FormatCommitsItem[]> => {
-  try {
-    if (_params.head_commit?.message) {
-      return [formatHeadCommit(_params.head_commit, _params)]
+const isMergePullRequestCommit = (item: ResApiFetchCommitsItem) => {
+  return (
+    /^Merge pull request #\d+ from /.test(item.commit.message) &&
+    (item.parents?.length || 0) > 1
+  )
+}
+
+const getDisplayCompareCommits = (commits: ResApiFetchCommitsItem[]) => {
+  const filteredCommits = commits.filter(
+    item => !isMergePullRequestCommit(item)
+  )
+  return filteredCommits.length ? filteredCommits : commits
+}
+
+const emptyCommitsResult = (): FormatCommitsResult => ({
+  commits: [],
+  compareUrl: '',
+  currentTag: '',
+  previousTag: ''
+})
+
+const getTagNameFromRef = (ref?: string, refType?: string) => {
+  if (refType !== 'tag' && !ref?.startsWith('refs/tags/')) return ''
+  return ref?.replace(/^refs\/tags\//, '') || ''
+}
+
+const getPreviousTag = async (
+  params: ReqPullCommitsByShaParams_Type,
+  currentTag: string
+) => {
+  const per_page = 100
+  let page = 1
+  let foundCurrentTag = false
+  let shouldFetchNextPage = true
+
+  while (shouldFetchNextPage) {
+    const tags: RepositoryTagItem[] = await fetchRepositoryTags({
+      owner: params.owner,
+      repo: params.repo,
+      page,
+      per_page
+    })
+
+    if (!tags.length) return ''
+
+    if (foundCurrentTag) return tags[0]?.name || ''
+
+    const currentIndex = tags.findIndex(tag => tag.name === currentTag)
+    if (currentIndex !== -1) {
+      const previousTag = tags[currentIndex + 1]?.name
+      if (previousTag) return previousTag
+      foundCurrentTag = true
     }
 
-    const commits = await fetchCommit(_params)
-    if (!commits?.length) return []
-    console.log('格式化commit author: ', JSON.stringify(commits))
+    if (tags.length < per_page) {
+      shouldFetchNextPage = false
+    } else {
+      page += 1
+    }
+  }
 
-    return commits.map(formatApiCommit)
+  return ''
+}
+
+const getCompareCommits = async (
+  params: ReqPullCommitsByShaParams_Type
+): Promise<FormatCommitsResult> => {
+  const currentTag = getTagNameFromRef(params.ref, params.refType)
+  if (!currentTag) return emptyCommitsResult()
+
+  const previousTag = await getPreviousTag(params, currentTag)
+  if (!previousTag) return emptyCommitsResult()
+
+  const compareResult = await fetchCompareCommits({
+    owner: params.owner,
+    repo: params.repo,
+    base: previousTag,
+    head: currentTag
+  })
+  const displayCommits = getDisplayCompareCommits(compareResult.commits)
+
+  return {
+    commits: displayCommits.map(formatApiCommit),
+    compareUrl: compareResult.html_url,
+    currentTag,
+    previousTag
+  }
+}
+
+const getSingleCommit = async (
+  params: ReqPullCommitsByShaParams_Type
+): Promise<FormatCommitsResult> => {
+  if (params.head_commit?.message) {
+    return {
+      ...emptyCommitsResult(),
+      commits: [formatHeadCommit(params.head_commit, params)]
+    }
+  }
+
+  const commits = await fetchCommit(params)
+  if (!commits?.length) return emptyCommitsResult()
+  console.log('格式化commit author: ', JSON.stringify(commits))
+
+  return {
+    ...emptyCommitsResult(),
+    commits: commits.map(formatApiCommit)
+  }
+}
+
+export const getCommits = async (
+  _params: ReqPullCommitsByShaParams_Type
+): Promise<FormatCommitsResult> => {
+  try {
+    let compareCommits = emptyCommitsResult()
+    try {
+      compareCommits = await getCompareCommits(_params)
+    } catch (error) {
+      compareCommits = emptyCommitsResult()
+    }
+    if (compareCommits.commits.length) return compareCommits
+
+    return await getSingleCommit(_params)
   } catch (error) {
-    return []
+    return emptyCommitsResult()
   }
 }
 

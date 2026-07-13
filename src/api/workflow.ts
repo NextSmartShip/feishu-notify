@@ -1,9 +1,9 @@
 import push from './push'
 import { stop } from '../utils'
 import { fetchWorkFlow } from '.'
-import type { TargetGroup } from '../types'
+import type { ActionRefContext, TargetGroup } from '../types'
 
-interface Props {
+interface Props extends ActionRefContext {
   owner?: string
   repo?: string
   run_id?: number
@@ -25,11 +25,13 @@ const getWorkFlow = async ({
   repo = '',
   run_id = -1,
   targetGroup = 'auto',
-  workflowRunJson = ''
+  workflowRunJson = '',
+  ref,
+  refType
 }: Props) => {
   const workflowRunPayload = parseWorkflowRunJson(workflowRunJson)
   if (workflowRunPayload) {
-    await push(workflowRunPayload, { targetGroup })
+    await push(workflowRunPayload, { targetGroup, ref, refType })
     return
   }
 
@@ -43,7 +45,7 @@ const getWorkFlow = async ({
       repo,
       run_id
     })
-    await push(payload, { targetGroup })
+    await push(payload, { targetGroup, ref, refType })
   } catch (error) {
     console.log('查看请求by错误时：', error)
   }

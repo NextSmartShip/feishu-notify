@@ -6,6 +6,8 @@ export interface CommitsType {
   repo: string
   commit_sha: string
   head_commit?: WorkflowRunHeadCommit
+  ref?: string
+  refType?: string
 }
 export type CommitKeysType = keyof CommitsType
 export type ReqPullCommitsByShaParams_Type = CommitsType
@@ -18,13 +20,53 @@ export interface ResApiFetchCommitsItem {
     author: { name: string; email: string; date: string }
   }
   html_url: string
-  author: { login: string; html_url: string }
+  author: { login: string; html_url: string } | null
+  parents?: { sha: string }[]
 }
 export interface FormatCommitsItem {
   date: string
   message: string
   html_url: string
-  author: { login: string; html_url: string }
+  author: { login: string; html_url: string } | null
+}
+
+export interface FormatCommitsResult {
+  commits: FormatCommitsItem[]
+  compareUrl: string
+  currentTag: string
+  previousTag: string
+}
+
+export interface RepositoryTagItem {
+  name: string
+  commit: {
+    sha: string
+    url: string
+  }
+}
+
+export interface FetchRepositoryTagsParams {
+  owner: string
+  repo: string
+  page: number
+  per_page: number
+}
+
+export interface FetchCompareCommitsParams {
+  owner: string
+  repo: string
+  base: string
+  head: string
+}
+
+export interface CompareCommitsResponse {
+  html_url: string
+  commits: ResApiFetchCommitsItem[]
+}
+
+export interface ActionRefContext {
+  ref?: string
+  refType?: string
 }
 
 export interface WorkflowRunHeadCommit {

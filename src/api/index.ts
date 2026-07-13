@@ -2,6 +2,10 @@ import axios from './request'
 import { BASE_PARAMS, botUrls } from '../config'
 import type {
   JobType,
+  CompareCommitsResponse,
+  FetchCompareCommitsParams,
+  FetchRepositoryTagsParams,
+  RepositoryTagItem,
   ReqFetchCommitParams_Type,
   ResApiFetchCommitsItem,
   TargetGroup,
@@ -57,6 +61,37 @@ export async function fetchCommit(
     ...BASE_PARAMS
   })
   return [result]
+}
+export async function fetchRepositoryTags({
+  owner,
+  repo,
+  page,
+  per_page
+}: FetchRepositoryTagsParams): Promise<RepositoryTagItem[]> {
+  const url = `/repos/${owner}/${repo}/tags`
+  return await axios({
+    method: 'GET',
+    url,
+    params: {
+      page,
+      per_page
+    },
+    ...BASE_PARAMS
+  })
+}
+export async function fetchCompareCommits({
+  owner,
+  repo,
+  base,
+  head
+}: FetchCompareCommitsParams): Promise<CompareCommitsResponse> {
+  const baseRef = encodeURIComponent(base)
+  const headRef = encodeURIComponent(head)
+  return await axios({
+    method: 'GET',
+    url: `/repos/${owner}/${repo}/compare/${baseRef}...${headRef}`,
+    ...BASE_PARAMS
+  })
 }
 export async function fetchJobHtmlUrl(url: string): Promise<JobType> {
   return await axios({

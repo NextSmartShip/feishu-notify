@@ -66,15 +66,21 @@ notify:
 
 ### 提交展示逻辑
 
-通知卡片里的提交信息以当前 workflow run 的 `head_sha` / `head_commit` 为准：
+生产环境 Tag 发版时，通知卡片会优先展示当前 Tag 与上一个仓库 Tag 之间的提交：
 
-- 优先使用 workflow run 返回的 `head_commit`，不额外查询关联 PR。
+- 通过 GitHub repository tags 列表找到当前 Tag 后面的上一个 Tag。
+- 通过 GitHub Compare API 拉取 `上一个Tag...当前Tag` 的 commits。
+- 卡片中展示区间内全部 commits，并附带 Compare 超链接。
+- 卡片主列表会过滤 GitHub 自动生成的 PR merge
+  commit，避免重复展示；Compare 链接仍保留完整提交历史。
+
+如果当前不是 Tag 构建、找不到上一个 Tag，或 GitHub Tag / Compare
+API 查询失败，则回退到当前 workflow run 的 `head_sha` / `head_commit`：
+
+- 优先使用 workflow run 返回的 `head_commit`。
 - 如果 `head_commit` 不存在，回退到 GitHub Commit API 拉取 `head_sha`
-  对应的单个commit。
-- 不再通过 `commits/{sha}/pulls` 查找关联 PR，也不会展示关联 PR 的全部 commits。
-
-这样可以保证飞书消息展示的是当前构建实际对应的提交，避免 tag 或 workflow
-run 只包含 PR 的部分提交时，把后续未进入当前构建的 PR commit 一并展示出来。
+  对应的单个 commit。
+- 不通过 `commits/{sha}/pulls` 查找关联 PR，也不会展示关联 PR 的全部 commits。
 
 ### 本地 GitHub Local Actions / act 验证
 

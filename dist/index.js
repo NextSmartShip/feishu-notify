@@ -35046,12 +35046,18 @@ const getActionOptions = () => {
     const username = core.getInput('username');
     const targetGroup = normalizeTargetGroup(core.getInput('target-group'));
     const workflowRunJson = core.getInput('workflow-run-json');
+    const ref = github.context.ref;
+    const refType = ref.startsWith('refs/tags/')
+        ? 'tag'
+        : ref.startsWith('refs/heads/')
+            ? 'branch'
+            : '';
     // getBooleanInput 其实本质上就是一种 parseBoolean(core.getInput('key'))
     const payload = github.context.payload;
     const owner = payload.organization?.login;
     const repo = payload.repository?.name;
     const run_id = github.context.runId;
-    console.log(`当前事件(eventName、token、run_id)：${token},run_id: ${run_id}`);
+    console.log(`当前事件(eventName、run_id)：${github.context.eventName},run_id: ${run_id}`);
     if (github.context.eventName === 'push') {
         const pushPayload = github.context.payload;
         core.info(`The head commit is: ${pushPayload.head_commit}`);
@@ -35065,6 +35071,8 @@ const getActionOptions = () => {
         run_id,
         targetGroup,
         workflowRunJson,
+        ref,
+        refType,
         github_token: token
         // motto,
         // filepath,
@@ -35090,6 +35098,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.fetchFeishuWebhook = fetchFeishuWebhook;
 exports.fetchCommit = fetchCommit;
+exports.fetchRepositoryTags = fetchRepositoryTags;
+exports.fetchCompareCommits = fetchCompareCommits;
 exports.fetchJobHtmlUrl = fetchJobHtmlUrl;
 exports.fetchWorkFlow = fetchWorkFlow;
 exports.fetchWorkFlowDuration = fetchWorkFlowDuration;
@@ -35132,6 +35142,27 @@ async function fetchCommit(body) {
         ...config_1.BASE_PARAMS
     });
     return [result];
+}
+async function fetchRepositoryTags({ owner, repo, page, per_page }) {
+    const url = `/repos/${owner}/${repo}/tags`;
+    return await (0, request_1.default)({
+        method: 'GET',
+        url,
+        params: {
+            page,
+            per_page
+        },
+        ...config_1.BASE_PARAMS
+    });
+}
+async function fetchCompareCommits({ owner, repo, base, head }) {
+    const baseRef = encodeURIComponent(base);
+    const headRef = encodeURIComponent(head);
+    return await (0, request_1.default)({
+        method: 'GET',
+        url: `/repos/${owner}/${repo}/compare/${baseRef}...${headRef}`,
+        ...config_1.BASE_PARAMS
+    });
 }
 async function fetchJobHtmlUrl(url) {
     return await (0, request_1.default)({
@@ -35223,7 +35254,7 @@ const getNotifyUsers = (email, workflowRunSuccess) => {
     }
     return baseNotifyUsers;
 };
-async function push(_content, { targetGroup = 'auto' } = {}) {
+async function push(_content, { targetGroup = 'auto', ref, refType } = {}) {
     try {
         const content = (typeof _content === 'string' ? JSON.parse(_content) : _content) || {};
         const run_id = content.id;
@@ -35234,9 +35265,12 @@ async function push(_content, { targetGroup = 'auto' } = {}) {
         const head_sha = content.head_sha;
         // 构建的分支：
         const branch = content.head_branch;
+        const actionRef = ref || content.ref;
+        const actionRefType = refType || content.ref_type || content.refType;
+        const isTagRef = actionRefType === 'tag' || actionRef?.startsWith?.('refs/tags/');
         const repository = content?.repository;
         // 此次action是Prod还是Test:
-        const isProd = content.event === 'release' || branch === 'master';
+        const isProd = isTagRef || content.event === 'release' || branch === 'master';
         console.log('by Push...: ', content);
         // 构建的详情页 (当workflow_run不存在时，html_url无法找到)：
         const jobRes = Array.isArray(content.jobs)
@@ -35264,9 +35298,16 @@ async function push(_content, { targetGroup = 'auto' } = {}) {
                 owner: repository?.owner?.login,
                 repo: repository?.name,
                 commit_sha: head_sha,
-                head_commit
+                head_commit,
+                ref: isTagRef ? actionRef : undefined,
+                refType: isTagRef ? actionRefType : undefined
             })
-            : [];
+            : {
+                commits: [],
+                compareUrl: '',
+                currentTag: '',
+                previousTag: ''
+            };
         const config = {
             wide_screen_mode: true
         };
@@ -35279,7 +35320,12 @@ async function push(_content, { targetGroup = 'auto' } = {}) {
         };
         const previewUrl = (0, utils_1.getPreviewUrl)(isProd, repository?.name) || '#';
         const baseMsg = `\n* [${buildDetailMsg}](${buildDetailPageUrl})`;
-        const commitMsgs = commits?.length ? (0, utils_1.formatCommitsMsg)(commits) : baseMsg;
+        const compareMsg = commits.compareUrl
+            ? `**Compare：** [${commits.previousTag}...${commits.currentTag}](${commits.compareUrl})\n`
+            : '';
+        const commitMsgs = commits.commits.length
+            ? (0, utils_1.formatCommitsMsg)(commits.commits)
+            : baseMsg;
         console.log('commitMsgs: ', commitMsgs);
         // duration:
         // const durationInfo = await fetchWorkFlowDuration({
@@ -35322,7 +35368,7 @@ async function push(_content, { targetGroup = 'auto' } = {}) {
                         elements: [
                             {
                                 tag: 'markdown',
-                                content: `**构建分支：**${branch}`
+                                content: `**构建分支：**${branch || actionRef || '-'}`
                             }
                         ]
                     },
@@ -35414,7 +35460,7 @@ async function push(_content, { targetGroup = 'auto' } = {}) {
                             {
                                 tag: 'markdown',
                                 text_align: 'left',
-                                content: `**Message [(构建链接)](${buildDetailPageUrl})：** \n${commitMsgs}`
+                                content: `**Message [(构建链接)](${buildDetailPageUrl})：** \n${compareMsg}${commitMsgs}`
                             }
                         ]
                     }
@@ -35568,10 +35614,10 @@ const parseWorkflowRunJson = (workflowRunJson) => {
         throw new Error('workflow-run-json 不是合法 JSON');
     }
 };
-const getWorkFlow = async ({ owner = 'NextSmartShip', repo = '', run_id = -1, targetGroup = 'auto', workflowRunJson = '' }) => {
+const getWorkFlow = async ({ owner = 'NextSmartShip', repo = '', run_id = -1, targetGroup = 'auto', workflowRunJson = '', ref, refType }) => {
     const workflowRunPayload = parseWorkflowRunJson(workflowRunJson);
     if (workflowRunPayload) {
-        await (0, push_1.default)(workflowRunPayload, { targetGroup });
+        await (0, push_1.default)(workflowRunPayload, { targetGroup, ref, refType });
         return;
     }
     if (!repo || run_id === -1)
@@ -35583,7 +35629,7 @@ const getWorkFlow = async ({ owner = 'NextSmartShip', repo = '', run_id = -1, ta
             repo,
             run_id
         });
-        await (0, push_1.default)(payload, { targetGroup });
+        await (0, push_1.default)(payload, { targetGroup, ref, refType });
     }
     catch (error) {
         console.log('查看请求by错误时：', error);
@@ -35778,8 +35824,16 @@ const workflow_1 = __importDefault(__nccwpck_require__(2684));
  */
 async function run() {
     try {
-        const { owner, repo, run_id, targetGroup, workflowRunJson } = (0, action_options_1.default)();
-        const params = { owner, repo, run_id, targetGroup, workflowRunJson };
+        const { owner, repo, run_id, targetGroup, workflowRunJson, ref, refType } = (0, action_options_1.default)();
+        const params = {
+            owner,
+            repo,
+            run_id,
+            targetGroup,
+            workflowRunJson,
+            ref,
+            refType
+        };
         await (0, workflow_1.default)(params);
     }
     catch (error) {
@@ -35924,7 +35978,7 @@ const formatCommitsMsg = (commits) => {
     const msgsArr = commits.map((c, i) => {
         const { date: _date, message = '', html_url = '#', author = { login: '', html_url: '' } } = c;
         // eslint-disable-next-line prefer-template
-        const countNum = commits?.length > 1 ? nums[i] + ' ' : '';
+        const countNum = commits?.length > 1 ? `${nums[i] || `${i + 1}.`} ` : '';
         const link = html_url;
         const text = message?.replace?.(/\n\n/g, ' ');
         const authorText = `${author?.login ? `(by: [${author.login}](${author.html_url}))` : ''}`;
@@ -35971,19 +36025,109 @@ const formatApiCommit = (item) => {
         author: item?.author
     };
 };
+const isMergePullRequestCommit = (item) => {
+    return (/^Merge pull request #\d+ from /.test(item.commit.message) &&
+        (item.parents?.length || 0) > 1);
+};
+const getDisplayCompareCommits = (commits) => {
+    const filteredCommits = commits.filter(item => !isMergePullRequestCommit(item));
+    return filteredCommits.length ? filteredCommits : commits;
+};
+const emptyCommitsResult = () => ({
+    commits: [],
+    compareUrl: '',
+    currentTag: '',
+    previousTag: ''
+});
+const getTagNameFromRef = (ref, refType) => {
+    if (refType !== 'tag' && !ref?.startsWith('refs/tags/'))
+        return '';
+    return ref?.replace(/^refs\/tags\//, '') || '';
+};
+const getPreviousTag = async (params, currentTag) => {
+    const per_page = 100;
+    let page = 1;
+    let foundCurrentTag = false;
+    let shouldFetchNextPage = true;
+    while (shouldFetchNextPage) {
+        const tags = await (0, api_1.fetchRepositoryTags)({
+            owner: params.owner,
+            repo: params.repo,
+            page,
+            per_page
+        });
+        if (!tags.length)
+            return '';
+        if (foundCurrentTag)
+            return tags[0]?.name || '';
+        const currentIndex = tags.findIndex(tag => tag.name === currentTag);
+        if (currentIndex !== -1) {
+            const previousTag = tags[currentIndex + 1]?.name;
+            if (previousTag)
+                return previousTag;
+            foundCurrentTag = true;
+        }
+        if (tags.length < per_page) {
+            shouldFetchNextPage = false;
+        }
+        else {
+            page += 1;
+        }
+    }
+    return '';
+};
+const getCompareCommits = async (params) => {
+    const currentTag = getTagNameFromRef(params.ref, params.refType);
+    if (!currentTag)
+        return emptyCommitsResult();
+    const previousTag = await getPreviousTag(params, currentTag);
+    if (!previousTag)
+        return emptyCommitsResult();
+    const compareResult = await (0, api_1.fetchCompareCommits)({
+        owner: params.owner,
+        repo: params.repo,
+        base: previousTag,
+        head: currentTag
+    });
+    const displayCommits = getDisplayCompareCommits(compareResult.commits);
+    return {
+        commits: displayCommits.map(formatApiCommit),
+        compareUrl: compareResult.html_url,
+        currentTag,
+        previousTag
+    };
+};
+const getSingleCommit = async (params) => {
+    if (params.head_commit?.message) {
+        return {
+            ...emptyCommitsResult(),
+            commits: [formatHeadCommit(params.head_commit, params)]
+        };
+    }
+    const commits = await (0, api_1.fetchCommit)(params);
+    if (!commits?.length)
+        return emptyCommitsResult();
+    console.log('格式化commit author: ', JSON.stringify(commits));
+    return {
+        ...emptyCommitsResult(),
+        commits: commits.map(formatApiCommit)
+    };
+};
 const getCommits = async (_params) => {
     try {
-        if (_params.head_commit?.message) {
-            return [formatHeadCommit(_params.head_commit, _params)];
+        let compareCommits = emptyCommitsResult();
+        try {
+            compareCommits = await getCompareCommits(_params);
         }
-        const commits = await (0, api_1.fetchCommit)(_params);
-        if (!commits?.length)
-            return [];
-        console.log('格式化commit author: ', JSON.stringify(commits));
-        return commits.map(formatApiCommit);
+        catch (error) {
+            compareCommits = emptyCommitsResult();
+        }
+        if (compareCommits.commits.length)
+            return compareCommits;
+        return await getSingleCommit(_params);
     }
     catch (error) {
-        return [];
+        return emptyCommitsResult();
     }
 };
 exports.getCommits = getCommits;

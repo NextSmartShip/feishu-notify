@@ -7,9 +7,9 @@ import {
   getPreviewUrl,
   handleDiffTime
 } from '../utils'
-import type { JobItemType, TargetGroup } from '../types'
+import type { ActionRefContext, JobItemType, TargetGroup } from '../types'
 
-interface PushOptions {
+interface PushOptions extends ActionRefContext {
   targetGroup?: TargetGroup
 }
 
@@ -59,7 +59,7 @@ const getNotifyUsers = (
 
 export default async function push(
   _content: any,
-  { targetGroup = 'auto' }: PushOptions = {}
+  { targetGroup = 'auto', ref, refType }: PushOptions = {}
 ) {
   try {
     const content =
@@ -72,9 +72,14 @@ export default async function push(
     const head_sha = content.head_sha
     // 构建的分支：
     const branch = content.head_branch
+    const actionRef = ref || content.ref
+    const actionRefType = refType || content.ref_type || content.refType
+    const isTagRef =
+      actionRefType === 'tag' || actionRef?.startsWith?.('refs/tags/')
     const repository = content?.repository
     // 此次action是Prod还是Test:
-    const isProd = content.event === 'release' || branch === 'master'
+    const isProd =
+      isTagRef || content.event === 'release' || branch === 'master'
     console.log('by Push...: ', content)
     // 构建的详情页 (当workflow_run不存在时，html_url无法找到)：
     const jobRes = Array.isArray(content.jobs)
@@ -105,9 +110,16 @@ export default async function push(
           owner: repository?.owner?.login,
           repo: repository?.name,
           commit_sha: head_sha,
-          head_commit
+          head_commit,
+          ref: isTagRef ? actionRef : undefined,
+          refType: isTagRef ? actionRefType : undefined
         })
-      : []
+      : {
+          commits: [],
+          compareUrl: '',
+          currentTag: '',
+          previousTag: ''
+        }
 
     const config = {
       wide_screen_mode: true
@@ -123,7 +135,12 @@ export default async function push(
     }
     const previewUrl = getPreviewUrl(isProd, repository?.name) || '#'
     const baseMsg = `\n* [${buildDetailMsg}](${buildDetailPageUrl})`
-    const commitMsgs = commits?.length ? formatCommitsMsg(commits) : baseMsg
+    const compareMsg = commits.compareUrl
+      ? `**Compare：** [${commits.previousTag}...${commits.currentTag}](${commits.compareUrl})\n`
+      : ''
+    const commitMsgs = commits.commits.length
+      ? formatCommitsMsg(commits.commits)
+      : baseMsg
     console.log('commitMsgs: ', commitMsgs)
 
     // duration:
@@ -168,7 +185,7 @@ export default async function push(
             elements: [
               {
                 tag: 'markdown',
-                content: `**构建分支：**${branch}`
+                content: `**构建分支：**${branch || actionRef || '-'}`
               }
             ]
           },
@@ -260,7 +277,7 @@ export default async function push(
               {
                 tag: 'markdown',
                 text_align: 'left',
-                content: `**Message [(构建链接)](${buildDetailPageUrl})：** \n${commitMsgs}`
+                content: `**Message [(构建链接)](${buildDetailPageUrl})：** \n${compareMsg}${commitMsgs}`
               }
             ]
           }

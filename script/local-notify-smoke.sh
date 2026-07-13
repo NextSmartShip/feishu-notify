@@ -4,6 +4,12 @@ set -euo pipefail
 
 scenario="${1:-}"
 workflow_path=".github/workflows/local-notify-smoke.yml"
+github_token="${GITHUB_TOKEN:-${GH_TOKEN:-local-act-token}}"
+current_tag="${CURRENT_TAG:-v236}"
+head_sha="${HEAD_SHA:-local-tag-smoke-sha}"
+repo_full_name="NextSmartShip/wms-ui"
+ref_json=""
+ref_context=""
 
 case "$scenario" in
   success)
@@ -18,8 +24,24 @@ case "$scenario" in
     conclusion="failure"
     message="test: local failure notification"
     ;;
+  tag-success)
+    if [[ "$github_token" == "local-act-token" ]]; then
+      echo "tag-success requires GITHUB_TOKEN or GH_TOKEN with repository read access" >&2
+      exit 1
+    fi
+    run_id="125"
+    job_id="458"
+    conclusion="success"
+    message="test: local tag release notification"
+    repo_full_name="NextSmartShip/wms-ui (local smoke test)"
+    ref_json=",
+              \"ref\": \"refs/tags/${current_tag}\",
+              \"ref_type\": \"tag\",
+              \"head_sha\": \"${head_sha}\""
+    ref_context="--env GITHUB_REF=refs/tags/${current_tag}"
+    ;;
   *)
-    echo "Usage: bash script/local-notify-smoke.sh <success|failure>" >&2
+    echo "Usage: bash script/local-notify-smoke.sh <success|failure|tag-success>" >&2
     exit 1
     ;;
 esac
@@ -43,7 +65,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ./
         with:
-          token: local-act-token
+          token: ${github_token}
           target-group: personal
           workflow-run-json: |
             {
@@ -61,7 +83,7 @@ jobs:
               },
               "repository": {
                 "name": "wms-ui",
-                "full_name": "NextSmartShip/wms-ui",
+                "full_name": "${repo_full_name}",
                 "owner": {
                   "login": "NextSmartShip"
                 }
@@ -78,11 +100,13 @@ jobs:
                   "html_url": "https://github.com/NextSmartShip/wms-ui/actions/runs/${run_id}/job/${job_id}"
                 }
               ]
+              ${ref_json}
             }
 YAML
 
 act workflow_dispatch \
   --workflows "$workflow_path" \
   --job notify \
-  --container-architecture linux/amd64 \
+  --pull=false \
+  ${ref_context} \
   -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:act-latest
