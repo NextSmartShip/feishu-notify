@@ -1,7 +1,7 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
 import type { PushEvent } from '@octokit/webhooks-definitions/schema'
-import type { TargetGroup } from './types'
+import type { LogicalProject, TargetGroup } from './types'
 
 const normalizeTargetGroup = (value: string): TargetGroup => {
   if (!value || value === 'auto') return 'auto'
@@ -9,10 +9,17 @@ const normalizeTargetGroup = (value: string): TargetGroup => {
   throw new Error('target-group 仅支持 auto 或 personal')
 }
 
+const normalizeProject = (value: string): LogicalProject => {
+  if (!value || value === 'auto') return 'auto'
+  if (value === 'oms' || value === 'wms' || value === 'pda') return value
+  throw new Error('project 仅支持 auto、oms、wms 或 pda')
+}
+
 const getActionOptions = () => {
   const token = core.getInput('token')
   const username = core.getInput('username')
   const targetGroup = normalizeTargetGroup(core.getInput('target-group'))
+  const project = normalizeProject(core.getInput('project'))
   const workflowRunJson = core.getInput('workflow-run-json')
   const ref = github.context.ref
   const refType = ref.startsWith('refs/tags/')
@@ -41,6 +48,7 @@ const getActionOptions = () => {
     repo,
     run_id,
     targetGroup,
+    project,
     workflowRunJson,
     ref,
     refType,

@@ -28,6 +28,7 @@ describe('run', () => {
       repo: 'wms-ui',
       run_id: 123,
       targetGroup: 'auto',
+      project: 'wms',
       workflowRunJson: '',
       ref: 'refs/tags/v236',
       refType: 'tag',
@@ -58,7 +59,8 @@ describe('run', () => {
     expect(mockGetWorkFlow).toHaveBeenCalledWith(
       expect.objectContaining({
         ref: 'refs/tags/v236',
-        refType: 'tag'
+        refType: 'tag',
+        project: 'wms'
       })
     )
   })

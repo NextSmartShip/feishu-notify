@@ -26,7 +26,13 @@ const main = async () => {
   console.log(`全部校验通过，共 ${targets.length} 人`)
 }
 
-main().catch(error => {
-  console.error(error instanceof Error ? error.message : String(error))
-  process.exitCode = 1
-})
+const run = async () => {
+  try {
+    await main()
+  } catch (error) {
+    console.error(error instanceof Error ? error.message : String(error))
+    process.exitCode = 1
+  }
+}
+
+void run()

@@ -81,6 +81,7 @@ export interface WorkflowRunHeadCommit {
 }
 
 export type TargetGroup = 'auto' | 'personal'
+export type LogicalProject = 'auto' | 'oms' | 'wms' | 'pda'
 
 // Jobs:
 export interface JobItemType {

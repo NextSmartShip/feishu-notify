@@ -35041,10 +35041,18 @@ const normalizeTargetGroup = (value) => {
         return 'personal';
     throw new Error('target-group 仅支持 auto 或 personal');
 };
+const normalizeProject = (value) => {
+    if (!value || value === 'auto')
+        return 'auto';
+    if (value === 'oms' || value === 'wms' || value === 'pda')
+        return value;
+    throw new Error('project 仅支持 auto、oms、wms 或 pda');
+};
 const getActionOptions = () => {
     const token = core.getInput('token');
     const username = core.getInput('username');
     const targetGroup = normalizeTargetGroup(core.getInput('target-group'));
+    const project = normalizeProject(core.getInput('project'));
     const workflowRunJson = core.getInput('workflow-run-json');
     const ref = github.context.ref;
     const refType = ref.startsWith('refs/tags/')
@@ -35070,6 +35078,7 @@ const getActionOptions = () => {
         repo,
         run_id,
         targetGroup,
+        project,
         workflowRunJson,
         ref,
         refType,
@@ -35237,6 +35246,15 @@ const getWorkflowRunSuccess = (content, jobs) => {
         return false;
     if (content?.conclusion === 'success')
         return true;
+    // 当通知 action 是唯一 job 的最后一步时，GitHub 仍会返回
+    // status=in_progress、conclusion=null。此时 action 能执行到这里，说明前置步骤
+    // 均已成功，不能因为 job 尚未完成而误报失败。多 job 工作流仍需等待其他
+    // job 完成，避免提前报告成功。
+    if (jobs.length === 1 &&
+        completedJobs.length === 0 &&
+        jobs[0]?.status === 'in_progress') {
+        return true;
+    }
     return (completedJobs.length > 0 &&
         completedJobs.every(job => job.conclusion === 'success'));
 };
@@ -35254,7 +35272,7 @@ const getNotifyUsers = (email, workflowRunSuccess) => {
     }
     return baseNotifyUsers;
 };
-async function push(_content, { targetGroup = 'auto', ref, refType } = {}) {
+async function push(_content, { targetGroup = 'auto', project = 'auto', ref, refType } = {}) {
     try {
         const content = (typeof _content === 'string' ? JSON.parse(_content) : _content) || {};
         const run_id = content.id;
@@ -35269,8 +35287,9 @@ async function push(_content, { targetGroup = 'auto', ref, refType } = {}) {
         const actionRefType = refType || content.ref_type || content.refType;
         const isTagRef = actionRefType === 'tag' || actionRef?.startsWith?.('refs/tags/');
         const repository = content?.repository;
+        const projectKey = project === 'auto' ? repository?.name : project;
         // 此次action是Prod还是Test:
-        const isProd = isTagRef || content.event === 'release' || branch === 'master';
+        const isProd = isTagRef || content.event === 'release' || branch === 'main';
         console.log('by Push...: ', content);
         // 构建的详情页 (当workflow_run不存在时，html_url无法找到)：
         const jobRes = Array.isArray(content.jobs)
@@ -35282,7 +35301,7 @@ async function push(_content, { targetGroup = 'auto', ref, refType } = {}) {
         // 构建的title：
         const buildDetailMsg = head_commit?.message?.replace?.(/^.*?\n\n/, '');
         // 项目名称：
-        const cnName = groupUrls.projectNameMaps[repository?.name] || 'NSS-项目';
+        const cnName = groupUrls.projectNameMaps[projectKey] || 'NSS-项目';
         // // 当前hook操作人
         const operator = content?.triggering_actor?.login;
         // // 当前hook操作人
@@ -35318,7 +35337,7 @@ async function push(_content, { targetGroup = 'auto', ref, refType } = {}) {
                 content: `${cnName} 构建情况（${buildEnv}）：${workflowRunSuccess ? '成功' : '失败'}`
             }
         };
-        const previewUrl = (0, utils_1.getPreviewUrl)(isProd, repository?.name) || '#';
+        const previewUrl = (0, utils_1.getPreviewUrl)(isProd, projectKey) || '#';
         const baseMsg = `\n* [${buildDetailMsg}](${buildDetailPageUrl})`;
         const compareMsg = commits.compareUrl
             ? `**Compare：** [${commits.previousTag}...${commits.currentTag}](${commits.compareUrl})\n`
@@ -35614,10 +35633,10 @@ const parseWorkflowRunJson = (workflowRunJson) => {
         throw new Error('workflow-run-json 不是合法 JSON');
     }
 };
-const getWorkFlow = async ({ owner = 'NextSmartShip', repo = '', run_id = -1, targetGroup = 'auto', workflowRunJson = '', ref, refType }) => {
+const getWorkFlow = async ({ owner = 'NextSmartShip', repo = '', run_id = -1, targetGroup = 'auto', project = 'auto', workflowRunJson = '', ref, refType }) => {
     const workflowRunPayload = parseWorkflowRunJson(workflowRunJson);
     if (workflowRunPayload) {
-        await (0, push_1.default)(workflowRunPayload, { targetGroup, ref, refType });
+        await (0, push_1.default)(workflowRunPayload, { targetGroup, project, ref, refType });
         return;
     }
     if (!repo || run_id === -1)
@@ -35629,7 +35648,7 @@ const getWorkFlow = async ({ owner = 'NextSmartShip', repo = '', run_id = -1, ta
             repo,
             run_id
         });
-        await (0, push_1.default)(payload, { targetGroup, ref, refType });
+        await (0, push_1.default)(payload, { targetGroup, project, ref, refType });
     }
     catch (error) {
         console.log('查看请求by错误时：', error);
@@ -35714,6 +35733,9 @@ exports.PROJECT_NAME_MAPS = {
     NSS_UTILS: 'nss-utils'
 };
 exports.projectNameMaps = {
+    oms: 'OMS',
+    wms: 'WMS',
+    pda: 'PDA（H5）',
     [exports.PROJECT_NAME_MAPS.WMS_MOBILE_UI]: 'PDA（H5）',
     [exports.PROJECT_NAME_MAPS.WMS_UI]: 'WMS',
     [exports.PROJECT_NAME_MAPS.OMS_UI]: 'OMS',
@@ -35723,12 +35745,18 @@ exports.projectNameMaps = {
 const BASE_PORTOCOL = 'https';
 const BASE_WEBSITE_URL = 'nextsmartship.com';
 exports.PROJECT_TEST_URL_MAPS = {
+    oms: `${BASE_PORTOCOL}://omsdev.${BASE_WEBSITE_URL}`,
+    wms: `${BASE_PORTOCOL}://wmsdev.${BASE_WEBSITE_URL}`,
+    pda: `${BASE_PORTOCOL}://pdadev.${BASE_WEBSITE_URL}`,
     [exports.PROJECT_NAME_MAPS.WMS_MOBILE_UI]: `${BASE_PORTOCOL}://pdadev.${BASE_WEBSITE_URL}`,
     [exports.PROJECT_NAME_MAPS.WMS_UI]: `${BASE_PORTOCOL}://wmsdev.${BASE_WEBSITE_URL}`,
     [exports.PROJECT_NAME_MAPS.OMS_UI]: `${BASE_PORTOCOL}://omsdev.${BASE_WEBSITE_URL}`,
     [exports.PROJECT_NAME_MAPS.NSS_WEBSITE]: `https://dev-nextsmartship.vercel.app/`
 };
 exports.PROJECT_URL_MAPS = {
+    oms: `${BASE_PORTOCOL}://fulfillship.${BASE_WEBSITE_URL}`,
+    wms: `${BASE_PORTOCOL}://wms.prod.${BASE_WEBSITE_URL}`,
+    pda: `${BASE_PORTOCOL}://pda.${BASE_WEBSITE_URL}`,
     [exports.PROJECT_NAME_MAPS.WMS_MOBILE_UI]: `${BASE_PORTOCOL}://pda.${BASE_WEBSITE_URL}`,
     [exports.PROJECT_NAME_MAPS.WMS_UI]: `${BASE_PORTOCOL}://wms.prod.${BASE_WEBSITE_URL}`,
     [exports.PROJECT_NAME_MAPS.OMS_UI]: `${BASE_PORTOCOL}://fulfillship.${BASE_WEBSITE_URL}`,
@@ -35824,12 +35852,13 @@ const workflow_1 = __importDefault(__nccwpck_require__(2684));
  */
 async function run() {
     try {
-        const { owner, repo, run_id, targetGroup, workflowRunJson, ref, refType } = (0, action_options_1.default)();
+        const { owner, repo, run_id, targetGroup, project, workflowRunJson, ref, refType } = (0, action_options_1.default)();
         const params = {
             owner,
             repo,
             run_id,
             targetGroup,
+            project,
             workflowRunJson,
             ref,
             refType

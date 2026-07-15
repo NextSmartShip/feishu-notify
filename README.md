@@ -42,6 +42,7 @@ notify:
     - uses: NextSmartShip/feishu-notify@master
       with:
         token: ${{ github.token }}
+        project: wms # monorepo 中显式指定 oms、wms 或 pda
 ```
 
 ### 测试群组
@@ -106,7 +107,7 @@ jobs:
             {
               "id": 123,
               "event": "push",
-              "head_branch": "master",
+              "head_branch": "main",
               "html_url": "https://github.com/NextSmartShip/wms-ui/actions/runs/123",
               "run_started_at": "2026-07-06T11:59:00Z",
               "head_commit": {

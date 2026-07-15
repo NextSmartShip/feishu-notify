@@ -1,5 +1,5 @@
 import { fetchFeishuWebhook, fetchJobHtmlUrl } from '../src/api'
-import { getCommits } from '../src/utils'
+import { getCommits, getPreviewUrl } from '../src/utils'
 import push from '../src/api/push'
 
 jest.mock('../src/api', () => ({
@@ -22,11 +22,14 @@ const mockFetchJobHtmlUrl = fetchJobHtmlUrl as jest.MockedFunction<
   typeof fetchJobHtmlUrl
 >
 const mockGetCommits = getCommits as jest.MockedFunction<typeof getCommits>
+const mockGetPreviewUrl = getPreviewUrl as jest.MockedFunction<
+  typeof getPreviewUrl
+>
 
 const baseWorkflowRun = {
   id: 123,
   event: 'push',
-  head_branch: 'master',
+  head_branch: 'main',
   head_sha: 'abc123',
   html_url: 'https://github.com/NextSmartShip/wms-ui/actions/runs/123',
   jobs_url: 'https://api.github.com/jobs',
@@ -156,6 +159,42 @@ describe('push', () => {
     )
   })
 
+  it('sends a success card when the notification runs in the current in-progress job', async () => {
+    mockFetchJobHtmlUrl.mockResolvedValue({
+      total_count: 1,
+      jobs: [
+        {
+          name: 'Build & Deploy to Prod',
+          status: 'in_progress',
+          conclusion: null,
+          html_url: 'https://github.com/job/1'
+        }
+      ]
+    })
+
+    await push(
+      {
+        ...baseWorkflowRun,
+        status: 'in_progress',
+        conclusion: null
+      },
+      { targetGroup: 'personal' }
+    )
+
+    const body = mockFetchFeishuWebhook.mock.calls[0][0]
+
+    expect(body.card.header.template).toBe('green')
+    expect(body.card.header.title.content).toContain('成功')
+    expect(JSON.stringify(body)).toContain('img_v2_8eba3fe2')
+    expect(mockFetchFeishuWebhook).toHaveBeenCalledWith(
+      body,
+      expect.objectContaining({
+        targetGroup: 'personal',
+        toBigGroup: true
+      })
+    )
+  })
+
   it('shows compare link and tag range commits for production tag notifications', async () => {
     mockGetCommits.mockResolvedValue({
       commits: [
@@ -216,7 +255,7 @@ describe('push', () => {
     expect(bodyText).toContain('formatted commits')
   })
 
-  it('does not show compare link for non-tag master notifications', async () => {
+  it('does not show compare link for non-tag main notifications', async () => {
     mockFetchJobHtmlUrl.mockResolvedValue({
       total_count: 1,
       jobs: [
@@ -234,5 +273,39 @@ describe('push', () => {
     const body = mockFetchFeishuWebhook.mock.calls[0][0]
 
     expect(JSON.stringify(body)).not.toContain('**Compare：**')
+  })
+
+  it('uses the explicit logical project for monorepo notifications', async () => {
+    mockFetchJobHtmlUrl.mockResolvedValue({
+      total_count: 1,
+      jobs: [
+        {
+          name: 'build',
+          status: 'completed',
+          conclusion: 'success',
+          html_url: 'https://github.com/job/1'
+        }
+      ]
+    })
+
+    await push(
+      {
+        ...baseWorkflowRun,
+        repository: {
+          ...baseWorkflowRun.repository,
+          name: 'workspace',
+          full_name: 'NextSmartShip/workspace'
+        }
+      },
+      { targetGroup: 'personal', project: 'pda' }
+    )
+
+    const body = mockFetchFeishuWebhook.mock.calls[0][0]
+
+    expect(body.card.header.title.content).toContain('PDA（H5）')
+    expect(mockGetPreviewUrl).toHaveBeenCalledWith(true, 'pda')
+    expect(mockGetCommits).toHaveBeenCalledWith(
+      expect.objectContaining({ repo: 'workspace' })
+    )
   })
 })

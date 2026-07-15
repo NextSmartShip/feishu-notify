@@ -81,6 +81,9 @@ export const PROJECT_NAME_MAPS = {
   NSS_UTILS: 'nss-utils'
 }
 export const projectNameMaps = {
+  oms: 'OMS',
+  wms: 'WMS',
+  pda: 'PDA（H5）',
   [PROJECT_NAME_MAPS.WMS_MOBILE_UI]: 'PDA（H5）',
   [PROJECT_NAME_MAPS.WMS_UI]: 'WMS',
   [PROJECT_NAME_MAPS.OMS_UI]: 'OMS',
@@ -91,12 +94,18 @@ const BASE_PORTOCOL = 'https'
 const BASE_WEBSITE_URL = 'nextsmartship.com'
 
 export const PROJECT_TEST_URL_MAPS = {
+  oms: `${BASE_PORTOCOL}://omsdev.${BASE_WEBSITE_URL}`,
+  wms: `${BASE_PORTOCOL}://wmsdev.${BASE_WEBSITE_URL}`,
+  pda: `${BASE_PORTOCOL}://pdadev.${BASE_WEBSITE_URL}`,
   [PROJECT_NAME_MAPS.WMS_MOBILE_UI]: `${BASE_PORTOCOL}://pdadev.${BASE_WEBSITE_URL}`,
   [PROJECT_NAME_MAPS.WMS_UI]: `${BASE_PORTOCOL}://wmsdev.${BASE_WEBSITE_URL}`,
   [PROJECT_NAME_MAPS.OMS_UI]: `${BASE_PORTOCOL}://omsdev.${BASE_WEBSITE_URL}`,
   [PROJECT_NAME_MAPS.NSS_WEBSITE]: `https://dev-nextsmartship.vercel.app/`
 }
 export const PROJECT_URL_MAPS = {
+  oms: `${BASE_PORTOCOL}://fulfillship.${BASE_WEBSITE_URL}`,
+  wms: `${BASE_PORTOCOL}://wms.prod.${BASE_WEBSITE_URL}`,
+  pda: `${BASE_PORTOCOL}://pda.${BASE_WEBSITE_URL}`,
   [PROJECT_NAME_MAPS.WMS_MOBILE_UI]: `${BASE_PORTOCOL}://pda.${BASE_WEBSITE_URL}`,
   [PROJECT_NAME_MAPS.WMS_UI]: `${BASE_PORTOCOL}://wms.prod.${BASE_WEBSITE_URL}`,
   [PROJECT_NAME_MAPS.OMS_UI]: `${BASE_PORTOCOL}://fulfillship.${BASE_WEBSITE_URL}`,

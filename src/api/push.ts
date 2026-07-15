@@ -7,10 +7,16 @@ import {
   getPreviewUrl,
   handleDiffTime
 } from '../utils'
-import type { ActionRefContext, JobItemType, TargetGroup } from '../types'
+import type {
+  ActionRefContext,
+  JobItemType,
+  LogicalProject,
+  TargetGroup
+} from '../types'
 
 interface PushOptions extends ActionRefContext {
   targetGroup?: TargetGroup
+  project?: LogicalProject
 }
 
 const failureConclusions = [
@@ -28,6 +34,18 @@ const getWorkflowRunSuccess = (content: any, jobs: JobItemType[]) => {
 
   if (hasFailedJob) return false
   if (content?.conclusion === 'success') return true
+
+  // 当通知 action 是唯一 job 的最后一步时，GitHub 仍会返回
+  // status=in_progress、conclusion=null。此时 action 能执行到这里，说明前置步骤
+  // 均已成功，不能因为 job 尚未完成而误报失败。多 job 工作流仍需等待其他
+  // job 完成，避免提前报告成功。
+  if (
+    jobs.length === 1 &&
+    completedJobs.length === 0 &&
+    jobs[0]?.status === 'in_progress'
+  ) {
+    return true
+  }
 
   return (
     completedJobs.length > 0 &&
@@ -59,7 +77,7 @@ const getNotifyUsers = (
 
 export default async function push(
   _content: any,
-  { targetGroup = 'auto', ref, refType }: PushOptions = {}
+  { targetGroup = 'auto', project = 'auto', ref, refType }: PushOptions = {}
 ) {
   try {
     const content =
@@ -77,9 +95,9 @@ export default async function push(
     const isTagRef =
       actionRefType === 'tag' || actionRef?.startsWith?.('refs/tags/')
     const repository = content?.repository
+    const projectKey = project === 'auto' ? repository?.name : project
     // 此次action是Prod还是Test:
-    const isProd =
-      isTagRef || content.event === 'release' || branch === 'master'
+    const isProd = isTagRef || content.event === 'release' || branch === 'main'
     console.log('by Push...: ', content)
     // 构建的详情页 (当workflow_run不存在时，html_url无法找到)：
     const jobRes = Array.isArray(content.jobs)
@@ -93,7 +111,7 @@ export default async function push(
     const buildDetailMsg = head_commit?.message?.replace?.(/^.*?\n\n/, '')
 
     // 项目名称：
-    const cnName = groupUrls.projectNameMaps[repository?.name] || 'NSS-项目'
+    const cnName = groupUrls.projectNameMaps[projectKey] || 'NSS-项目'
     // // 当前hook操作人
     const operator = content?.triggering_actor?.login
     // // 当前hook操作人
@@ -133,7 +151,7 @@ export default async function push(
         }`
       }
     }
-    const previewUrl = getPreviewUrl(isProd, repository?.name) || '#'
+    const previewUrl = getPreviewUrl(isProd, projectKey) || '#'
     const baseMsg = `\n* [${buildDetailMsg}](${buildDetailPageUrl})`
     const compareMsg = commits.compareUrl
       ? `**Compare：** [${commits.previousTag}...${commits.currentTag}](${commits.compareUrl})\n`

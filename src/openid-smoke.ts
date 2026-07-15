@@ -5,9 +5,7 @@ export type OpenIdSmokeTarget = UsersEnum | 'all'
 
 const SUCCESS_CODE = 0
 
-export const getOpenIdSmokeTargets = (
-  target: string = 'all'
-): NotifyUserItemType[] => {
+export const getOpenIdSmokeTargets = (target = 'all'): NotifyUserItemType[] => {
   const normalizedTarget = target.trim().toLowerCase()
 
   if (

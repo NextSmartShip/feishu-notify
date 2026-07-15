@@ -21,6 +21,11 @@ inputs:
     description: 'Notification target group. Use personal for test runs.'
     required: false
     default: 'auto'
+  project:
+    description:
+      'Logical project in a monorepo. Supports auto, oms, wms, or pda.'
+    required: false
+    default: 'auto'
   workflow-run-json:
     description: 'Workflow run JSON for local test runs.'
     required: false
