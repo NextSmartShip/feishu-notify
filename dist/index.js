@@ -35972,9 +35972,10 @@ function handleDiffTime(_start, _end) {
     const start = (0, dayjs_1.default)(_start);
     const end = (0, dayjs_1.isDayjs)(_end) ? _end : (0, dayjs_1.default)(_end);
     const diffDuration = dayjs_1.default.duration(end.diff(start));
+    const hours = diffDuration.hours();
     const minutes = diffDuration.minutes();
     const seconds = diffDuration.seconds();
-    return `🔧 ${minutes}分钟${seconds}秒`;
+    return `🔧 ${hours ? `${hours}小时` : ''}${minutes}分钟${seconds}秒`;
 }
 function formatDisplayTime(milliseconds) {
     const dayjsDuration = (0, dayjs_1.default)(milliseconds);

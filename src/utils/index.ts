@@ -62,9 +62,10 @@ export function handleDiffTime(_start: string, _end: Dayjs) {
   const start = dayjs(_start)
   const end = isDayjs(_end) ? _end : dayjs(_end)
   const diffDuration = dayjs.duration(end.diff(start))
+  const hours = diffDuration.hours()
   const minutes = diffDuration.minutes()
   const seconds = diffDuration.seconds()
-  return `🔧 ${minutes}分钟${seconds}秒`
+  return `🔧 ${hours ? `${hours}小时` : ''}${minutes}分钟${seconds}秒`
 }
 
 export function formatDisplayTime(milliseconds: number) {
