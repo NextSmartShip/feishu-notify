@@ -65,7 +65,7 @@ describe('push', () => {
     })
   })
 
-  it('mentions only the push author when a workflow job fails', async () => {
+  it('mentions every configured user when a workflow job fails', async () => {
     mockFetchJobHtmlUrl.mockResolvedValue({
       total_count: 1,
       jobs: [
@@ -86,7 +86,9 @@ describe('push', () => {
     expect(body.card.header.template).toBe('red')
     expect(body.card.header.title.content).toContain('失败')
     expect(JSON.stringify(body)).toContain('img_v2_c6a3dadb')
-    expect(atContent).toBe('<at id=ou_7e57f1df77cdadca33485693a5b941db></at>')
+    expect(atContent).toBe(
+      '<at id=ou_7e57f1df77cdadca33485693a5b941db></at> <at id=ou_4f549e882a2e4903ffa10c46004826dc></at> <at id=ou_65a386303a0ae33215b57a9736000a24></at> <at id=ou_00667c9d1390ed0ab2d03ad99881df6c></at>'
+    )
     expect(mockFetchFeishuWebhook).toHaveBeenCalledWith(
       body,
       expect.objectContaining({
@@ -96,7 +98,7 @@ describe('push', () => {
     )
   })
 
-  it('falls back to jiaqiang_wu when a failed workflow push author is not configured', async () => {
+  it('mentions every configured user when the push author is not configured', async () => {
     mockFetchJobHtmlUrl.mockResolvedValue({
       total_count: 1,
       jobs: [
@@ -126,7 +128,7 @@ describe('push', () => {
     const body = mockFetchFeishuWebhook.mock.calls[0][0]
 
     expect(body.card.elements[0].text.content).toBe(
-      '<at id=ou_7e57f1df77cdadca33485693a5b941db></at>'
+      '<at id=ou_7e57f1df77cdadca33485693a5b941db></at> <at id=ou_4f549e882a2e4903ffa10c46004826dc></at> <at id=ou_65a386303a0ae33215b57a9736000a24></at> <at id=ou_00667c9d1390ed0ab2d03ad99881df6c></at>'
     )
   })
 
@@ -150,6 +152,9 @@ describe('push', () => {
     expect(body.card.header.template).toBe('green')
     expect(body.card.header.title.content).toContain('成功')
     expect(JSON.stringify(body)).toContain('img_v2_8eba3fe2')
+    expect(body.card.elements[0].text.content).toBe(
+      '<at id=ou_7e57f1df77cdadca33485693a5b941db></at> <at id=ou_4f549e882a2e4903ffa10c46004826dc></at> <at id=ou_65a386303a0ae33215b57a9736000a24></at> <at id=ou_00667c9d1390ed0ab2d03ad99881df6c></at>'
+    )
     expect(mockFetchFeishuWebhook).toHaveBeenCalledWith(
       body,
       expect.objectContaining({

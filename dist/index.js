@@ -35258,20 +35258,7 @@ const getWorkflowRunSuccess = (content, jobs) => {
     return (completedJobs.length > 0 &&
         completedJobs.every(job => job.conclusion === 'success'));
 };
-const getNotifyUsers = (email, workflowRunSuccess) => {
-    const targetUserInfo = groupUrls.notifyUserList.find(n => n.email === email);
-    if (!workflowRunSuccess) {
-        return [targetUserInfo || groupUrls.notifyUserMap.jiaqiang_wu];
-    }
-    const baseNotifyUsers = [
-        groupUrls.notifyUserMap.gabby_zhou,
-        groupUrls.notifyUserMap.shenglie_zuo
-    ];
-    if (targetUserInfo?.feishu_open_id) {
-        baseNotifyUsers.push(targetUserInfo);
-    }
-    return baseNotifyUsers;
-};
+const getNotifyUsers = () => groupUrls.notifyUserList;
 async function push(_content, { targetGroup = 'auto', project = 'auto', ref, refType } = {}) {
     try {
         const content = (typeof _content === 'string' ? JSON.parse(_content) : _content) || {};
@@ -35354,7 +35341,7 @@ async function push(_content, { targetGroup = 'auto', project = 'auto', ref, ref
         // })
         const currentDayjsTime = (0, utils_1.getCurrentDayjs)(true);
         const displayTime = (0, utils_1.handleDiffTime)(content.run_started_at, currentDayjsTime);
-        const notifyUsers = getNotifyUsers(email, workflowRunSuccess);
+        const notifyUsers = getNotifyUsers();
         for (const b of notifyUsers) {
             console.log('baseNotifyUsers: ', b);
         }
