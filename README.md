@@ -38,6 +38,7 @@ notify:
   permissions:
     contents: read
     actions: read
+    pull-requests: read
   steps:
     - uses: NextSmartShip/feishu-notify@master
       with:
@@ -58,6 +59,7 @@ notify:
   permissions:
     contents: read
     actions: read
+    pull-requests: read
   steps:
     - uses: NextSmartShip/feishu-notify@master
       with:
@@ -75,13 +77,16 @@ notify:
 - 卡片主列表会过滤 GitHub 自动生成的 PR merge
   commit，避免重复展示；Compare 链接仍保留完整提交历史。
 
-如果当前不是 Tag 构建、找不到上一个 Tag，或 GitHub Tag / Compare
-API 查询失败，则回退到当前 workflow run 的 `head_sha` / `head_commit`：
+如果当前不是 Tag 构建，则通过 `head_sha`
+查找关联 PR，并展示该 PR 的全部 commits。使用默认 `github.token`
+时，通知 job 需要声明 `pull-requests: read` 权限。
+
+如果找不到关联 PR、PR commits 查询失败、找不到上一个 Tag，或 GitHub Tag /
+Compare API 查询失败，则回退到当前 workflow run 的 `head_sha` / `head_commit`：
 
 - 优先使用 workflow run 返回的 `head_commit`。
 - 如果 `head_commit` 不存在，回退到 GitHub Commit API 拉取 `head_sha`
   对应的单个 commit。
-- 不通过 `commits/{sha}/pulls` 查找关联 PR，也不会展示关联 PR 的全部 commits。
 
 ### 本地 GitHub Local Actions / act 验证
 

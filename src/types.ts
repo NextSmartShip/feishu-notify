@@ -23,6 +23,12 @@ export interface ResApiFetchCommitsItem {
   author: { login: string; html_url: string } | null
   parents?: { sha: string }[]
 }
+export interface AssociatedPullRequestItem {
+  number: number
+  commits_url: string
+  merged_at: string | null
+  merge_commit_sha: string | null
+}
 export interface FormatCommitsItem {
   date: string
   message: string
@@ -57,6 +63,14 @@ export interface FetchCompareCommitsParams {
   repo: string
   base: string
   head: string
+}
+
+export interface FetchPullRequestCommitsParams {
+  owner: string
+  repo: string
+  pullNumber: number
+  page: number
+  per_page: number
 }
 
 export interface CompareCommitsResponse {

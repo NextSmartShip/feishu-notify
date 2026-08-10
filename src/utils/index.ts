@@ -6,6 +6,7 @@ import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
 import isToday from 'dayjs/plugin/isToday'
 import type {
+  AssociatedPullRequestItem,
   FormatCommitsItem,
   FormatCommitsResult,
   PullCommitsByShaParams_keys_Type,
@@ -14,7 +15,13 @@ import type {
   ResApiFetchCommitsItem,
   WorkflowRunHeadCommit
 } from '../types'
-import { fetchCommit, fetchCompareCommits, fetchRepositoryTags } from '../api'
+import {
+  fetchCommit,
+  fetchCompareCommits,
+  fetchPullRequestCommits,
+  fetchPullRequestsByCommit,
+  fetchRepositoryTags
+} from '../api'
 import * as groupUrls from '../config'
 
 const { extend } = dayjs
@@ -255,6 +262,41 @@ const getCompareCommits = async (
   }
 }
 
+const getPullRequestCommits = async (
+  params: ReqPullCommitsByShaParams_Type
+): Promise<FormatCommitsResult> => {
+  const pullRequests: AssociatedPullRequestItem[] =
+    await fetchPullRequestsByCommit(params)
+  const pullRequest =
+    pullRequests.find(item => item.merge_commit_sha === params.commit_sha) ||
+    pullRequests.find(item => item.merged_at) ||
+    pullRequests[0]
+  if (!pullRequest) return emptyCommitsResult()
+
+  const per_page = 100
+  let page = 1
+  const commits: ResApiFetchCommitsItem[] = []
+  let shouldFetchNextPage = true
+
+  while (shouldFetchNextPage) {
+    const pageCommits = await fetchPullRequestCommits({
+      owner: params.owner,
+      repo: params.repo,
+      pullNumber: pullRequest.number,
+      page,
+      per_page
+    })
+    commits.push(...pageCommits)
+    shouldFetchNextPage = pageCommits.length === per_page
+    page += 1
+  }
+
+  return {
+    ...emptyCommitsResult(),
+    commits: commits.map(formatApiCommit)
+  }
+}
+
 const getSingleCommit = async (
   params: ReqPullCommitsByShaParams_Type
 ): Promise<FormatCommitsResult> => {
@@ -286,6 +328,15 @@ export const getCommits = async (
       compareCommits = emptyCommitsResult()
     }
     if (compareCommits.commits.length) return compareCommits
+
+    if (!getTagNameFromRef(_params.ref, _params.refType)) {
+      try {
+        const pullRequestCommits = await getPullRequestCommits(_params)
+        if (pullRequestCommits.commits.length) return pullRequestCommits
+      } catch (error) {
+        // 关联 PR 查询失败时继续使用当前 head commit，保证通知仍可发送
+      }
+    }
 
     return await getSingleCommit(_params)
   } catch (error) {

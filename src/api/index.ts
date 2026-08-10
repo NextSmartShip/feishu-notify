@@ -1,9 +1,11 @@
 import axios from './request'
 import { BASE_PARAMS, botUrls } from '../config'
 import type {
+  AssociatedPullRequestItem,
   JobType,
   CompareCommitsResponse,
   FetchCompareCommitsParams,
+  FetchPullRequestCommitsParams,
   FetchRepositoryTagsParams,
   RepositoryTagItem,
   ReqFetchCommitParams_Type,
@@ -61,6 +63,32 @@ export async function fetchCommit(
     ...BASE_PARAMS
   })
   return [result]
+}
+export async function fetchPullRequestsByCommit(
+  body: ReqFetchCommitParams_Type
+): Promise<AssociatedPullRequestItem[]> {
+  return await axios({
+    method: 'GET',
+    url: `/repos/${body.owner}/${body.repo}/commits/${body.commit_sha}/pulls`,
+    ...BASE_PARAMS
+  })
+}
+export async function fetchPullRequestCommits({
+  owner,
+  repo,
+  pullNumber,
+  page,
+  per_page
+}: FetchPullRequestCommitsParams): Promise<ResApiFetchCommitsItem[]> {
+  return await axios({
+    method: 'GET',
+    url: `/repos/${owner}/${repo}/pulls/${pullNumber}/commits`,
+    params: {
+      page,
+      per_page
+    },
+    ...BASE_PARAMS
+  })
 }
 export async function fetchRepositoryTags({
   owner,

@@ -1,6 +1,8 @@
 import {
   fetchCommit,
   fetchCompareCommits,
+  fetchPullRequestCommits,
+  fetchPullRequestsByCommit,
   fetchRepositoryTags
 } from '../src/api'
 import { formatCommitsMsg, getCommits } from '../src/utils'
@@ -8,6 +10,8 @@ import { formatCommitsMsg, getCommits } from '../src/utils'
 jest.mock('../src/api', () => ({
   fetchCommit: jest.fn(),
   fetchCompareCommits: jest.fn(),
+  fetchPullRequestCommits: jest.fn(),
+  fetchPullRequestsByCommit: jest.fn(),
   fetchRepositoryTags: jest.fn()
 }))
 
@@ -18,6 +22,12 @@ const mockFetchRepositoryTags = fetchRepositoryTags as jest.MockedFunction<
 const mockFetchCompareCommits = fetchCompareCommits as jest.MockedFunction<
   typeof fetchCompareCommits
 >
+const mockFetchPullRequestsByCommit =
+  fetchPullRequestsByCommit as jest.MockedFunction<
+    typeof fetchPullRequestsByCommit
+  >
+const mockFetchPullRequestCommits =
+  fetchPullRequestCommits as jest.MockedFunction<typeof fetchPullRequestCommits>
 
 const createApiCommit = ({
   message,
@@ -48,6 +58,8 @@ const createApiCommit = ({
 describe('getCommits', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    mockFetchPullRequestsByCommit.mockResolvedValue([])
+    mockFetchPullRequestCommits.mockResolvedValue([])
   })
 
   it('loads commits between the current tag and previous repository tag', async () => {
@@ -364,7 +376,58 @@ describe('getCommits', () => {
     expect(message).not.toContain('undefined [test: commit 21]')
   })
 
-  it('formats the workflow run head commit without loading associated PR commits', async () => {
+  it('loads all commits from the pull request associated with the head SHA', async () => {
+    mockFetchPullRequestsByCommit.mockResolvedValue([
+      {
+        number: 379,
+        commits_url:
+          'https://api.github.com/repos/NextSmartShip/workspace/pulls/379/commits',
+        merged_at: '2026-08-10T06:44:20Z',
+        merge_commit_sha: 'd2d92403'
+      }
+    ])
+    mockFetchPullRequestCommits.mockResolvedValue([
+      createApiCommit({
+        message:
+          '🐛 fix(chat): 优化 LiveChat 加载失败提示的生命周期管理，避免异步误报',
+        sha: '33593a64'
+      }),
+      createApiCommit({
+        message: '⚡ perf(chat): 调整 LiveChat 加载超时时间，提升初始化成功率',
+        sha: '9cc16b75'
+      })
+    ])
+
+    const result = await getCommits({
+      owner: 'NextSmartShip',
+      repo: 'workspace',
+      commit_sha: 'd2d92403',
+      head_commit: {
+        message: '⚡ perf(chat): 调整 LiveChat 加载超时时间，提升初始化成功率'
+      }
+    })
+
+    expect(mockFetchPullRequestsByCommit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        owner: 'NextSmartShip',
+        repo: 'workspace',
+        commit_sha: 'd2d92403'
+      })
+    )
+    expect(mockFetchPullRequestCommits).toHaveBeenCalledWith({
+      owner: 'NextSmartShip',
+      repo: 'workspace',
+      pullNumber: 379,
+      page: 1,
+      per_page: 100
+    })
+    expect(result.commits.map(commit => commit.message)).toEqual([
+      '🐛 fix(chat): 优化 LiveChat 加载失败提示的生命周期管理，避免异步误报',
+      '⚡ perf(chat): 调整 LiveChat 加载超时时间，提升初始化成功率'
+    ])
+  })
+
+  it('falls back to the workflow run head commit when no PR is associated', async () => {
     const commits = await getCommits({
       owner: 'NextSmartShip',
       repo: 'wms-ui',
@@ -379,6 +442,7 @@ describe('getCommits', () => {
       }
     })
 
+    expect(mockFetchPullRequestsByCommit).toHaveBeenCalled()
     expect(fetchCommit).not.toHaveBeenCalled()
     expect(commits.commits).toEqual([
       expect.objectContaining({

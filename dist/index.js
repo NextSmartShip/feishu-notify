@@ -35107,6 +35107,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.fetchFeishuWebhook = fetchFeishuWebhook;
 exports.fetchCommit = fetchCommit;
+exports.fetchPullRequestsByCommit = fetchPullRequestsByCommit;
+exports.fetchPullRequestCommits = fetchPullRequestCommits;
 exports.fetchRepositoryTags = fetchRepositoryTags;
 exports.fetchCompareCommits = fetchCompareCommits;
 exports.fetchJobHtmlUrl = fetchJobHtmlUrl;
@@ -35151,6 +35153,24 @@ async function fetchCommit(body) {
         ...config_1.BASE_PARAMS
     });
     return [result];
+}
+async function fetchPullRequestsByCommit(body) {
+    return await (0, request_1.default)({
+        method: 'GET',
+        url: `/repos/${body.owner}/${body.repo}/commits/${body.commit_sha}/pulls`,
+        ...config_1.BASE_PARAMS
+    });
+}
+async function fetchPullRequestCommits({ owner, repo, pullNumber, page, per_page }) {
+    return await (0, request_1.default)({
+        method: 'GET',
+        url: `/repos/${owner}/${repo}/pulls/${pullNumber}/commits`,
+        params: {
+            page,
+            per_page
+        },
+        ...config_1.BASE_PARAMS
+    });
 }
 async function fetchRepositoryTags({ owner, repo, page, per_page }) {
     const url = `/repos/${owner}/${repo}/tags`;
@@ -36114,6 +36134,34 @@ const getCompareCommits = async (params) => {
         previousTag
     };
 };
+const getPullRequestCommits = async (params) => {
+    const pullRequests = await (0, api_1.fetchPullRequestsByCommit)(params);
+    const pullRequest = pullRequests.find(item => item.merge_commit_sha === params.commit_sha) ||
+        pullRequests.find(item => item.merged_at) ||
+        pullRequests[0];
+    if (!pullRequest)
+        return emptyCommitsResult();
+    const per_page = 100;
+    let page = 1;
+    const commits = [];
+    let shouldFetchNextPage = true;
+    while (shouldFetchNextPage) {
+        const pageCommits = await (0, api_1.fetchPullRequestCommits)({
+            owner: params.owner,
+            repo: params.repo,
+            pullNumber: pullRequest.number,
+            page,
+            per_page
+        });
+        commits.push(...pageCommits);
+        shouldFetchNextPage = pageCommits.length === per_page;
+        page += 1;
+    }
+    return {
+        ...emptyCommitsResult(),
+        commits: commits.map(formatApiCommit)
+    };
+};
 const getSingleCommit = async (params) => {
     if (params.head_commit?.message) {
         return {
@@ -36141,6 +36189,16 @@ const getCommits = async (_params) => {
         }
         if (compareCommits.commits.length)
             return compareCommits;
+        if (!getTagNameFromRef(_params.ref, _params.refType)) {
+            try {
+                const pullRequestCommits = await getPullRequestCommits(_params);
+                if (pullRequestCommits.commits.length)
+                    return pullRequestCommits;
+            }
+            catch (error) {
+                // 关联 PR 查询失败时继续使用当前 head commit，保证通知仍可发送
+            }
+        }
         return await getSingleCommit(_params);
     }
     catch (error) {
