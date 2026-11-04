@@ -55,6 +55,48 @@ const createApiCommit = ({
     parents
   }) as any
 
+describe('formatCommitsMsg', () => {
+  it.each(['\n', '\r\n', '\r'])(
+    'keeps multiline commit messages inside a single link with %j line endings',
+    newline => {
+      const url =
+        'https://github.com/NextSmartShip/workspace/commit/bcdfb753365152735c77a5dccd96728770b645f0'
+      const message = formatCommitsMsg([
+        {
+          date: '今天 16:56:13',
+          message: [
+            'feat(ticket): 工单附件上传统一限制单文件 200MB',
+            '',
+            '- 超出上限时在上传前拦截',
+            '- 本地 nginx 同步调整为 201m'
+          ].join(newline),
+          html_url: url,
+          author: { login: 'jawQ', html_url: 'https://github.com/jawQ' }
+        }
+      ])
+
+      expect(message).toBe(
+        `[feat(ticket): 工单附件上传统一限制单文件 200MB - 超出上限时在上传前拦截 - 本地 nginx 同步调整为 201m](${url}) (by: [jawQ](https://github.com/jawQ)) - 📅 <font color="grey">今天 16:56:13</font>`
+      )
+    }
+  )
+
+  it('escapes brackets and backslashes in commit link text', () => {
+    const message = formatCommitsMsg([
+      {
+        date: '',
+        message: 'fix: [ticket] 修复 [附件](https://example.com) 路径 C:\\temp',
+        html_url: 'https://github.com/NextSmartShip/workspace/commit/abc123',
+        author: null
+      }
+    ])
+
+    expect(message).toBe(
+      '[fix: \\[ticket\\] 修复 \\[附件\\](https://example.com) 路径 C:\\\\temp](https://github.com/NextSmartShip/workspace/commit/abc123) - 📅 <font color="grey"></font>'
+    )
+  })
+})
+
 describe('getCommits', () => {
   beforeEach(() => {
     jest.clearAllMocks()

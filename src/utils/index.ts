@@ -114,8 +114,9 @@ export const formatCommitsMsg = (commits: FormatCommitsItem[]) => {
     // eslint-disable-next-line prefer-template
     const countNum = commits?.length > 1 ? `${nums[i] || `${i + 1}.`} ` : ''
     const link = html_url
-    const text = message?.replace?.(/\n\n/g, ' ')
-    const authorText = `${author?.login ? `(by: [${author.login}](${author.html_url}))` : ''}`
+    // 链接文本保持单行，转义可能破坏 Markdown 链接边界的字符。
+    const text = message.replace(/[\r\n]+/g, ' ').replace(/[\\[\]]/g, '\\$&')
+    const authorText = `${author?.login ? ` (by: [${author.login}](${author.html_url}))` : ''}`
     const date = ` - 📅 <font color="grey">${_date}</font>`
     return `${countNum}[${text}](${link})${authorText}${date}`
   })
