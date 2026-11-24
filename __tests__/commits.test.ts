@@ -57,7 +57,7 @@ const createApiCommit = ({
 
 describe('formatCommitsMsg', () => {
   it.each(['\n', '\r\n', '\r'])(
-    'keeps multiline commit messages inside a single link with %j line endings',
+    'renders subject as link and keeps body lines below with %j line endings',
     newline => {
       const url =
         'https://github.com/NextSmartShip/workspace/commit/bcdfb753365152735c77a5dccd96728770b645f0'
@@ -76,7 +76,7 @@ describe('formatCommitsMsg', () => {
       ])
 
       expect(message).toBe(
-        `[feat(ticket): 工单附件上传统一限制单文件 200MB - 超出上限时在上传前拦截 - 本地 nginx 同步调整为 201m](${url}) (by: [jawQ](https://github.com/jawQ)) - 📅 <font color="grey">今天 16:56:13</font>`
+        `[feat(ticket): 工单附件上传统一限制单文件 200MB](${url}) (by: [jawQ](https://github.com/jawQ)) - 📅 <font color="grey">今天 16:56:13</font>\n- 超出上限时在上传前拦截\n- 本地 nginx 同步调整为 201m`
       )
     }
   )

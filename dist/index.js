@@ -36017,11 +36017,17 @@ const formatCommitsMsg = (commits) => {
         // eslint-disable-next-line prefer-template
         const countNum = commits?.length > 1 ? `${nums[i] || `${i + 1}.`} ` : '';
         const link = html_url;
-        // 链接文本保持单行，转义可能破坏 Markdown 链接边界的字符。
-        const text = message.replace(/[\r\n]+/g, ' ').replace(/[\\[\]]/g, '\\$&');
+        // 首行作为标题链接（转义可能破坏 Markdown 链接边界的字符），正文保留原有换行置于其后
+        const [subject = '', ...bodyLines] = message
+            .trim()
+            .split(/\r\n|\r|\n/)
+            .map(line => line.trimEnd());
+        const text = subject.replace(/[\\[\]]/g, '\\$&');
         const authorText = `${author?.login ? ` (by: [${author.login}](${author.html_url}))` : ''}`;
         const date = ` - 📅 <font color="grey">${_date}</font>`;
-        return `${countNum}[${text}](${link})${authorText}${date}`;
+        const body = bodyLines.join('\n').replace(/^\n+/, '');
+        const header = `${countNum}[${text}](${link})${authorText}${date}`;
+        return body ? `${header}\n${body}` : header;
     });
     return msgsArr.join('\n');
 };
